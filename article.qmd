@@ -1,0 +1,96 @@
+---
+title: "Influência da Temperatura no Crescimento de Plantas de Feijão (*Phaseolus vulgaris* L.)"
+author: "Autor Correspondente"
+date: today
+lang: pt-BR
+format:
+  html:
+    toc: true
+    toc-location: left
+    page-layout: article
+    theme: cosmo
+filters:
+  - scientific-writing
+bibliography: ref.bib
+scientific-writing:
+  connector-ambiguity-mode: balanced
+  connector-ambiguity-overrides:
+    assim: strict
+    logo: strict
+    pois: lenient
+  hedge-threshold: 4
+  ignore-terms:
+    - feijoeiro
+    - feijão
+    - phaseolus
+    - vulgaris
+  section-goals:
+    Resumo:
+      maxAvgSentence: 24
+      maxLongSentenceRate: 18
+    Material e Métodos:
+      maxPassivePer1000: 30
+    Discussão:
+      minLexicalDiversity: 0.58
+---
+
+## Resumo
+
+A temperatura regula processos fisiológicos essenciais ao crescimento do feijoeiro, incluindo germinação, expansão foliar, fotossíntese e alocação de biomassa. Este manuscrito avalia o efeito de quatro regimes térmicos constantes sobre o desenvolvimento inicial de plantas de feijão (*Phaseolus vulgaris* L.) cultivadas em casa de vegetação. Foram comparadas temperaturas de {{< var temp_baixa >}}°C, {{< var temp_media_baixa >}}°C, {{< var temp_otima >}}°C e {{< var temp_alta >}}°C durante trinta dias após a semeadura, com 5 repetições por tratamento. As variáveis analisadas incluíram altura de planta, número de folhas, área foliar e massa seca da parte aérea.
+
+Os resultados indicaram resposta significativa das plantas ao gradiente térmico. A temperatura de 25°C promoveu maior crescimento vegetativo, enquanto 15°C reduziu o acúmulo de biomassa e atrasou a emissão de folhas. A resposta observada sugere que temperaturas moderadas favorecem a coordenação entre expansão foliar e produção de fotoassimilados, enquanto temperaturas baixas limitam o metabolismo e retardam a formação de área fotossinteticamente ativa. Esses achados reforçam a importância do manejo térmico e do planejamento da semeadura em sistemas de produção sujeitos a oscilações climáticas.
+
+**Palavras-chave:** fisiologia vegetal; crescimento inicial; estresse térmico; área foliar; manejo agrícola.
+
+## Introdução
+
+A temperatura é um dos fatores abióticos mais importantes para o crescimento e desenvolvimento das plantas [@taiz2017plant]. Ela influencia a velocidade das reações metabólicas, a atividade enzimática, a absorção de água e nutrientes, a expansão celular e a taxa de fotossíntese líquida. Em culturas anuais, pequenas diferenças térmicas durante as fases iniciais podem alterar o estabelecimento do estande, a duração do ciclo e a capacidade da planta de interceptar radiação ao longo do desenvolvimento [@hatfield2015temperature].
+
+O feijão (*Phaseolus vulgaris* L.) é uma das principais culturas alimentares em regiões tropicais e subtropicais. Além de sua relevância econômica, possui papel social expressivo por compor a base alimentar de grande parte da população. A produtividade da cultura, entretanto, é frequentemente limitada por condições ambientais desfavoráveis, entre elas temperaturas abaixo ou acima da faixa considerada ótima para germinação e crescimento vegetativo.
+
+Durante a emergência e as primeiras semanas de desenvolvimento, o feijoeiro apresenta elevada sensibilidade a variações térmicas [@porch2001effects]. Temperaturas baixas tendem a reduzir a velocidade de emergência, limitar a expansão foliar e prolongar o período necessário para a formação de um dossel eficiente. Temperaturas elevadas, por outro lado, podem aumentar a demanda evaporativa, intensificar o consumo de reservas e comprometer o balanço entre crescimento vegetativo e manutenção metabólica [@wahid2007heat].
+
+Embora a faixa térmica adequada ao feijoeiro seja amplamente discutida em manuais técnicos, ainda é útil demonstrar experimentalmente como diferentes temperaturas afetam componentes simples de crescimento. Ensaios controlados permitem isolar o efeito térmico de outros fatores de campo, como disponibilidade hídrica, fertilidade do solo, radiação incidente e pressão de pragas. Assim, este estudo teve como objetivo avaliar o crescimento inicial de plantas de feijão submetidas a diferentes regimes de temperatura em ambiente protegido.
+
+## Material e Métodos
+
+O experimento foi conduzido em casa de vegetação com temperatura controlada. Utilizou-se delineamento inteiramente casualizado com {{< var n_tratamentos >}} tratamentos térmicos: {{< var temp_baixa >}}°C, {{< var temp_media_baixa >}}°C, {{< var temp_otima >}}°C e {{< var temp_alta >}}°C. Cada tratamento foi composto por {{< var n_repeticoes >}} repetições, totalizando {{< var n_unidades >}} unidades experimentais. Cada unidade experimental consistiu em um vaso plástico contendo substrato comercial esterilizado e duas plantas após o desbaste.
+
+As sementes foram selecionadas visualmente quanto à integridade e uniformidade de tamanho. A semeadura foi realizada a {{< var profundidade_semeadura >}} centímetros de profundidade, e a irrigação foi mantida próxima à capacidade de campo durante todo o período experimental. Após a emergência, realizou-se o desbaste para padronizar a densidade de plantas por vaso. O experimento foi acompanhado diariamente durante 30 dias após a semeadura.
+
+As avaliações biométricas foram realizadas semanalmente. A altura de planta foi medida do colo até o ápice da haste principal com régua graduada. O número de folhas foi contabilizado considerando folhas completamente expandidas. A área foliar foi estimada por imagens digitais obtidas sob iluminação padronizada, com posterior processamento em software de análise de imagem. Ao final do experimento, a parte aérea foi coletada, acondicionada em sacos de papel e seca em estufa até massa constante.
+
+Os dados foram submetidos à análise de variância. Quando houve efeito significativo dos tratamentos, as médias foram comparadas pelo teste de Tukey a 5% de probabilidade. Também foram ajustados modelos de regressão para descrever a resposta das variáveis ao gradiente de temperatura. As análises foram realizadas no software R, considerando cada vaso como unidade experimental [@rcore2024].
+
+## Resultados
+
+A temperatura afetou significativamente todas as variáveis biométricas avaliadas. O maior crescimento em altura foi observado no tratamento de {{< var temp_otima >}}°C, com incremento médio de 2,3 cm por dia entre a segunda e a quarta semana. No tratamento de {{< var temp_baixa >}}°C, o incremento médio foi de apenas 0,8 cm por dia, indicando forte limitação do crescimento vegetativo em ambiente frio. O tratamento de 20°C apresentou resposta intermediária, enquanto 30°C manteve crescimento elevado, porém inferior ao observado em 25°C.
+
+O número de folhas também aumentou com a elevação da temperatura até 25°C. Plantas mantidas a 15°C apresentaram menor emissão foliar e atraso visível na expansão das primeiras folhas trifolioladas. Em 25°C, as plantas exibiram maior uniformidade entre repetições e arquitetura vegetativa mais vigorosa. Em 30°C, embora a emissão de folhas tenha sido relativamente alta, algumas plantas apresentaram folhas menores e sinais iniciais de redução de turgor nas horas mais quentes do dia [@wahid2007heat].
+
+A área foliar apresentou resposta quadrática em relação à temperatura, com valores máximos estimados entre {{< var temp_max_area_foliar_min >}}°C e {{< var temp_max_area_foliar_max >}}°C. Plantas cultivadas a {{< var temp_baixa >}}°C apresentaram área foliar 62% inferior àquelas cultivadas na faixa ótima. Esse resultado evidencia que a temperatura não afeta apenas o número de folhas, mas também a capacidade de expansão de cada lâmina foliar. Como a área foliar determina a interceptação de luz, sua redução tende a limitar o acúmulo posterior de biomassa.
+
+A massa seca da parte aérea seguiu tendência semelhante à área foliar. O maior acúmulo foi registrado a 25°C, enquanto o menor valor ocorreu a 15°C. O tratamento de 30°C não reduziu drasticamente a massa seca, mas apresentou maior variabilidade entre repetições. Essa variabilidade sugere que temperaturas mais elevadas podem amplificar diferenças individuais de vigor ou pequenas variações na disponibilidade de água, mesmo em ambiente controlado.
+
+## Discussão
+
+Os resultados obtidos confirmam que o crescimento inicial do feijoeiro depende fortemente do regime térmico. A resposta superior observada a 25°C é coerente com a faixa térmica normalmente associada ao crescimento vegetativo da cultura [@taiz2017plant; @sage2007temperature]. Nessa condição, a expansão foliar, a emissão de novas folhas e o acúmulo de massa seca ocorreram de forma coordenada, indicando balanço favorável entre produção e uso de fotoassimilados.
+
+A redução do crescimento a 15°C pode ser atribuída à menor atividade enzimática e à desaceleração de processos relacionados à divisão e expansão celular [@hatfield2015temperature]. Em temperaturas baixas, a planta tende a apresentar menor taxa de crescimento relativo, atraso no desenvolvimento fenológico e menor capacidade de formar rapidamente um dossel ativo. Esse comportamento é especialmente relevante para regiões onde o plantio ocorre em períodos de transição entre estações, quando noites frias podem limitar a emergência e o estabelecimento inicial.
+
+O desempenho observado a 30°C indica que temperaturas altas nem sempre causam redução imediata de crescimento, mas podem estreitar a margem de segurança fisiológica da planta. Nessa condição, pequenos déficits hídricos ou aumentos adicionais de temperatura podem intensificar perdas por transpiração e reduzir a eficiência fotossintética. Portanto, a interpretação agronômica deve considerar não apenas a temperatura média, mas também a amplitude térmica diária, a umidade relativa do ar e a disponibilidade de água no substrato.
+
+Do ponto de vista prático, os resultados reforçam a necessidade de planejamento cuidadoso do calendário de semeadura. Em áreas sujeitas a temperaturas baixas no início do ciclo, o atraso da semeadura ou o uso de cultivares mais adaptadas pode reduzir riscos de estabelecimento. Em regiões quentes, estratégias como irrigação adequada, cobertura do solo e escolha de épocas com menor estresse térmico podem contribuir para manter o crescimento vegetativo em faixa favorável.
+
+## Conclusão
+
+A temperatura influenciou de forma marcante o crescimento inicial de plantas de feijão. O tratamento de 25°C proporcionou maior altura, maior número de folhas, maior área foliar e maior acúmulo de massa seca. A temperatura de 15°C limitou o desenvolvimento vegetativo, enquanto 30°C manteve crescimento relativamente alto, mas com maior variabilidade entre plantas. Os resultados indicam que a faixa próxima a 25°C favorece o estabelecimento inicial do feijoeiro e deve ser considerada no planejamento de experimentos, cultivos protegidos e calendários de semeadura.
+
+## Limitações e Perspectivas
+
+Este estudo foi conduzido em ambiente controlado e avaliou apenas o crescimento inicial. Em condições de campo, a resposta das plantas pode ser modificada por radiação solar, umidade do solo, fertilidade, patógenos e flutuações térmicas ao longo do dia. Estudos futuros devem investigar a interação entre temperatura e disponibilidade hídrica, além de comparar cultivares com diferentes níveis de tolerância ao estresse térmico. Também é recomendável acompanhar o ciclo completo da cultura para verificar se diferenças iniciais de crescimento se refletem em produtividade de grãos.
+
+## Referências
+
+::: {#refs}
+:::

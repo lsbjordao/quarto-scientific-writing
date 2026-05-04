@@ -1,0 +1,17 @@
+# Parâmetros experimentais — article.qmd
+# Altere aqui para propagar automaticamente por todo o texto
+n_tratamentos: 4
+n_repeticoes: 5
+n_unidades: 20
+n_dias: 30
+profundidade_semeadura: 3
+temp_baixa: 15
+temp_media_baixa: 20
+temp_otima: 25
+temp_alta: 30
+incremento_25: 2.3
+incremento_15: 0.8
+area_foliar_deficit: 62
+temp_max_area_foliar_min: 23
+temp_max_area_foliar_max: 27
+alpha_tukey: 5
