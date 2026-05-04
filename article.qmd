@@ -54,7 +54,7 @@ Embora a faixa térmica adequada ao feijoeiro seja amplamente discutida em manua
 
 ## Material e Métodos
 
-O experimento foi conduzido em casa de vegetação com temperatura controlada. Utilizou-se delineamento inteiramente casualizado com {{< var n_tratamentos >}} tratamentos térmicos: {{< var temp_baixa >}}°C, {{< var temp_media_baixa >}}°C, {{< var temp_otima >}}°C e {{< var temp_alta >}}°C. Cada tratamento foi composto por {{< var n_repeticoes >}} repetições, totalizando {{< var n_unidades >}} unidades experimentais. Cada unidade experimental consistiu em um vaso plástico contendo substrato comercial esterilizado e duas plantas após o desbaste.
+O experimento bem bacana foi conduzido em casa de vegetação com temperatura controlada. Utilizou-se delineamento inteiramente casualizado com {{< var n_tratamentos >}} tratamentos térmicos: {{< var temp_baixa >}}°C, {{< var temp_media_baixa >}}°C, {{< var temp_otima >}}°C e {{< var temp_alta >}}°C. Cada tratamento foi composto por {{< var n_repeticoes >}} repetições, totalizando {{< var n_unidades >}} unidades experimentais. Cada unidade experimental consistiu em um vaso plástico contendo substrato comercial esterilizado e duas plantas após o desbaste.
 
 As sementes foram selecionadas visualmente quanto à integridade e uniformidade de tamanho. A semeadura foi realizada a {{< var profundidade_semeadura >}} centímetros de profundidade, e a irrigação foi mantida próxima à capacidade de campo durante todo o período experimental. Após a emergência, realizou-se o desbaste para padronizar a densidade de plantas por vaso. O experimento foi acompanhado diariamente durante 30 dias após a semeadura.
 
