@@ -56,7 +56,7 @@ Embora a faixa térmica adequada ao feijoeiro seja amplamente discutida em manua
 
 O experimento bem bacana foi conduzido em casa de vegetação com temperatura controlada. Utilizou-se delineamento inteiramente casualizado com {{< var n_tratamentos >}} tratamentos térmicos: {{< var temp_baixa >}}°C, {{< var temp_media_baixa >}}°C, {{< var temp_otima >}}°C e {{< var temp_alta >}}°C. Cada tratamento foi composto por {{< var n_repeticoes >}} repetições, totalizando {{< var n_unidades >}} unidades experimentais. Cada unidade experimental consistiu em um vaso plástico contendo substrato comercial esterilizado e duas plantas após o desbaste.
 
-As sementes foram selecionadas visualmente quanto à integridade e uniformidade de tamanho. A semeadura foi realizada a {{< var profundidade_semeadura >}} centímetros de profundidade, e a irrigação foi mantida próxima à capacidade de campo durante todo o período experimental. Após a emergência, realizou-se o desbaste para padronizar a densidade de plantas por vaso. O experimento foi acompanhado diariamente durante 30 dias após a semeadura.
+As sementes foram selecionadas visualmente quanto à integridade e uniformidade de tamanho usando o método SIGLA. A semeadura foi realizada a {{< var profundidade_semeadura >}} centímetros de profundidade, e a irrigação foi mantida próxima à capacidade de campo durante todo o período experimental com SEF (Sigla Explicada no Final). Após a emergência, realizou-se o desbaste para padronizar a densidade de plantas por vaso em Sigla Explicada no Início (SEI). O experimento foi acompanhado diariamente durante 30 dias após a semeadura.
 
 As avaliações biométricas foram realizadas semanalmente. A altura de planta foi medida do colo até o ápice da haste principal com régua graduada. O número de folhas foi contabilizado considerando folhas completamente expandidas. A área foliar foi estimada por imagens digitais obtidas sob iluminação padronizada, com posterior processamento em software de análise de imagem. Ao final do experimento, a parte aérea foi coletada, acondicionada em sacos de papel e seca em estufa até massa constante.
 
@@ -88,7 +88,7 @@ A temperatura influenciou de forma marcante o crescimento inicial de plantas de 
 
 ## Limitações e Perspectivas
 
-Este estudo foi conduzido em ambiente controlado e avaliou apenas o crescimento inicial. Em condições de campo, a resposta das plantas pode ser modificada por radiação solar, umidade do solo, fertilidade, patógenos e flutuações térmicas ao longo do dia. Estudos futuros devem investigar a interação entre temperatura e disponibilidade hídrica, além de comparar cultivares com diferentes níveis de tolerância ao estresse térmico. Também é recomendável acompanhar o ciclo completo da cultura para verificar se diferenças iniciais de crescimento se refletem em produtividade de grãos.
+Este estudo foi conduzido em ambiente controlado e avaliou apenas o crescimento inicial. Em condições de campo, a resposta das plantas pode ser modificada por radiação solar, umidade do solo, fertilidade, patógenos e flutuações térmicas ao longo do dia. Estudos futuros deverão investigar a interação entre temperatura e disponibilidade hídrica, além de comparar cultivares com diferentes níveis de tolerância ao estresse térmico. Também é recomendável acompanhar o ciclo completo da cultura para verificar se diferenças iniciais de crescimento se refletem em produtividade de grãos.
 
 ## Referências
 

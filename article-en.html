@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 <meta name="author" content="Corresponding Author">
-<meta name="dcterms.date" content="2026-05-04">
+<meta name="dcterms.date" content="2026-05-05">
 
 <title>Influence of Temperature on the Growth of Common Bean Plants (Phaseolus vulgaris L.)</title>
 <style>
@@ -58,6 +58,8 @@ div.csl-indent {
 <link href="article-en_files/libs/bootstrap/bootstrap-4d7f0bce1131f3e5f9547cd857cfbfc8.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script src="article-en_files/libs/quarto-contrib/scientific-writing-1.0.0/scientific-writing.js"></script>
 <link href="article-en_files/libs/quarto-contrib/scientific-writing-1.0.0/scientific-writing.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/nlp_compromise/4.8.2/nlp_compromise.min.js" async="" crossorigin="anonymous"></script>
+
 <script>
 window.WritingStatsConfig = {
   sentenceLong: 30,
@@ -69,14 +71,16 @@ window.WritingStatsConfig = {
   hedgeThreshold: 4,
   defaultCompact: false,
   defaultAlertsOnly: false,
-  sectionGoals: {"Materials and Methods":{"maxPassivePer1000":["30"]},"Abstract":{"maxAvgSentence":["24"],"maxLongSentenceRate":["18"]},"Discussion":{"minLexicalDiversity":["0.58"]}},
+  sectionGoals: {"Abstract":{"maxAvgSentence":["24"],"maxLongSentenceRate":["18"]},"Discussion":{"minLexicalDiversity":["0.58"]},"Materials and Methods":{"maxPassivePer1000":["30"]}},
   ignoreTerms: [["bean"],["phaseolus"],["vulgaris"]],
   connectorAmbiguityMode: ["balanced"],
-  connectorAmbiguityOverrides: {"as":["strict"],"since":["lenient"],"then":["balanced"]},
+  connectorAmbiguityOverrides: {"since":["lenient"],"then":["balanced"],"as":["strict"]},
   variableCount: 15,
-  variableEntries: [{"name":"n_tratamentos","value":"4"},{"name":"n_repeticoes","value":"5"},{"name":"n_unidades","value":"20"},{"name":"n_dias","value":"30"},{"name":"profundidade_semeadura","value":"3"},{"name":"temp_baixa","value":"15"},{"name":"temp_media_baixa","value":"20"},{"name":"temp_otima","value":"25"},{"name":"temp_alta","value":"30"},{"name":"incremento_25","value":"2.3"},{"name":"incremento_15","value":"0.8"},{"name":"area_foliar_deficit","value":"62"},{"name":"temp_max_area_foliar_min","value":"23"},{"name":"temp_max_area_foliar_max","value":"27"},{"name":"alpha_tukey","value":"5"}],
+  variableEntries: [{"value":"4","name":"n_tratamentos"},{"value":"5","name":"n_repeticoes"},{"value":"20","name":"n_unidades"},{"value":"30","name":"n_dias"},{"value":"3","name":"profundidade_semeadura"},{"value":"15","name":"temp_baixa"},{"value":"20","name":"temp_media_baixa"},{"value":"25","name":"temp_otima"},{"value":"30","name":"temp_alta"},{"value":"2.3","name":"incremento_25"},{"value":"0.8","name":"incremento_15"},{"value":"62","name":"area_foliar_deficit"},{"value":"23","name":"temp_max_area_foliar_min"},{"value":"27","name":"temp_max_area_foliar_max"},{"value":"5","name":"alpha_tukey"}],
   sourceEvidenceTokens: [{"value":"15"},{"value":"20"},{"value":"25"},{"value":"30"},{"value":"25"},{"value":"15"},{"value":"15"},{"value":"20"},{"value":"25"},{"value":"30"},{"value":"5"},{"value":"25"},{"value":"2.3"},{"value":"15"},{"value":"0.8"},{"value":"20"},{"value":"30"},{"value":"25"},{"value":"25"},{"value":"15"},{"value":"25"},{"value":"30"},{"value":"23"},{"value":"27"},{"value":"15"},{"value":"62"},{"value":"25"},{"value":"15"},{"value":"30"},{"value":"25"},{"value":"15"},{"value":"30"},{"value":"25"},{"value":"15"},{"value":"30"},{"value":"25"}],
-  referenceKeys: ["taiz2017plant","hatfield2015temperature","wahid2007heat","porch2001effects","sage2007temperature","rcore2024"]
+  referenceKeys: ["taiz2017plant","hatfield2015temperature","wahid2007heat","porch2001effects","sage2007temperature","rcore2024"],
+  nlpCdn: true,
+  nlpCdnUrl: "https://cdnjs.cloudflare.com/ajax/libs/nlp_compromise/4.8.2/nlp_compromise.min.js"
 };
 </script>
 
@@ -125,7 +129,7 @@ window.WritingStatsConfig = {
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">May 4, 2026</p>
+      <p class="date">May 5, 2026</p>
     </div>
   </div>
   
@@ -146,7 +150,7 @@ window.WritingStatsConfig = {
 <section id="introduction" class="level2">
 <h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
 <p>Temperature is one of the most important abiotic factors controlling plant growth and development. It affects the rate of metabolic reactions, enzyme activity, water and nutrient uptake, cell expansion, and net photosynthesis. In annual crops, small thermal differences during the early stages can alter stand establishment, crop-cycle duration, and the plant’s ability to intercept radiation throughout development.</p>
-<p>Common bean (<em>Phaseolus vulgaris</em> L.) is a major food crop in tropical and subtropical regions. In addition to its economic importance, it has strong social relevance because it is part of the basic diet of many populations. However, crop productivity is often limited by unfavorable environmental conditions, including temperatures below or above the optimal range for germination and vegetative growth.</p>
+<p>Common bean (<em>Phaseolus vulgaris</em> L.) is a major food crop in tropical and subtropical regions. In addition to its economic importance, it has strong social relevance because it is part of the basic diet of many populations. However, crop productivity isn’t often limited by unfavorable environmental conditions, including temperatures below or above the optimal range for germination and vegetative growth.</p>
 <p>During emergence and the first weeks of development, common bean plants are highly sensitive to thermal variation. Low temperatures tend to reduce emergence speed, limit leaf expansion, and extend the time required to form an efficient canopy. High temperatures, in contrast, may increase evaporative demand, intensify reserve consumption, and disrupt the balance between vegetative growth and metabolic maintenance.</p>
 <p>Although the suitable temperature range for common bean is widely discussed in technical recommendations, it remains useful to experimentally demonstrate how different temperatures affect simple growth components. Controlled trials make it possible to isolate thermal effects from other field factors, such as water availability, soil fertility, incoming radiation, and pest pressure. Therefore, this study aimed to evaluate the early growth of common bean plants submitted to different temperature regimes under protected cultivation.</p>
 </section>

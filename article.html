@@ -58,6 +58,8 @@ div.csl-indent {
 <link href="article_files/libs/bootstrap/bootstrap-4d7f0bce1131f3e5f9547cd857cfbfc8.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
 <script src="article_files/libs/quarto-contrib/scientific-writing-1.0.0/scientific-writing.js"></script>
 <link href="article_files/libs/quarto-contrib/scientific-writing-1.0.0/scientific-writing.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/nlp_compromise/4.8.2/nlp_compromise.min.js" async="" crossorigin="anonymous"></script>
+
 <script>
 window.WritingStatsConfig = {
   sentenceLong: 30,
@@ -69,14 +71,16 @@ window.WritingStatsConfig = {
   hedgeThreshold: 4,
   defaultCompact: false,
   defaultAlertsOnly: false,
-  sectionGoals: {"Discussão":{"minLexicalDiversity":["0.58"]},"Resumo":{"maxAvgSentence":["24"],"maxLongSentenceRate":["18"]},"Material e Métodos":{"maxPassivePer1000":["30"]}},
+  sectionGoals: {"Discussão":{"minLexicalDiversity":["0.58"]},"Material e Métodos":{"maxPassivePer1000":["30"]},"Resumo":{"maxAvgSentence":["24"],"maxLongSentenceRate":["18"]}},
   ignoreTerms: [["feijoeiro"],["feijão"],["phaseolus"],["vulgaris"]],
   connectorAmbiguityMode: ["balanced"],
-  connectorAmbiguityOverrides: {"pois":["lenient"],"logo":["strict"],"assim":["strict"]},
+  connectorAmbiguityOverrides: {"pois":["lenient"],"assim":["strict"],"logo":["strict"]},
   variableCount: 15,
-  variableEntries: [{"name":"n_tratamentos","value":"4"},{"name":"n_repeticoes","value":"5"},{"name":"n_unidades","value":"20"},{"name":"n_dias","value":"30"},{"name":"profundidade_semeadura","value":"3"},{"name":"temp_baixa","value":"15"},{"name":"temp_media_baixa","value":"20"},{"name":"temp_otima","value":"25"},{"name":"temp_alta","value":"30"},{"name":"incremento_25","value":"2.3"},{"name":"incremento_15","value":"0.8"},{"name":"area_foliar_deficit","value":"62"},{"name":"temp_max_area_foliar_min","value":"23"},{"name":"temp_max_area_foliar_max","value":"27"},{"name":"alpha_tukey","value":"5"}],
-  sourceEvidenceTokens: [{"name":"temp_baixa","value":"15"},{"name":"temp_media_baixa","value":"20"},{"name":"temp_otima","value":"25"},{"name":"temp_alta","value":"30"},{"value":"5"},{"value":"25"},{"value":"15"},{"value":"2017"},{"value":"2015"},{"value":"2001"},{"value":"2007"},{"name":"n_tratamentos","value":"4"},{"name":"temp_baixa","value":"15"},{"name":"temp_media_baixa","value":"20"},{"name":"temp_otima","value":"25"},{"name":"temp_alta","value":"30"},{"name":"n_repeticoes","value":"5"},{"name":"n_unidades","value":"20"},{"name":"profundidade_semeadura","value":"3"},{"value":"30"},{"value":"5"},{"value":"2024"},{"name":"temp_otima","value":"25"},{"value":"2.3"},{"name":"temp_baixa","value":"15"},{"value":"0.8"},{"value":"20"},{"value":"30"},{"value":"25"},{"value":"25"},{"value":"15"},{"value":"25"},{"value":"30"},{"value":"2007"},{"name":"temp_max_area_foliar_min","value":"23"},{"name":"temp_max_area_foliar_max","value":"27"},{"name":"temp_baixa","value":"15"},{"value":"62"},{"value":"25"},{"value":"15"},{"value":"30"},{"value":"25"},{"value":"2017"},{"value":"2007"},{"value":"15"},{"value":"2015"},{"value":"30"},{"value":"25"},{"value":"15"},{"value":"30"},{"value":"25"}],
-  referenceKeys: ["taiz2017plant","hatfield2015temperature","wahid2007heat","porch2001effects","sage2007temperature","rcore2024"]
+  variableEntries: [{"value":"4","name":"n_tratamentos"},{"value":"5","name":"n_repeticoes"},{"value":"20","name":"n_unidades"},{"value":"30","name":"n_dias"},{"value":"3","name":"profundidade_semeadura"},{"value":"15","name":"temp_baixa"},{"value":"20","name":"temp_media_baixa"},{"value":"25","name":"temp_otima"},{"value":"30","name":"temp_alta"},{"value":"2.3","name":"incremento_25"},{"value":"0.8","name":"incremento_15"},{"value":"62","name":"area_foliar_deficit"},{"value":"23","name":"temp_max_area_foliar_min"},{"value":"27","name":"temp_max_area_foliar_max"},{"value":"5","name":"alpha_tukey"}],
+  sourceEvidenceTokens: [{"value":"15","name":"temp_baixa"},{"value":"20","name":"temp_media_baixa"},{"value":"25","name":"temp_otima"},{"value":"30","name":"temp_alta"},{"value":"5"},{"value":"25"},{"value":"15"},{"value":"2017"},{"value":"2015"},{"value":"2001"},{"value":"2007"},{"value":"4","name":"n_tratamentos"},{"value":"15","name":"temp_baixa"},{"value":"20","name":"temp_media_baixa"},{"value":"25","name":"temp_otima"},{"value":"30","name":"temp_alta"},{"value":"5","name":"n_repeticoes"},{"value":"20","name":"n_unidades"},{"value":"3","name":"profundidade_semeadura"},{"value":"30"},{"value":"5"},{"value":"2024"},{"value":"25","name":"temp_otima"},{"value":"2.3"},{"value":"15","name":"temp_baixa"},{"value":"0.8"},{"value":"20"},{"value":"30"},{"value":"25"},{"value":"25"},{"value":"15"},{"value":"25"},{"value":"30"},{"value":"2007"},{"value":"23","name":"temp_max_area_foliar_min"},{"value":"27","name":"temp_max_area_foliar_max"},{"value":"15","name":"temp_baixa"},{"value":"62"},{"value":"25"},{"value":"15"},{"value":"30"},{"value":"25"},{"value":"2017"},{"value":"2007"},{"value":"15"},{"value":"2015"},{"value":"30"},{"value":"25"},{"value":"15"},{"value":"30"},{"value":"25"}],
+  referenceKeys: ["taiz2017plant","hatfield2015temperature","wahid2007heat","porch2001effects","sage2007temperature","rcore2024"],
+  nlpCdn: true,
+  nlpCdnUrl: "https://cdnjs.cloudflare.com/ajax/libs/nlp_compromise/4.8.2/nlp_compromise.min.js"
 };
 </script>
 
@@ -125,7 +129,7 @@ window.WritingStatsConfig = {
     <div>
     <div class="quarto-title-meta-heading">Data de Publicação</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">4 de maio de 2026</p>
+      <p class="date">5 de maio de 2026</p>
     </div>
   </div>
   
@@ -153,7 +157,7 @@ window.WritingStatsConfig = {
 <section id="material-e-métodos" class="level2">
 <h2 class="anchored" data-anchor-id="material-e-métodos">Material e Métodos</h2>
 <p>O experimento bem bacana foi conduzido em casa de vegetação com temperatura controlada. Utilizou-se delineamento inteiramente casualizado com 4 tratamentos térmicos: 15°C, 20°C, 25°C e 30°C. Cada tratamento foi composto por 5 repetições, totalizando 20 unidades experimentais. Cada unidade experimental consistiu em um vaso plástico contendo substrato comercial esterilizado e duas plantas após o desbaste.</p>
-<p>As sementes foram selecionadas visualmente quanto à integridade e uniformidade de tamanho. A semeadura foi realizada a 3 centímetros de profundidade, e a irrigação foi mantida próxima à capacidade de campo durante todo o período experimental. Após a emergência, realizou-se o desbaste para padronizar a densidade de plantas por vaso. O experimento foi acompanhado diariamente durante 30 dias após a semeadura.</p>
+<p>As sementes foram selecionadas visualmente quanto à integridade e uniformidade de tamanho usando o método SIGLA. A semeadura foi realizada a 3 centímetros de profundidade, e a irrigação foi mantida próxima à capacidade de campo durante todo o período experimental com SEF (Sigla Explicada no Final). Após a emergência, realizou-se o desbaste para padronizar a densidade de plantas por vaso em Sigla Explicada no Início (SEI). O experimento foi acompanhado diariamente durante 30 dias após a semeadura.</p>
 <p>As avaliações biométricas foram realizadas semanalmente. A altura de planta foi medida do colo até o ápice da haste principal com régua graduada. O número de folhas foi contabilizado considerando folhas completamente expandidas. A área foliar foi estimada por imagens digitais obtidas sob iluminação padronizada, com posterior processamento em software de análise de imagem. Ao final do experimento, a parte aérea foi coletada, acondicionada em sacos de papel e seca em estufa até massa constante.</p>
 <p>Os dados foram submetidos à análise de variância. Quando houve efeito significativo dos tratamentos, as médias foram comparadas pelo teste de Tukey a 5% de probabilidade. Também foram ajustados modelos de regressão para descrever a resposta das variáveis ao gradiente de temperatura. As análises foram realizadas no software R, considerando cada vaso como unidade experimental <span class="citation" data-cites="rcore2024">(<a href="#ref-rcore2024" role="doc-biblioref">R Core Team 2024</a>)</span>.</p>
 </section>
@@ -177,7 +181,7 @@ window.WritingStatsConfig = {
 </section>
 <section id="limitações-e-perspectivas" class="level2">
 <h2 class="anchored" data-anchor-id="limitações-e-perspectivas">Limitações e Perspectivas</h2>
-<p>Este estudo foi conduzido em ambiente controlado e avaliou apenas o crescimento inicial. Em condições de campo, a resposta das plantas pode ser modificada por radiação solar, umidade do solo, fertilidade, patógenos e flutuações térmicas ao longo do dia. Estudos futuros devem investigar a interação entre temperatura e disponibilidade hídrica, além de comparar cultivares com diferentes níveis de tolerância ao estresse térmico. Também é recomendável acompanhar o ciclo completo da cultura para verificar se diferenças iniciais de crescimento se refletem em produtividade de grãos.</p>
+<p>Este estudo foi conduzido em ambiente controlado e avaliou apenas o crescimento inicial. Em condições de campo, a resposta das plantas pode ser modificada por radiação solar, umidade do solo, fertilidade, patógenos e flutuações térmicas ao longo do dia. Estudos futuros deverão investigar a interação entre temperatura e disponibilidade hídrica, além de comparar cultivares com diferentes níveis de tolerância ao estresse térmico. Também é recomendável acompanhar o ciclo completo da cultura para verificar se diferenças iniciais de crescimento se refletem em produtividade de grãos.</p>
 </section>
 <section id="referências" class="level2">
 <h2 class="anchored" data-anchor-id="referências">Referências</h2>

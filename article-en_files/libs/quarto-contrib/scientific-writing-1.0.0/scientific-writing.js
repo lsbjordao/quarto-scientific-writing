@@ -21,7 +21,18 @@
   var SOURCE_EVIDENCE_TOKENS = [];
   var SOURCE_EVIDENCE_INDEX = 0;
   var REFERENCE_KEYS = [];
+  var NLP_CDN_ENABLED = true;
+  var NLP_CDN_URL = 'https://cdn.jsdelivr.net/npm/compromise/builds/compromise.min.js';
+  var NLP_LIB = null;
+  var NLP_READY = null;
+  var NLP_STATUS = 'pending';
+  var NLP_ERROR = '';
   var ANALYSIS_CACHE = Object.create(null);
+    var WINK_LIB = null;
+    var WINK_NLP = null;
+    var WINK_READY = null;
+    var WINK_STATUS = 'pending';
+    var WINK_ERROR = '';
   var ANALYSIS_WORKER = null;
   var ANALYSIS_WORKER_DISABLED = false;
   var ANALYSIS_REQ_ID = 0;
@@ -120,6 +131,8 @@
     SOURCE_EVIDENCE_TOKENS = Array.isArray(CFG.sourceEvidenceTokens) ? CFG.sourceEvidenceTokens : [];
     SOURCE_EVIDENCE_INDEX = 0;
     REFERENCE_KEYS = Array.isArray(CFG.referenceKeys) ? CFG.referenceKeys : [];
+    NLP_CDN_ENABLED = CFG.nlpCdn !== false;
+    NLP_CDN_URL = String(CFG.nlpCdnUrl || NLP_CDN_URL);
   }
 
   // Quarto propagates YAML `lang` to <html lang="...">.
@@ -194,7 +207,7 @@
     pt: {
       wSuffix: 'p', sent: 'frase', sentP: 'frases',
       diversity: '🔵 diversidade', longSent: '🟡 frase longa',
-      passive: '〰 passiva', repeated: 'repetidas:', cross: 'recorrente na seção:',
+      passive: 'voz passiva', repeated: 'repetidas:', cross: 'recorrente na seção:',
       readTime: 'min de leitura', words: 'palavras', parag: 'parágrafo', paragP: 'parágrafos',
       alert: 'alerta', alertP: 'alertas', observation: 'observação', observationP: 'observações',
       hideBtn: 'ocultar anotações', showBtn: 'mostrar anotações',
@@ -211,7 +224,8 @@
       avgParagraph: 'parágrafo médio', longestSentence: 'maior frase',
       docDiversity: 'diversidade', passiveTotal: 'passivas',
       passiveDensity: 'dens. passiva', longSentenceRate: 'frases longas',
-      topRepeated: 'repetições globais', connectors: 'conectores', nominalization: 'nominalizações',
+      topRepeated: 'repetições globais', repeatedTerms: 'repetições',
+      connectors: 'conectores', nominalization: 'nominalizações',
       connectorAdd: 'conectores aditivos', connectorContrast: 'conectores de contraste',
       connectorCause: 'conectores de causa', connectorConclusion: 'conectores de conclusão',
       connectorTime: 'conectores temporais',
@@ -232,13 +246,66 @@
       reasonFewCitations: 'poucas citações na seção',
       reasonResultsCitation: 'citação em Resultados',
       analysisPreparing: 'analisando texto...', analysisEngine: 'motor JS-only',
+      analysisLoadingNlp: 'carregando NLP via CDN...',
       analysisWorker: 'worker', analysisSync: 'direto', analysisCache: 'cache', analysisTime: 'tempo',
+      nlpEngine: 'motor NLP',
+      nlpLoaded: 'cdnjs ativo',
+      nlpDisabled: 'desligado',
+      nlpFallback: 'fallback heurístico',
+      nlpUnavailable: 'CDN indisponível',
+      nlpNominalLoad: 'frases nominalmente densas',
+      nlpNominalLoadDesc: 'Frases com alta carga de substantivos/nominalizações, comum em prosa científica densa. Clique para destacar.',
+      nlpWeakVerbs: 'verbos genéricos',
+      nlpWeakVerbsDesc: 'Predicados pouco informativos ou muito genéricos; em manuscritos, prefira verbos que expressem a relação científica com precisão. Clique para destacar.',
+      nlpNounStacks: 'cadeias nominais',
+      nlpNounStacksDesc: 'Sequências longas de termos técnicos sem preposição ou pausa. Podem dificultar leitura, especialmente em títulos e Resultados. Clique para destacar.',
+      nlpVerbDiversity: 'diversidade verbal',
+      nlpVerbDiversityDesc: 'Proporção de verbos distintos entre os verbos detectados. Valores baixos indicam dependência de poucos predicados.',
+      nlpNounVerbRatio: 'razão subst./verbo',
+      nlpNounVerbRatioDesc: 'Razão entre substantivos e verbos detectados pelo motor NLP. Valores altos sugerem estilo nominal e menos orientado a ação.',
+      nlpKeyTerms: 'termos-chave NLP',
+      nlpKeyTermsDesc: 'Candidatos a termos centrais do manuscrito extraídos por frequência e, quando disponível, pelo analisador NLP.',
+      nlpTopics: 'tópicos NLP',
+      nlpWinkReadingEase: 'facilidade de leitura (Flesch)',
+      nlpWinkReadingEaseDesc: 'Flesch Reading Ease (0–100). Valores menores indicam texto mais difícil. Artigos científicos: tipicamente 30–50.',
+      nlpWinkGradeLevel: 'nível escolar (F-K)',
+      nlpWinkGradeLevelDesc: 'Flesch-Kincaid Grade Level — nível de escolaridade necessário para compreender o texto. Artigos científicos: tipicamente 12–16.',
+      nlpWinkAvgWords: 'média pal./frase (wink)',
+      nlpWinkAvgWordsDesc: 'Média de palavras por frase calculada pelo wink-nlp.',
+      nlpWinkReadTime: 'tempo de leitura (wink)',
+      nlpWinkReadTimeDesc: 'Tempo estimado de leitura calculado pelo wink-nlp para o texto em inglês.',
+      nlpWinkComplexWords: 'palavras complexas (wink)',
+      nlpWinkComplexWordsDesc: 'Palavras complexas detectadas pelo wink-nlp. Em inglês científico, densidade muito alta pode indicar prosa excessivamente pesada. Clique para destacar.',
+      nlpWinkModalVerbs: 'verbos modais (wink)',
+      nlpWinkModalVerbsDesc: 'Modais detectados pelo wink-nlp (can, could, may, might, should, would etc.). Útil para revisar grau de cautela, especulação ou obrigação. Clique para destacar.',
+      nlpWinkPassive: 'voz passiva (wink)',
+      nlpWinkPassiveDesc: 'Frases em voz passiva detectadas via POS tagging do wink-nlp (verbo principal precedido por forma de "to be"). Clique para destacar.',
+      nlpWinkWeakOpeners: 'aberturas fracas (wink)',
+      nlpWinkWeakOpenersDesc: 'Frases iniciadas com sujeito expletivo ("It is", "There are", "This is" etc.) detectadas pelo wink-nlp. Aberturas fracas adiam o sujeito real e podem enfraquecer o texto científico. Clique para destacar.',
+      nlpWinkComplexDensity: 'densidade pal. complexas (wink)',
+      nlpWinkComplexDensityDesc: 'Percentual de palavras polissilábicas (≥3 sílabas) no texto, calculado pelo wink-nlp. Valores acima de 20% podem indicar prosa muito densa.',
+      nlpWinkVerbDiversity: 'diversidade verbal (wink)',
+      nlpWinkVerbDiversityDesc: 'Proporção entre lemas verbais únicos e total de verbos detectados pelo wink-nlp (POS: VERB). Valores maiores indicam vocabulário verbal mais variado.',
+      nlpTopicsDesc: 'Tópicos e entidades recorrentes extraídos pelo pacote NLP. Úteis para conferir foco terminológico do manuscrito. Clique para destacar.',
+      nlpEntities: 'entidades nomeadas',
+      nlpEntitiesDesc: 'Pessoas, organizações e lugares detectados no corpo do manuscrito. Útil para conferir nomes próprios, instituições, softwares e locais. Clique para destacar.',
+      nlpValuesDates: 'valores/datas NLP',
+      nlpValuesDatesDesc: 'Valores e datas reconhecidos pelo NLP, incluindo alguns números escritos por extenso. Use para checar evidências textuais. Clique para destacar.',
+      nlpAdverbs: 'advérbios',
+      nlpAdverbsDesc: 'Advérbios detectados pelo NLP. Excesso pode enfraquecer precisão ou criar tom menos objetivo em manuscritos. Clique para destacar.',
+      nlpContractions: 'contrações',
+      nlpContractionsDesc: 'Contrações detectadas (ex.: isn\'t, don\'t). Em inglês formal, contrações devem ser evitadas em textos científicos.',
+      nlpQuestions: 'frases interrogativas',
+      nlpQuestionsDesc: 'Frases interrogativas detectadas no corpo do texto. Perguntas retóricas devem ser usadas com cautela em manuscritos científicos.',
       readability: 'legibilidade', flesch: 'flesch', grade: 'nível', fog: 'fog',
       complexSent: 'frases complexas', hedges: 'atenuadores', repeatedStarts: 'inícios repetidos',
       hedgeDensity: 'dens. atenuadores',
       undefinedAcronyms: 'siglas sem definição', emphaticPunct: 'pontuação enfática',
       evidence: 'evidências', evidenceDensity: 'dens. evidências',
       termVariants: 'variações de termo', cohesionGaps: 'lacunas de coesão',
+      longParagraphs: 'parágrafos longos',
+      citationGaps: 'lacunas de citação',
+      resultsCitations: 'citações em Resultados',
       abstractCoverage: 'cobertura resumo', colloquial: 'informalidade',
       avgSentenceDesc: 'Comprimento médio das frases (palavras). Recomendado: ≤25 para textos científicos.',
       sentenceVarDesc: 'Variação no comprimento das frases. Maior variação indica ritmo mais dinâmico.',
@@ -249,21 +316,25 @@
       passiveDensityDesc: 'Voz passiva por 1000 palavras. Aceitável em Métodos; evitar nas demais seções.',
       longSentRateDesc: 'Proporção de frases longas (acima do limite configurado). Clique para destacar no texto.',
       topRepeatedDesc: 'Palavras com maior número de repetições no documento. Clique para destacar.',
+      repeatedTermsDesc: 'Número de termos repetidos no documento, excluindo palavras funcionais e termos ignorados. Clique para destacar as repetições nos parágrafos.',
       connectorsDesc: 'Total de conectores detectados. Clique para destacar no texto.',
       nominalizationDesc: 'Nominalizações: substantivos derivados de verbos/adjetivos que densificam o texto. Clique para destacar.',
       fleschDesc: 'Flesch Reading Ease: quanto maior, mais fácil. 0–30 = muito difícil (acadêmico); 60–70 = padrão jornalístico.',
       gradeDesc: 'Flesch-Kincaid Grade Level: equivalência ao ano escolar americano. Artigos científicos típicos ficam entre 12–16.',
       fogDesc: 'Gunning Fog Index: estima os anos de escolaridade necessários para compreender o texto na primeira leitura. Fórmula: 0,4 × (palavras/frase + % palavras complexas). Textos acadêmicos: 12–18.',
-      complexSentDesc: 'Frases com múltiplas orações subordinadas ou alta complexidade sintática.',
+      complexSentDesc: 'Frases com múltiplas orações subordinadas ou alta complexidade sintática. Clique para destacar.',
       hedgeDesc: 'Atenuadores: expressões que reduzem a força assertiva (ex.: pode, sugere, parece). Clique para destacar.',
       undefinedAcronymsDesc: 'Siglas usadas no texto sem definição prévia entre parênteses.',
       emphaticPunctDesc: 'Ocorrências de pontuação enfática (! ou ??) — inadequadas em textos científicos.',
       evidenceDesc: 'Marcadores de evidência: números, percentuais, unidades de medida e citações. Clique para destacar no texto.',
       termVariantsDesc: 'Formas divergentes de um mesmo termo — possível inconsistência terminológica.',
       cohesionGapsDesc: 'Parágrafos sem conector de transição no início, após parágrafo de múltiplas frases. Clique para destacar.',
+      longParagraphsDesc: 'Parágrafos acima do limite configurado de palavras. Clique para destacar.',
+      citationGapsDesc: 'Parágrafos em Introdução/Discussão sem marcador de citação detectado. Clique para destacar.',
+      resultsCitationsDesc: 'Parágrafos de Resultados com citação bibliográfica detectada. Clique para destacar.',
       abstractCoverageDesc: 'Presença dos elementos esperados no Resumo: objetivo, método, resultado, conclusão.',
-      colloquialDesc: 'Termos informais ou coloquiais detectados — evitar em textos científicos.',
-      repeatedStartsDesc: 'Frases consecutivas que iniciam com a mesma palavra ou expressão.',
+      colloquialDesc: 'Termos informais ou coloquiais detectados — evitar em textos científicos. Clique para destacar.',
+      repeatedStartsDesc: 'Frases consecutivas que iniciam com a mesma palavra ou expressão. Clique para destacar.',
       sectionScoreDesc: 'Score médio de complexidade das seções (0–100). Valores altos indicam seções mais densas.',
       noVerbDesc: 'Frases sem verbo principal identificável. Clique para destacar no texto.',
       connectorAddDesc: 'Conectores aditivos (e, além disso, também…). Clique para destacar.',
@@ -272,7 +343,7 @@
       connectorConclusionDesc: 'Conectores de conclusão (logo, assim, portanto…). Clique para destacar.',
       connectorTimeDesc: 'Conectores temporais (quando, depois, antes…). Clique para destacar.',
       pronounAmbig: 'pronomes ambíguos',
-      pronounAmbigDesc: 'Frases iniciadas com pronomes demonstrativos/pessoais sem antecedente claro (isso, este, eles…).',
+      pronounAmbigDesc: 'Frases iniciadas com pronomes demonstrativos/pessoais sem antecedente claro (isso, este, eles…). Clique para destacar.',
       modalVerbs: 'verbos modais',
       modalVerbsDesc: 'Verbos modais (pode, deve, seria…). Excesso em Resultados indica falta de assertividade. Clique para destacar.',
       firstPerson: 'primeira pessoa',
@@ -299,6 +370,26 @@
       evidenceUnparameterizedDesc: 'Valores numéricos não vinculados a nenhuma variável em _variables.yml — considere parametrizá-los para facilitar atualizações.',
       variableCount: 'variáveis definidas',
       variableCountDesc: 'Número de variáveis escalares definidas em _variables.yml.',
+      groupSentences: 'Frases',
+      groupParagraphs: 'Parágrafos & Seções',
+      groupReadability: 'Legibilidade',
+      groupVocabulary: 'Vocabulário',
+      groupVoice: 'Voz & Tom',
+      groupConnectors: 'Conectores',
+      groupCitations: 'Citações & Referências',
+      groupEvidence: 'Evidências',
+      groupNlp: 'NLP científico',
+      groupAbstract: 'Resumo',
+      groupSearchSelection: 'Busca & Seleção',
+      italicText: 'itálico',
+      italicTextDesc: 'Elementos em itálico no manuscrito. Clique para destacar.',
+      regexSearch: 'busca regex',
+      regexSearchDesc: 'Informe uma regex para destacar ocorrências no texto.',
+      regexPlaceholder: 'regex (ex.: gene[s]?|p-valor)',
+      regexApply: 'marcar',
+      regexClear: 'limpar',
+      regexMatches: 'ocorrências',
+      regexInvalid: 'regex inválida',
       referencesUsed: 'referências usadas',
       referencesUsedDesc: 'Entradas do ref.bib citadas no manuscrito.',
       citationsTotal: 'citações',
@@ -310,7 +401,7 @@
     en: {
       wSuffix: 'w', sent: 'sentence', sentP: 'sentences',
       diversity: '🔵 diversity', longSent: '🟡 long sentence',
-      passive: '〰 passive', repeated: 'repeated:', cross: 'recurrent in section:',
+      passive: 'passive voice', repeated: 'repeated:', cross: 'recurrent in section:',
       readTime: 'min read', words: 'words', parag: 'paragraph', paragP: 'paragraphs',
       alert: 'alert', alertP: 'alerts', observation: 'observation', observationP: 'observations',
       hideBtn: 'hide notes', showBtn: 'show notes',
@@ -327,7 +418,8 @@
       avgParagraph: 'avg paragraph', longestSentence: 'longest sentence',
       docDiversity: 'diversity', passiveTotal: 'passives',
       passiveDensity: 'passive dens.', longSentenceRate: 'long sentences',
-      topRepeated: 'global repeats', connectors: 'connectors', nominalization: 'nominalizations',
+      topRepeated: 'global repeats', repeatedTerms: 'repetitions',
+      connectors: 'connectors', nominalization: 'nominalizations',
       connectorAdd: 'additive connectors', connectorContrast: 'contrast connectors',
       connectorCause: 'causal connectors', connectorConclusion: 'conclusion connectors',
       connectorTime: 'temporal connectors',
@@ -348,13 +440,66 @@
       reasonFewCitations: 'few citations in section',
       reasonResultsCitation: 'citation in Results',
       analysisPreparing: 'analyzing text...', analysisEngine: 'JS-only engine',
+      analysisLoadingNlp: 'loading NLP from CDN...',
       analysisWorker: 'worker', analysisSync: 'direct', analysisCache: 'cache', analysisTime: 'time',
+      nlpEngine: 'NLP engine',
+      nlpLoaded: 'cdnjs active',
+      nlpDisabled: 'disabled',
+      nlpFallback: 'heuristic fallback',
+      nlpUnavailable: 'CDN unavailable',
+      nlpNominalLoad: 'noun-dense sentences',
+      nlpNominalLoadDesc: 'Sentences with high noun/nominalization load, a common source of dense scientific prose. Click to highlight.',
+      nlpWeakVerbs: 'generic verbs',
+      nlpWeakVerbsDesc: 'Low-information or overly generic predicates; in manuscripts, prefer verbs that express the scientific relationship precisely. Click to highlight.',
+      nlpNounStacks: 'noun stacks',
+      nlpNounStacksDesc: 'Long technical term chains without a preposition or pause. They can reduce readability, especially in titles and Results. Click to highlight.',
+      nlpVerbDiversity: 'verb diversity',
+      nlpVerbDiversityDesc: 'Share of distinct verbs among detected verbs. Low values indicate reliance on a small predicate set.',
+      nlpNounVerbRatio: 'noun/verb ratio',
+      nlpNounVerbRatioDesc: 'Ratio between nouns and verbs detected by the NLP engine. High values suggest a nominal, less action-oriented style.',
+      nlpKeyTerms: 'NLP key terms',
+      nlpKeyTermsDesc: 'Candidate central manuscript terms extracted by frequency and, when available, by the NLP analyzer.',
+      nlpTopics: 'NLP topics',
+      nlpWinkReadingEase: 'reading ease (Flesch)',
+      nlpWinkReadingEaseDesc: 'Flesch Reading Ease Score (0–100). Lower values indicate harder text. Typical scientific range: 30–50.',
+      nlpWinkGradeLevel: 'grade level (F-K)',
+      nlpWinkGradeLevelDesc: 'Flesch-Kincaid Grade Level — education level needed to understand the text. Scientific articles typically score 12–16.',
+      nlpWinkAvgWords: 'avg words/sentence (wink)',
+      nlpWinkAvgWordsDesc: 'Average number of words per sentence computed by wink-nlp.',
+      nlpWinkReadTime: 'reading time (wink)',
+      nlpWinkReadTimeDesc: 'Estimated reading time computed by wink-nlp for the English text.',
+      nlpWinkComplexWords: 'complex words (wink)',
+      nlpWinkComplexWordsDesc: 'Complex words detected by wink-nlp. In scientific English, very high density can signal overly heavy prose. Click to highlight.',
+      nlpWinkModalVerbs: 'modal verbs (wink)',
+      nlpWinkModalVerbsDesc: 'Modals detected by wink-nlp (can, could, may, might, should, would, etc.). Useful for reviewing caution, speculation, or obligation. Click to highlight.',
+      nlpWinkPassive: 'passive voice (wink)',
+      nlpWinkPassiveDesc: 'Passive-voice sentences detected via wink-nlp POS tagging (main verb preceded by a form of "to be"). Click to highlight.',
+      nlpWinkWeakOpeners: 'weak sentence openers (wink)',
+      nlpWinkWeakOpenersDesc: 'Sentences beginning with an expletive subject ("It is", "There are", "This is", etc.) detected by wink-nlp. Weak openers defer the real subject and can dilute scientific writing. Click to highlight.',
+      nlpWinkComplexDensity: 'complex word density (wink)',
+      nlpWinkComplexDensityDesc: 'Percentage of polysyllabic words (≥3 syllables) in the text, computed by wink-nlp. Values above 20% may indicate very dense prose.',
+      nlpWinkVerbDiversity: 'verb diversity (wink)',
+      nlpWinkVerbDiversityDesc: 'Ratio of unique verb lemmas to total verbs detected by wink-nlp (POS: VERB). Higher values indicate more varied verb vocabulary.',
+      nlpTopicsDesc: 'Recurring topics and entities extracted by the NLP package. Useful for checking the manuscript’s terminological focus. Click to highlight.',
+      nlpEntities: 'named entities',
+      nlpEntitiesDesc: 'People, organizations, and places detected in the manuscript body. Useful for checking proper names, institutions, software, and locations. Click to highlight.',
+      nlpValuesDates: 'NLP values/dates',
+      nlpValuesDatesDesc: 'Values and dates recognized by NLP, including some numbers written as words. Use to check textual evidence. Click to highlight.',
+      nlpAdverbs: 'adverbs',
+      nlpAdverbsDesc: 'Adverbs detected by NLP. Excess can weaken precision or create a less objective manuscript tone. Click to highlight.',
+      nlpContractions: 'contractions',
+      nlpContractionsDesc: 'Contractions detected (e.g., isn\'t, don\'t). In formal scientific writing, contractions should be avoided.',
+      nlpQuestions: 'interrogative sentences',
+      nlpQuestionsDesc: 'Interrogative sentences detected in the body text. Rhetorical questions should be used sparingly in scientific manuscripts.',
       readability: 'readability', flesch: 'flesch', grade: 'grade', fog: 'fog',
       complexSent: 'complex sentences', hedges: 'hedges', repeatedStarts: 'repeated starts',
       hedgeDensity: 'hedge density',
       undefinedAcronyms: 'undefined acronyms', emphaticPunct: 'emphatic punctuation',
       evidence: 'evidence', evidenceDensity: 'evidence density',
       termVariants: 'term variants', cohesionGaps: 'cohesion gaps',
+      longParagraphs: 'long paragraphs',
+      citationGaps: 'citation gaps',
+      resultsCitations: 'Results citations',
       abstractCoverage: 'abstract coverage', colloquial: 'colloquial tone',
       avgSentenceDesc: 'Average sentence length (words). Recommended: \u226425 for scientific texts.',
       sentenceVarDesc: 'Variation in sentence length. Greater variation suggests a more dynamic rhythm.',
@@ -365,21 +510,25 @@
       passiveDensityDesc: 'Passive voice per 1000 words. Acceptable in Methods; avoid elsewhere.',
       longSentRateDesc: 'Proportion of long sentences (above threshold). Click to highlight in text.',
       topRepeatedDesc: 'Most repeated words in the document. Click to highlight.',
+      repeatedTermsDesc: 'Number of repeated terms in the document, excluding function words and ignored terms. Click to highlight repetitions in paragraphs.',
       connectorsDesc: 'Total connectors detected. Click to highlight in text.',
       nominalizationDesc: 'Nominalizations: nouns derived from verbs/adjectives that can densify prose. Click to highlight.',
       fleschDesc: 'Flesch Reading Ease: higher = easier. 0\u201330 = very difficult (academic); 60\u201370 = standard.',
       gradeDesc: 'Flesch-Kincaid Grade Level: U.S. school year equivalent. Academic papers typically score 12\u201316.',
       fogDesc: 'Gunning Fog Index: estimates years of schooling needed to understand the text on first reading. Formula: 0.4 \u00d7 (words/sentence + % complex words). Academic texts: 12\u201318.',
-      complexSentDesc: 'Sentences with multiple subordinate clauses or high syntactic complexity.',
+      complexSentDesc: 'Sentences with multiple subordinate clauses or high syntactic complexity. Click to highlight.',
       hedgeDesc: 'Hedges: expressions that weaken assertive force (e.g., may, suggests, appears). Click to highlight.',
       undefinedAcronymsDesc: 'Acronyms used in the text without a prior parenthetical definition.',
       emphaticPunctDesc: 'Emphatic punctuation occurrences (! or ??) \u2014 inappropriate in scientific texts.',
       evidenceDesc: 'Evidence markers: numbers, percentages, measurement units, and citations. Click to highlight in text.',
       termVariantsDesc: 'Divergent forms of the same term \u2014 possible terminological inconsistency.',
       cohesionGapsDesc: 'Paragraphs without a transition connector at the start, after a multi-sentence paragraph. Click to highlight.',
+      longParagraphsDesc: 'Paragraphs above the configured word limit. Click to highlight.',
+      citationGapsDesc: 'Introduction/Discussion paragraphs without a detected citation marker. Click to highlight.',
+      resultsCitationsDesc: 'Results paragraphs with a detected bibliographic citation. Click to highlight.',
       abstractCoverageDesc: 'Presence of expected elements in the Abstract: objective, method, result, conclusion.',
-      colloquialDesc: 'Informal or colloquial terms detected \u2014 avoid in scientific writing.',
-      repeatedStartsDesc: 'Consecutive sentences beginning with the same word or phrase.',
+      colloquialDesc: 'Informal or colloquial terms detected \u2014 avoid in scientific writing. Click to highlight.',
+      repeatedStartsDesc: 'Consecutive sentences beginning with the same word or phrase. Click to highlight.',
       sectionScoreDesc: 'Average section complexity score (0\u2013100). Higher values indicate denser sections.',
       noVerbDesc: 'Sentences with no identifiable main verb. Click to highlight in text.',
       connectorAddDesc: 'Additive connectors (and, furthermore, also\u2026). Click to highlight.',
@@ -388,7 +537,7 @@
       connectorConclusionDesc: 'Conclusion connectors (thus, hence, therefore\u2026). Click to highlight.',
       connectorTimeDesc: 'Temporal connectors (when, after, before\u2026). Click to highlight.',
       pronounAmbig: 'ambiguous pronouns',
-      pronounAmbigDesc: 'Sentences starting with demonstrative/personal pronouns without a clear antecedent (it, this, they\u2026).',
+      pronounAmbigDesc: 'Sentences starting with demonstrative/personal pronouns without a clear antecedent (it, this, they\u2026). Click to highlight.',
       modalVerbs: 'modal verbs',
       modalVerbsDesc: 'Modal verbs (may, might, would, should\u2026). Overuse in Results signals lack of assertiveness. Click to highlight.',
       firstPerson: 'first person',
@@ -415,6 +564,26 @@
       evidenceUnparameterizedDesc: 'Numeric values not linked to any variable in _variables.yml — consider parameterizing them for easier updates.',
       variableCount: 'defined variables',
       variableCountDesc: 'Number of scalar variables defined in _variables.yml.',
+      groupSentences: 'Sentences',
+      groupParagraphs: 'Paragraphs & Sections',
+      groupReadability: 'Readability',
+      groupVocabulary: 'Vocabulary',
+      groupVoice: 'Voice & Tone',
+      groupConnectors: 'Connectors',
+      groupCitations: 'Citations & References',
+      groupEvidence: 'Evidence',
+      groupNlp: 'Scientific NLP',
+      groupAbstract: 'Abstract',
+      groupSearchSelection: 'Search & Select',
+      italicText: 'italic',
+      italicTextDesc: 'Italicized elements in the manuscript. Click to highlight.',
+      regexSearch: 'regex search',
+      regexSearchDesc: 'Enter a regex to highlight matches in text.',
+      regexPlaceholder: 'regex (e.g.: gene[s]?|p-value)',
+      regexApply: 'highlight',
+      regexClear: 'clear',
+      regexMatches: 'matches',
+      regexInvalid: 'invalid regex',
       referencesUsed: 'references used',
       referencesUsedDesc: 'ref.bib entries cited in the manuscript.',
       citationsTotal: 'citations',
@@ -553,16 +722,22 @@
   function getUndefinedAcronyms(sentences) {
     var defined = new Set();
     var freq = {};
-    var defRe = /\b([A-Za-zÀ-ÿ][A-Za-zÀ-ÿ\-]*(?:\s+[A-Za-zÀ-ÿ][A-Za-zÀ-ÿ\-]*){1,8})\s+\(([A-Z]{2,})\)/g;
+    var defTermFirstRe = /\b([A-Za-zÀ-ÿ][A-Za-zÀ-ÿ\-]*(?:\s+[A-Za-zÀ-ÿ][A-Za-zÀ-ÿ\-]*){1,8})\s+\(([A-Z]{2,})\)/g;
+    var defAcrFirstRe = /\b([A-Z]{2,})\s*\(([A-Za-zÀ-ÿ][A-Za-zÀ-ÿ\-]*(?:\s+[A-Za-zÀ-ÿ][A-Za-zÀ-ÿ\-]*){1,8})\)/g;
     var acrRe = /\b[A-Z]{2,}s?\b/g;
 
     sentences.forEach(function (sentence) {
       var s = String(sentence || '');
       var m;
-      while ((m = defRe.exec(s)) !== null) {
+      while ((m = defTermFirstRe.exec(s)) !== null) {
         defined.add(m[2]);
       }
-      defRe.lastIndex = 0;
+      defTermFirstRe.lastIndex = 0;
+
+      while ((m = defAcrFirstRe.exec(s)) !== null) {
+        defined.add(m[1]);
+      }
+      defAcrFirstRe.lastIndex = 0;
 
       while ((m = acrRe.exec(s)) !== null) {
         var acr = m[0].replace(/s$/, '');
@@ -756,16 +931,619 @@
     return (String(text || '').match(re) || []).length;
   }
 
+  function detectGlobalNlp() {
+    var candidates = [window.nlp, window.compromise];
+    for (var i = 0; i < candidates.length; i++) {
+      if (candidates[i]) return candidates[i];
+    }
+    return null;
+  }
+
+  function ensureNlpEngine() {
+    if (!NLP_CDN_ENABLED) {
+      NLP_STATUS = 'disabled';
+      return Promise.resolve(null);
+    }
+    var existing = detectGlobalNlp();
+    if (existing) {
+      NLP_LIB = existing;
+      NLP_STATUS = 'loaded';
+      return Promise.resolve(NLP_LIB);
+    }
+    if (NLP_READY) return NLP_READY;
+
+    NLP_STATUS = 'loading';
+    NLP_READY = new Promise(function (resolve) {
+      var done = false;
+      var preloaded = Array.from(document.scripts || []).some(function (s) {
+        return s.src === NLP_CDN_URL;
+      });
+      var script = document.createElement('script');
+      var timer = setTimeout(function () {
+        if (done) return;
+        done = true;
+        NLP_STATUS = 'unavailable';
+        NLP_ERROR = 'timeout';
+        resolve(null);
+      }, 4500);
+
+      script.src = NLP_CDN_URL;
+      script.async = true;
+      script.crossOrigin = 'anonymous';
+      script.onload = function () {
+        if (done) return;
+        done = true;
+        clearTimeout(timer);
+        NLP_LIB = detectGlobalNlp();
+        NLP_STATUS = NLP_LIB ? 'loaded' : 'unavailable';
+        if (!NLP_LIB) NLP_ERROR = 'global not found';
+        resolve(NLP_LIB);
+      };
+      script.onerror = function () {
+        if (done) return;
+        done = true;
+        clearTimeout(timer);
+        NLP_STATUS = 'unavailable';
+        NLP_ERROR = 'load error';
+        resolve(null);
+      };
+      if (preloaded) {
+        return;
+      }
+      document.head.appendChild(script);
+    });
+    return NLP_READY;
+  }
+
+  function detectWinkBundleUrl() {
+    var scripts = document.querySelectorAll('script[src]');
+    for (var i = 0; i < scripts.length; i++) {
+      if (/scientific-writing\.js/.test(scripts[i].src)) {
+        return scripts[i].src.replace(/scientific-writing\.js([?#].*)?$/, 'wink-bundle.min.js');
+      }
+    }
+    return null;
+  }
+
+  function ensureWinkEngine() {
+    if (LANG !== 'en') {
+      WINK_STATUS = 'disabled';
+      return Promise.resolve(null);
+    }
+    if (WINK_NLP) return Promise.resolve(WINK_NLP);
+    if (WINK_READY) return WINK_READY;
+    var url = detectWinkBundleUrl();
+    if (!url) {
+      WINK_STATUS = 'unavailable';
+      WINK_ERROR = 'bundle not found';
+      return Promise.resolve(null);
+    }
+    WINK_STATUS = 'loading';
+    WINK_READY = new Promise(function (resolve) {
+      var done = false;
+      var script = document.createElement('script');
+      var timer = setTimeout(function () {
+        if (done) return;
+        done = true;
+        WINK_STATUS = 'unavailable';
+        WINK_ERROR = 'timeout';
+        resolve(null);
+      }, 12000);
+      script.src = url;
+      script.async = true;
+      script.onload = function () {
+        if (done) return;
+        done = true;
+        clearTimeout(timer);
+        try {
+          var winkNLPFn = window.winkNLP;
+          var model = window.winkEngLiteWebModel;
+          if (winkNLPFn && model) {
+            WINK_NLP = winkNLPFn(model);
+            WINK_LIB = winkNLPFn;
+            WINK_STATUS = 'loaded';
+          } else {
+            WINK_STATUS = 'unavailable';
+            WINK_ERROR = 'globals not found';
+          }
+        } catch (e) {
+          WINK_STATUS = 'unavailable';
+          WINK_ERROR = String(e.message || e);
+        }
+        resolve(WINK_NLP);
+      };
+      script.onerror = function () {
+        if (done) return;
+        done = true;
+        clearTimeout(timer);
+        WINK_STATUS = 'unavailable';
+        WINK_ERROR = 'load error';
+        resolve(null);
+      };
+      document.head.appendChild(script);
+    });
+    return WINK_READY;
+  }
+
+  function analyzeWinkNlp(text) {
+    var result = {
+      winkAvailable: false,
+      fleschReadingEase: null,
+      fleschKincaidGrade: null,
+      avgWordsPerSentence: null,
+      readingTimeSecs: 0,
+      complexWordCount: 0,
+      complexWords: [],
+      modalCount: 0,
+      modalTerms: [],
+      passiveSentenceCount: 0,
+      weakOpenerCount: 0,
+      verbLemmaDiversity: null,
+      complexWordDensity: null,
+    };
+    if (!WINK_NLP || LANG !== 'en') return result;
+    try {
+      var doc = WINK_NLP.readDoc(String(text || ''));
+      var its = WINK_NLP.its;
+      var tokenTexts = doc.tokens().out();
+      var posAll = doc.tokens().out(its.pos);
+      var lemmaAll = doc.tokens().out(its.lemma);
+      var modalFreq = {};
+      var modalLemmas = {
+        can: true, could: true, may: true, might: true, must: true,
+        shall: true, should: true, will: true, would: true,
+      };
+      result.winkAvailable = true;
+      var stats = doc.out(its.readabilityStats);
+      if (stats) {
+        result.fleschReadingEase = typeof stats.fres === 'number' ? Math.round(stats.fres * 10) / 10 : null;
+        if (stats.numOfWords > 0 && stats.numOfSentences > 0) {
+          result.avgWordsPerSentence = Math.round((stats.numOfWords / stats.numOfSentences) * 10) / 10;
+          result.fleschKincaidGrade = Math.round(((0.39 * (stats.numOfWords / stats.numOfSentences)) + (11.8 * (countSyllablesText(text) / stats.numOfWords)) - 15.59) * 10) / 10;
+        }
+        result.readingTimeSecs = Number(stats.readingTimeSecs) || 0;
+        result.complexWordCount = Number(stats.numOfComplexWords) || 0;
+        result.complexWords = Object.keys(stats.complexWords || {}).map(function (word) {
+          return { text: normalizeWord(word), count: 1 };
+        }).filter(function (item) { return item.text; });
+        if (stats.numOfWords > 0) {
+          result.complexWordDensity = Math.round((result.complexWordCount / stats.numOfWords) * 1000) / 10;
+        }
+      }
+      var verbLemmaList = [];
+      for (var t = 0; t < posAll.length; t++) {
+        if (posAll[t] === 'AUX' && modalLemmas[lemmaAll[t]]) {
+          var surface = normalizeWord(tokenTexts[t]);
+          if (surface) modalFreq[surface] = (modalFreq[surface] || 0) + 1;
+        }
+        if (posAll[t] === 'VERB' && lemmaAll[t]) verbLemmaList.push(lemmaAll[t]);
+      }
+      if (verbLemmaList.length > 0) {
+        var uniqueVerbLemmas = new Set(verbLemmaList);
+        result.verbLemmaDiversity = Math.round((uniqueVerbLemmas.size / verbLemmaList.length) * 1000) / 10;
+      }
+      result.modalTerms = Object.keys(modalFreq)
+        .sort(function (a, b) { return modalFreq[b] - modalFreq[a] || a.localeCompare(b); })
+        .map(function (term) { return { text: term, count: modalFreq[term] }; });
+      result.modalCount = result.modalTerms.reduce(function (sum, item) { return sum + item.count; }, 0);
+      var passiveCount = 0;
+      var weakOpenerCount = 0;
+      var WEAK_OPENER_PAT = /^(?:it\s+(?:is|was|has|had|will|would|can|could|might|should|may)\b|there\s+(?:is|are|was|were|has|have|had)\b|this\s+(?:is|was|has|had)\b)/i;
+      doc.sentences().each(function (s) {
+        var sentText = s.out().trim();
+        if (WEAK_OPENER_PAT.test(sentText)) weakOpenerCount++;
+        var tokens = s.tokens();
+        var posArr = tokens.out(its.pos);
+        var lemmaArr = tokens.out(its.lemma);
+        for (var i = 1; i < posArr.length; i++) {
+          if (posArr[i] === 'VERB') {
+            var window3 = lemmaArr.slice(Math.max(0, i - 3), i);
+            if (window3.indexOf('be') !== -1) {
+              passiveCount++;
+              break;
+            }
+          }
+        }
+      });
+      result.passiveSentenceCount = passiveCount;
+      result.weakOpenerCount = weakOpenerCount;
+    } catch (e) {}
+    return result;
+  }
+
+  function isWinkPassiveSentence(text) {
+    if (!WINK_NLP || LANG !== 'en') return false;
+    try {
+      var doc = WINK_NLP.readDoc(String(text || ''));
+      var its = WINK_NLP.its;
+      var found = false;
+      doc.sentences().each(function (s) {
+        if (found) return;
+        var tokens = s.tokens();
+        var posArr = tokens.out(its.pos);
+        var lemmaArr = tokens.out(its.lemma);
+        for (var i = 1; i < posArr.length; i++) {
+          if (posArr[i] === 'VERB') {
+            var window3 = lemmaArr.slice(Math.max(0, i - 3), i);
+            if (window3.indexOf('be') !== -1) {
+              found = true;
+              return;
+            }
+          }
+        }
+      });
+      return found;
+    } catch (e) {}
+    return false;
+  }
+
+  function highlightWinkPassiveSentences(p) {
+    if (!WINK_NLP || LANG !== 'en') return;
+    var title = L.nlpWinkPassive;
+    var marked = p.innerHTML.replace(
+      /([.!?]+\s+)(?=[A-ZÁÉÍÓÚÀÂÊÔÃÕÜÇÑ"])/g,
+      '$1\x00'
+    );
+    p.innerHTML = marked.split('\x00').map(function (part) {
+      var plain = part.replace(/<[^>]+>/g, ' ').trim();
+      return plain && isWinkPassiveSentence(plain)
+        ? '<span class="ws-wink-passive" data-ws-focus="wink-passive" data-ws-reason="' + escapeHTML(title) + '" title="' + escapeHTML(title) + '">' + part + '</span>'
+        : part;
+    }).join('');
+  }
+
+  function highlightWinkComplexWords(p, nlpStats) {
+    if (!nlpStats || !nlpStats.winkComplexWords || !nlpStats.winkComplexWords.length) return;
+    highlightTermListInNode(p, nlpStats.winkComplexWords, 'ws-wink-complex', L.nlpWinkComplexWords);
+  }
+
+  function highlightWinkModalVerbs(p, nlpStats) {
+    var terms = (nlpStats && nlpStats.winkModalTerms) || [];
+    var list = terms
+      .map(function (item) { return normalizeWord(item.text || item); })
+      .filter(Boolean)
+      .sort(function (a, b) { return b.length - a.length; });
+    if (!list.length) return;
+    var escaped = list.map(function (term) {
+      return term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    });
+    highlightRegexInNode(p, new RegExp('\\b(?:' + escaped.join('|') + ')\\b', 'gi'), 'ws-wink-modal', L.nlpWinkModalVerbs);
+  }
+
+  function highlightWinkWeakOpeners(p) {
+    if (LANG !== 'en') return;
+    var title = L.nlpWinkWeakOpeners;
+    var WEAK_OPENER_PAT = /^(?:it\s+(?:is|was|has|had|will|would|can|could|might|should|may)\b|there\s+(?:is|are|was|were|has|have|had)\b|this\s+(?:is|was|has|had)\b)/i;
+    var marked = p.innerHTML.replace(
+      /([.!?]+\s+)(?=[A-ZÁÉÍÓÚÀÂÊÔÃÕÜÇÑ"])/g,
+      '$1\x00'
+    );
+    p.innerHTML = marked.split('\x00').map(function (part) {
+      var plain = part.replace(/<[^>]+>/g, ' ').trim();
+      return plain && WEAK_OPENER_PAT.test(plain)
+        ? '<span class="ws-wink-weak-opener" data-ws-focus="wink-weak-opener" data-ws-reason="' + escapeHTML(title) + '" title="' + escapeHTML(title) + '">' + part + '</span>'
+        : part;
+    }).join('');
+  }
+
+  function makeNlpDoc(text) {
+    var lib = NLP_LIB || detectGlobalNlp();
+    if (!lib) return null;
+    try {
+      if (typeof lib === 'function') return lib(String(text || ''));
+      if (lib && typeof lib.text === 'function') return lib.text(String(text || ''));
+    } catch (e) {}
+    return null;
+  }
+
+  function stripNlpNoise(text) {
+    return String(text || '')
+      .replace(/\((?:[^)]*\d{4}[^)]*)\)/g, ' ')
+      .replace(/\[[0-9,\-\s]+\]/g, ' ')
+      .replace(/\b[A-ZÁÉÍÓÚÀÂÊÔÃÕÜÇ][A-Za-zÀ-ÿ'’-]+\s+et\s+al\.?/g, ' ')
+      .replace(/\bet\s+al\.?/gi, ' ')
+      .replace(/\bal\.\s*\d{4}\b/gi, ' ')
+      .replace(/\b\d{4}\b/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  function normalizeNlpTerm(value) {
+    if (value == null) return '';
+    if (typeof value === 'string') return normalizeWord(value).replace(/\s+/g, ' ').trim();
+    if (typeof value === 'object') {
+      return normalizeWord(value.text || value.normal || value.normalized || value.implicit || value.word || '')
+        .replace(/\s+/g, ' ')
+        .trim();
+    }
+    return '';
+  }
+
+  function nlpViewArray(doc, method) {
+    if (!doc || typeof doc[method] !== 'function') return [];
+    try {
+      var view = doc[method]();
+      var raw = [];
+      if (view && typeof view.out === 'function') {
+        try { raw = view.out('array'); } catch (e1) {}
+        if (!Array.isArray(raw)) {
+          try { raw = String(view.out('text') || '').split(/\s*,\s*|\n+/); } catch (e2) {}
+        }
+      }
+      if ((!raw || !raw.length) && view && typeof view.data === 'function') raw = view.data();
+      if ((!raw || !raw.length) && Array.isArray(view)) raw = view;
+      return (raw || []).map(normalizeNlpTerm).filter(Boolean);
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function nlpViewItems(doc, method) {
+    if (!doc || typeof doc[method] !== 'function') return [];
+    try {
+      var view = doc[method]();
+      var raw = [];
+      if (view && typeof view.out === 'function') {
+        try { raw = view.out('array'); } catch (e1) {}
+      }
+      if ((!raw || !raw.length) && view && typeof view.data === 'function') raw = view.data();
+      if ((!raw || !raw.length) && Array.isArray(view)) raw = view;
+      return (raw || []).map(function (item) {
+        var text = normalizeNlpTerm(item);
+        var count = item && typeof item === 'object' ? Number(item.count || item.frequency || 1) : 1;
+        return text ? { text: text, count: isFinite(count) && count > 0 ? count : 1 } : null;
+      }).filter(Boolean);
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function compactNlpItems(items, limit) {
+    var freq = {};
+    (items || []).forEach(function (item) {
+      var text = normalizeNlpTerm(item.text || item);
+      if (!text || text.length < 3 || STOP_WORDS.has(text) || shouldIgnoreWord(text)) return;
+      freq[text] = (freq[text] || 0) + (Number(item.count) || 1);
+    });
+    return Object.keys(freq)
+      .sort(function (a, b) { return freq[b] - freq[a] || a.localeCompare(b); })
+      .slice(0, limit || 8)
+      .map(function (text) { return { text: text, count: freq[text] }; });
+  }
+
+  function looksLikeNamedEntity(text) {
+    var raw = String(text || '').trim();
+    if (!raw) return false;
+    var cleaned = raw.replace(/^[^\wÀ-ÿ]+|[^\wÀ-ÿ.]+$/g, '').trim();
+    if (!cleaned || cleaned.length < 3) return false;
+    var lower = normalizeWord(cleaned.replace(/\.+$/g, ''));
+    var blocked = new Set([
+      'que', 'al', 'et al', 'alta', 'colo', 'luz', 'dia', 'dias', 'semana', 'semanas',
+      'tratamento', 'tratamentos', 'temperatura', 'temperaturas', 'plantas', 'planta',
+      'crescimento', 'resultados', 'discussao', 'discussão', 'metodos', 'métodos',
+      'resumo', 'introducao', 'introdução', 'conclusao', 'conclusão',
+      'which', 'that', 'while', 'whereas', 'however', 'results', 'methods', 'discussion',
+      'abstract', 'conclusion', 'plant', 'plants', 'temperature', 'temperatures',
+    ]);
+    if (blocked.has(lower) || STOP_WORDS.has(lower) || shouldIgnoreWord(lower)) return false;
+    if (/^(?:al|et al)\.?(?:\s+\d{4})?$/i.test(cleaned)) return false;
+    if (/\d{4}/.test(cleaned)) return false;
+    if (/[,;:]\s*$/.test(raw)) return false;
+
+    var words = cleaned.split(/\s+/).filter(Boolean);
+    if (words.length > 6) return false;
+    var hasAcronym = words.some(function (w) { return /^[A-Z]{2,}(?:\.[A-Z]+)*\.?$/.test(w); });
+    var hasOrgSuffix = /\b(inc|corp|ltd|university|institute|department|team|foundation|software|R|universidade|instituto|embrapa|fapesp|cnpq|capes)\b/i.test(cleaned);
+    var capitalized = words.filter(function (w) {
+      return /^[A-ZÁÉÍÓÚÀÂÊÔÃÕÜÇ][A-Za-zÀ-ÿ'’-]{2,}$/.test(w) || /^[A-Z]\.$/.test(w);
+    }).length;
+    return hasAcronym || hasOrgSuffix || capitalized >= Math.min(2, words.length);
+  }
+
+  function compactNamedEntities(items, limit) {
+    return compactNlpItems((items || []).filter(function (item) {
+      return looksLikeNamedEntity(item.text || item);
+    }), limit || 8);
+  }
+
+  function extractValueDateTerms(text) {
+    var src = String(text || '');
+    var ranges = [];
+    var patterns = [
+      /\b\d+(?:[\.,]\d+)?\s*(?:%|mg|g|kg|ml|l|cm|mm|nm|ha|m\/s|\u00b0c|kpa|pa|ppm|ppb)\b/gi,
+      /\b\d+(?:[\.,]\d+)?\b/g,
+      LANG === 'en'
+        ? /\b(?:one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety|hundred|thousand)\b(?:[\s-]+\b(?:one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety|hundred|thousand)\b)*/gi
+        : /\b(?:um|uma|dois|duas|tr[eê]s|quatro|cinco|seis|sete|oito|nove|dez|onze|doze|treze|quatorze|catorze|quinze|vinte|trinta|quarenta|cinquenta|sessenta|setenta|oitenta|noventa|cem|cento|mil)\b(?:\s+(?:e\s+)?\b(?:um|uma|dois|duas|tr[eê]s|quatro|cinco|seis|sete|oito|nove|dez|onze|doze|treze|quatorze|catorze|quinze|vinte|trinta|quarenta|cinquenta|sessenta|setenta|oitenta|noventa|cem|cento|mil)\b)*/gi,
+      LANG === 'en'
+        ? /\b(?:january|february|march|april|may|june|july|august|september|october|november|december)\s+\d{1,2}(?:,\s*\d{4})?\b/gi
+        : /\b\d{1,2}\s+de\s+(?:janeiro|fevereiro|mar[cç]o|abril|maio|junho|julho|agosto|setembro|outubro|novembro|dezembro)(?:\s+de\s+\d{4})?\b/gi
+    ];
+    patterns.forEach(function (re) {
+      var r = new RegExp(re.source, re.flags || 'gi');
+      var m;
+      while ((m = r.exec(src)) !== null) {
+        ranges.push([m.index, m.index + m[0].length]);
+      }
+    });
+    if (!ranges.length) return [];
+    ranges.sort(function (a, b) { return a[0] - b[0] || b[1] - a[1]; });
+    var merged = [];
+    ranges.forEach(function (rng) {
+      var last = merged[merged.length - 1];
+      if (last && rng[0] < last[1]) {
+        last[1] = Math.max(last[1], rng[1]);
+      } else {
+        merged.push(rng.slice());
+      }
+    });
+    return merged.map(function (rng) {
+      return { text: src.slice(rng[0], rng[1]).toLowerCase(), count: 1 };
+    });
+  }
+
+  function displayNlpItems(items) {
+    return (items || []).map(function (item) {
+      return item.text + (item.count > 1 ? ' \xd7' + item.count : '');
+    });
+  }
+
+  function getWeakVerbTerms() {
+    return LANG === 'en'
+      ? ['be', 'is', 'are', 'was', 'were', 'have', 'has', 'had', 'show', 'shows', 'showed',
+          'indicate', 'indicates', 'indicated', 'suggest', 'suggests', 'suggested', 'present',
+          'presents', 'presented', 'occur', 'occurs', 'occurred', 'perform', 'performed',
+          'conduct', 'conducted', 'make', 'made', 'do', 'does', 'did']
+      : ['ser', 'é', 'são', 'foi', 'foram', 'estar', 'está', 'estão', 'ter', 'tem', 'têm',
+          'apresentar', 'apresenta', 'apresentaram', 'realizar', 'realiza', 'realizado',
+          'fazer', 'faz', 'ocorrer', 'ocorre', 'ocorreram', 'mostrar', 'mostra', 'indicou',
+          'indica', 'indicam', 'sugerir', 'sugere', 'sugerem', 'observar', 'observou'];
+  }
+
+  function countWeakVerbs(text) {
+    var source = String(text || '').toLowerCase();
+    var alpha = LANG === 'en' ? 'A-Za-z' : 'A-Za-zÀ-ÿ';
+    return getWeakVerbTerms().reduce(function (sum, term) {
+      var safe = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      var re;
+      try {
+        re = new RegExp('(?<![' + alpha + '])' + safe + '(?![' + alpha + '])', 'gi');
+      } catch (e) {
+        re = new RegExp('(^|[^' + alpha + '])' + safe + '(?=$|[^' + alpha + '])', 'gi');
+      }
+      var m = source.match(re);
+      return sum + (m ? m.length : 0);
+    }, 0);
+  }
+
+  function countNounStacks(text) {
+    if (LANG !== 'en') return 0;
+    var matches = String(text || '').match(/\b(?:[A-Za-z]{4,}\s+){2,}[A-Za-z]{4,}\b/g) || [];
+    return matches.filter(function (m) {
+      var terms = m.toLowerCase().split(/\s+/).filter(function (w) {
+        return !STOP_WORDS.has(w) && !shouldIgnoreWord(w);
+      });
+      return terms.length >= 3;
+    }).length;
+  }
+
+  function sentenceNominalLoad(sentence) {
+    var words = countWords(sentence);
+    if (words < 14) return false;
+    var nominal = countNominalizations(sentence);
+    var verbRe = getVerbRegex();
+    var verbs = (String(sentence || '').match(new RegExp(verbRe.source, 'gi')) || []).length;
+    var content = (String(sentence || '').match(LANG === 'en' ? /\b[a-z]{5,}\b/gi : /\b[a-záéíóúàâêôãõüçñ]{5,}\b/gi) || [])
+      .filter(function (w) {
+        var lower = normalizeWord(w);
+        return !STOP_WORDS.has(lower) && !shouldIgnoreWord(lower);
+      }).length;
+    return nominal >= 3 || (content >= 10 && verbs <= 1);
+  }
+
+  function countNominalLoadSentences(sentences) {
+    return (sentences || []).filter(sentenceNominalLoad).length;
+  }
+
+  function candidateKeyTerms(text, nlpNouns) {
+    var freq = {};
+    (nlpNouns && nlpNouns.length ? nlpNouns : (String(text || '').match(LANG === 'en' ? /\b[a-z]{6,}\b/gi : /\b[a-záéíóúàâêôãõüçñ]{6,}\b/gi) || []))
+      .forEach(function (term) {
+        var t = normalizeWord(term).replace(/[^a-z0-9áéíóúàâêôãõüçñ\s-]/gi, '').replace(/\s+/g, ' ').trim();
+        if (!t || t.length < 5 || STOP_WORDS.has(t) || shouldIgnoreWord(t)) return;
+        freq[t] = (freq[t] || 0) + 1;
+      });
+    return Object.keys(freq)
+      .filter(function (k) { return freq[k] >= 2; })
+      .sort(function (a, b) { return freq[b] - freq[a] || a.localeCompare(b); })
+      .slice(0, 6)
+      .map(function (k) { return k + ' \xd7' + freq[k]; });
+  }
+
+  function analyzeScientificNlp(text, sentences) {
+    var cleanText = stripNlpNoise(text);
+    var doc = makeNlpDoc(cleanText);
+    var winkStats = (LANG === 'en' && WINK_NLP) ? analyzeWinkNlp(text) : null;
+    var nouns = nlpViewArray(doc, 'nouns');
+    var verbs = nlpViewArray(doc, 'verbs');
+    var adjectives = nlpViewArray(doc, 'adjectives');
+    var adverbs = nlpViewArray(doc, 'adverbs');
+    var topics = compactNlpItems(nlpViewItems(doc, 'topics'), 8);
+    var people = compactNamedEntities(nlpViewItems(doc, 'people'), 8);
+    var organizations = compactNamedEntities(nlpViewItems(doc, 'organizations').concat(nlpViewItems(doc, 'organisations')), 8);
+    var places = compactNamedEntities(nlpViewItems(doc, 'places'), 8);
+    var valueDateTerms = compactNlpItems(extractValueDateTerms(text), 50);
+    var dates = compactNlpItems(nlpViewItems(doc, 'dates'), 8);
+    var values = valueDateTerms.length ? valueDateTerms : compactNlpItems(nlpViewItems(doc, 'values'), 8);
+    var adverbItems = compactNlpItems(adverbs.map(function (text) { return { text: text, count: 1 }; }), 8);
+    var verbUniq = new Set(verbs.map(function (v) { return v.replace(/\s+/g, ' '); }));
+    var nounVerbRatio = verbs.length ? nouns.length / verbs.length : nouns.length ? nouns.length : 0;
+    var lexicalTagged = nouns.length + verbs.length + adjectives.length + adverbs.length;
+
+    // compromise v14: contractions (EN only), questions, verb tense
+    var contractionItems = [];
+    if (LANG === 'en' && doc && typeof doc.contractions === 'function') {
+      try { contractionItems = doc.contractions().out('array') || []; } catch (e) {}
+    }
+    var questionItems = [];
+    if (doc && typeof doc.questions === 'function') {
+      try { questionItems = doc.questions().out('array') || []; } catch (e) {}
+    }
+    return {
+      nlpAvailable: !!doc,
+      nounCount: nouns.length,
+      verbCount: verbs.length,
+      adjectiveCount: adjectives.length,
+      adverbCount: adverbs.length,
+      nounVerbRatio: nounVerbRatio,
+      verbDiversity: verbs.length ? verbUniq.size / verbs.length : 1,
+      taggedDensity: countWords(text) ? lexicalTagged / countWords(text) : 0,
+      nominalLoadCount: countNominalLoadSentences(sentences || getSentences(text)),
+      weakVerbCount: countWeakVerbs(text),
+      nounStackCount: countNounStacks(text),
+      keyTerms: candidateKeyTerms(text, topics.length ? topics.map(function (x) { return x.text; }) : nouns),
+      topics: topics,
+      people: people,
+      organizations: organizations,
+      places: places,
+      dates: dates,
+      values: values,
+      adverbs: adverbItems,
+      winkComplexWordCount: winkStats ? (winkStats.complexWordCount || 0) : 0,
+      winkComplexWords: winkStats ? (winkStats.complexWords || []) : [],
+      winkModalCount: winkStats ? (winkStats.modalCount || 0) : 0,
+      winkModalTerms: winkStats ? (winkStats.modalTerms || []) : [],
+      winkReadingTimeSecs: winkStats ? (winkStats.readingTimeSecs || 0) : 0,
+      passiveSentenceCount: winkStats ? (winkStats.passiveSentenceCount || 0) : 0,
+      winkWeakOpenerCount: winkStats ? (winkStats.weakOpenerCount || 0) : 0,
+      topicCount: topics.reduce(function (sum, x) { return sum + x.count; }, 0),
+      entityCount: people.concat(organizations, places).reduce(function (sum, x) { return sum + x.count; }, 0),
+      dateValueCount: values.length + dates.length,
+      contractionCount: contractionItems.length,
+      questionCount: questionItems.length,
+    };
+  }
+
+  function getParaOpeningKey(text) {
+    var src = String(text || '').trim().replace(/^["'«\(\[\{\s]+/, '');
+    var words = (src.match(LANG === 'en' ? /\b[a-z]+\b/gi : /\b[a-záéíóúàâêôãõüçñ]+\b/gi) || [])
+      .map(normalizeWord)
+      .filter(Boolean);
+    if (!words.length) return '';
+    if (words.length === 1) return words[0];
+    return words[0] + ' ' + words[1];
+  }
+
   function getParaOpeningRepeats(paragraphTexts) {
     var freq = {};
     (paragraphTexts || []).forEach(function (t) {
-      var first = (t.trim().split(/\s+/)[0] || '').toLowerCase().replace(/[^a-z\u00e1\u00e9\u00ed\u00f3\u00fa\u00e0\u00e2\u00ea\u00f4\u00e3\u00f5\u00fc\u00e7]/gi, '');
-      if (first.length < 3) return;
-      freq[first] = (freq[first] || 0) + 1;
+      var key = getParaOpeningKey(t);
+      if (!key || key.length < 3) return;
+      freq[key] = (freq[key] || 0) + 1;
     });
     return Object.keys(freq)
       .filter(function (k) { return freq[k] >= 2; })
-      .sort(function (a, b) { return freq[b] - freq[a]; })
+      .sort(function (a, b) { return freq[b] - freq[a] || a.localeCompare(b); })
       .map(function (k) { return { word: k, count: freq[k] }; });
   }
 
@@ -933,17 +1711,23 @@
   }
 
   function getGlobalFrequent(text, limit) {
+    return getGlobalRepeatedItems(text, 3, limit).map(function (item) {
+      return item.text + ' ×' + item.count;
+    });
+  }
+
+  function getGlobalRepeatedItems(text, minCount, limit) {
     var RE = LANG === 'en' ? /\b[a-z]{4,}\b/gi : /\b[a-záéíóúàâêôãõüç]{4,}\b/gi;
     var freq = {};
     (text.match(RE) || []).forEach(function (w) {
       var lower = w.toLowerCase();
       if (!STOP_WORDS.has(lower) && !shouldIgnoreWord(lower)) freq[lower] = (freq[lower] || 0) + 1;
     });
-    return Object.keys(freq)
-      .filter(function (k) { return freq[k] > 2; })
+    var repeated = Object.keys(freq)
+      .filter(function (k) { return freq[k] >= (minCount || 3); })
       .sort(function (a, b) { return freq[b] - freq[a]; })
-      .slice(0, limit)
-      .map(function (k) { return k + ' ×' + freq[k]; });
+      .map(function (k) { return { text: k, count: freq[k] }; });
+    return limit ? repeated.slice(0, limit) : repeated;
   }
 
   function getConnectorCategories() {
@@ -1622,12 +2406,32 @@
     'ws-modal': 'modal',
     'ws-firstperson': 'firstperson',
     'ws-citation-start': 'citation-start',
+    'ws-colloquial': 'colloquial',
+    'ws-complex-sent': 'complexsent',
+    'ws-repeated-start': 'repeated-start',
+    'ws-pronoun-ambig': 'pronounambig',
+    'ws-nlp-nominal-load': 'nlp-nominal-load',
+    'ws-nlp-weak-verb': 'nlp-weakverb',
+    'ws-nlp-noun-stack': 'nlp-nounstack',
+    'ws-nlp-topic': 'nlp-topics',
+    'ws-nlp-entity': 'nlp-entities',
+    'ws-nlp-value-date': 'nlp-values-dates',
+    'ws-nlp-adverb': 'nlp-adverbs',
+    'ws-wink-passive': 'wink-passive',
+    'ws-wink-complex': 'wink-complex',
+    'ws-wink-modal': 'wink-modal',
+    'ws-wink-weak-opener': 'wink-weak-opener',
     'ws-connector': 'connectors',
     'ws-connector-add': 'connectors-add',
     'ws-connector-contrast': 'connectors-contrast',
     'ws-connector-cause': 'connectors-cause',
     'ws-connector-conclusion': 'connectors-conclusion',
     'ws-connector-time': 'connectors-time',
+    'ws-para-long': 'paragraph-long',
+    'ws-citation-low': 'citation-low',
+    'ws-results-citation': 'results-citation',
+    'ws-italic-text': 'italic',
+    'ws-regex-match': 'regex',
   };
 
   function markReason(el, focus, reason) {
@@ -1656,6 +2460,9 @@
   }
 
   function getActiveFocus() {
+    if (document.body.classList.contains('ws-focus-evidence-unparameterized')) {
+      return 'evidence-unparameterized';
+    }
     for (var cls in HIGHLIGHT_FOCUS_CLASSES) {
       var focus = HIGHLIGHT_FOCUS_CLASSES[cls];
       if (focus && document.body.classList.contains('ws-focus-' + focus)) return focus;
@@ -1672,7 +2479,9 @@
       ? reasons.filter(function (r) {
           return r.focus === activeFocus ||
             (activeFocus === 'connectors' && r.focus.indexOf('connectors-') === 0) ||
-            (activeFocus === 'evidence' && r.focus.indexOf('evidence-') === 0);
+            (activeFocus === 'evidence' && r.focus.indexOf('evidence-') === 0) ||
+            (activeFocus === 'evidence-unparameterized' &&
+              (r.focus === 'evidence' || r.focus === 'evidence-hardcoded'));
         })
       : reasons;
     if (!filtered.length) filtered = reasons;
@@ -1915,7 +2724,8 @@
           markReason(span, 'evidence', L.evidence);
         } else {
           span.className = 'ws-evidence-hardcoded';
-          markReason(span, 'evidence-hardcoded', L.evidenceHardcoded);
+          markReason(span, 'evidence-hardcoded',
+            VARIABLE_COUNT > 0 ? L.evidenceHardcoded + ' | ' + L.evidenceUnparameterized : L.evidenceHardcoded);
         }
         span.textContent = text.slice(rng[0], rng[1]);
         frag.appendChild(span);
@@ -2001,6 +2811,69 @@
     }
   }
 
+  function termBoundaryOk(text, start, end) {
+    var before = start > 0 ? text.charAt(start - 1) : '';
+    var after = end < text.length ? text.charAt(end) : '';
+    return (!before || !isWordChar(before)) && (!after || !isWordChar(after));
+  }
+
+  function highlightTermListInNode(node, terms, cls, title) {
+    var list = (terms || [])
+      .map(function (t) { return normalizeWord(t.text || t); })
+      .filter(function (t) { return t.length >= 3; })
+      .sort(function (a, b) { return b.length - a.length; })
+      .slice(0, 20);
+    if (!list.length) return;
+
+    if (node.nodeType === Node.TEXT_NODE) {
+      var text = node.textContent;
+      var lower = text.toLowerCase();
+      var ranges = [];
+      list.forEach(function (term) {
+        var from = 0;
+        while (from < lower.length) {
+          var idx = lower.indexOf(term, from);
+          if (idx === -1) break;
+          var end = idx + term.length;
+          if (termBoundaryOk(lower, idx, end)) ranges.push([idx, end]);
+          from = idx + Math.max(1, term.length);
+        }
+      });
+      if (!ranges.length) return;
+      ranges.sort(function (a, b) { return a[0] - b[0] || b[1] - a[1]; });
+      var merged = [];
+      ranges.forEach(function (rng) {
+        var last = merged[merged.length - 1];
+        if (last && rng[0] < last[1]) return;
+        merged.push(rng);
+      });
+      var frag = document.createDocumentFragment();
+      var pos = 0;
+      merged.forEach(function (rng) {
+        if (rng[0] > pos) frag.appendChild(document.createTextNode(text.slice(pos, rng[0])));
+        var span = document.createElement('span');
+        span.className = cls;
+        var focus = HIGHLIGHT_FOCUS_CLASSES[cls] || '';
+        markReason(span, focus, title);
+        span.textContent = text.slice(rng[0], rng[1]);
+        frag.appendChild(span);
+        pos = rng[1];
+      });
+      if (pos < text.length) frag.appendChild(document.createTextNode(text.slice(pos)));
+      node.parentNode.replaceChild(frag, node);
+    } else if (
+      node.nodeType === Node.ELEMENT_NODE &&
+      node.tagName !== 'SCRIPT' && node.tagName !== 'STYLE' &&
+      !node.classList.contains('ws-note') &&
+      !node.classList.contains('citation') &&
+      !node.classList.contains('csl-entry') &&
+      node.id !== 'refs' &&
+      node.getAttribute('role') !== 'doc-biblioref'
+    ) {
+      Array.from(node.childNodes).forEach(function (c) { highlightTermListInNode(c, list, cls, title); });
+    }
+  }
+
   function highlightNominalizations(p) {
     var re = LANG === 'en'
       ? /\b[a-z]{5,}(?:tion|ment|ity|ness|ance|ence)\b/gi
@@ -2042,6 +2915,139 @@
   function highlightHedges(p) {
     var patterns = getHedgeRegexes();
     highlightPatternInNode(p, patterns, 'ws-hedge');
+  }
+
+  function highlightColloquial(p) {
+    var terms = getColloquialTerms();
+    terms.forEach(function (term) {
+      var safe = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      var re = term.indexOf(' ') >= 0
+        ? new RegExp(safe, 'gi')
+        : new RegExp('\\b' + safe + '\\b', 'gi');
+      highlightRegexInNode(p, re, 'ws-colloquial', L.colloquial);
+    });
+  }
+
+  function highlightComplexSentences(p) {
+    var title = L.complexSent;
+    var marked = p.innerHTML.replace(
+      /([.!?]+\s+)(?=[A-ZÁÉÍÓÚÀÂÊÔÃÕÜÇÑ"])/g,
+      '$1\x00'
+    );
+    p.innerHTML = marked.split('\x00').map(function (part) {
+      var plain = part.replace(/<[^>]+>/g, ' ');
+      return sentenceComplexityScore(plain) >= 3
+        ? '<span class="ws-complex-sent" data-ws-focus="complexsent" data-ws-reason="' + escapeHTML(title) + '" title="' + escapeHTML(title) + '">' + part + '</span>'
+        : part;
+    }).join('');
+  }
+
+  function highlightRepeatedStarts(p, repeatedParaStartSet) {
+    if (!repeatedParaStartSet || repeatedParaStartSet.size === 0) return;
+    var text = p.innerText || p.textContent || '';
+    var key = getParaOpeningKey(text);
+    if (!key || !repeatedParaStartSet.has(key)) return;
+
+    var pattern = key.split(/\s+/).map(function (w) {
+      return w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    }).join('\\s+');
+    var re = new RegExp("^(\\s*[\"'«\\(\\[]*)(" + pattern + ")\\b", 'i');
+    var title = L.repeatedStarts;
+    var walker = document.createTreeWalker(p, NodeFilter.SHOW_TEXT, null);
+    while (walker.nextNode()) {
+      var node = walker.currentNode;
+      var src = node.textContent || '';
+      if (!src.trim()) continue;
+      var m = src.match(re);
+      if (!m) return;
+      var prefix = m[1] || '';
+      var phrase = m[2] || '';
+      var suffix = src.slice((prefix + phrase).length);
+      var frag = document.createDocumentFragment();
+      if (prefix) frag.appendChild(document.createTextNode(prefix));
+      var span = document.createElement('span');
+      span.className = 'ws-repeated-start';
+      markReason(span, 'repeated-start', title);
+      span.title = title;
+      span.textContent = phrase;
+      frag.appendChild(span);
+      if (suffix) frag.appendChild(document.createTextNode(suffix));
+      node.parentNode.replaceChild(frag, node);
+      return;
+    }
+  }
+
+  function highlightPronounAmbig(p) {
+    var re = LANG === 'en'
+      ? /(?:^|(?<=[.!?]\s{1,3}))(it|this|these|those|they|them|its)\b/gi
+      : /(?:^|(?<=[.!?]\s{1,3}))(isso|este|esta|estes|estas|eles|elas|ele|ela|tal|tais)\b/gi;
+    highlightRegexInNode(p, re, 'ws-pronoun-ambig', L.pronounAmbig);
+  }
+
+  function highlightNlpNominalLoad(p) {
+    var title = L.nlpNominalLoad;
+    var marked = p.innerHTML.replace(
+      /([.!?]+\s+)(?=[A-ZÁÉÍÓÚÀÂÊÔÃÕÜÇÑ"])/g,
+      '$1\x00'
+    );
+    p.innerHTML = marked.split('\x00').map(function (part) {
+      var plain = part.replace(/<[^>]+>/g, ' ');
+      return sentenceNominalLoad(plain)
+        ? '<span class="ws-nlp-nominal-load" data-ws-focus="nlp-nominal-load" data-ws-reason="' + escapeHTML(title) + '" title="' + escapeHTML(title) + '">' + part + '</span>'
+        : part;
+    }).join('');
+  }
+
+  function highlightNlpWeakVerbs(p) {
+    var terms = getWeakVerbTerms().map(function (term) {
+      return term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    });
+    if (!terms.length) return;
+    var alpha = LANG === 'en' ? 'A-Za-z' : 'A-Za-zÀ-ÿ';
+    try {
+      highlightRegexInNode(p, new RegExp('(?<![' + alpha + '])(?:' + terms.join('|') + ')(?![' + alpha + '])', 'gi'), 'ws-nlp-weak-verb', L.nlpWeakVerbs);
+    } catch (e) {
+      highlightRegexInNode(p, new RegExp('\\b(?:' + terms.join('|') + ')\\b', 'gi'), 'ws-nlp-weak-verb', L.nlpWeakVerbs);
+    }
+  }
+
+  function highlightNlpNounStacks(p) {
+    if (LANG !== 'en') return;
+    highlightRegexInNode(p, /\b(?:[A-Za-z]{4,}\s+){2,}[A-Za-z]{4,}\b/g, 'ws-nlp-noun-stack', L.nlpNounStacks);
+  }
+
+  function highlightNlpTopics(p, nlpStats) {
+    var terms = (nlpStats && nlpStats.topics && nlpStats.topics.length)
+      ? nlpStats.topics
+      : (nlpStats && nlpStats.keyTerms || []).map(function (term) {
+          return { text: String(term).split(/\s+\xd7/)[0], count: 1 };
+        });
+    highlightTermListInNode(p, terms, 'ws-nlp-topic', L.nlpTopics);
+  }
+
+  function highlightNlpEntities(p, nlpStats) {
+    if (!nlpStats) return;
+    highlightTermListInNode(
+      p,
+      (nlpStats.people || []).concat(nlpStats.organizations || [], nlpStats.places || []),
+      'ws-nlp-entity',
+      L.nlpEntities
+    );
+  }
+
+  function highlightNlpValuesDates(p, nlpStats) {
+    if (!nlpStats) return;
+    highlightTermListInNode(
+      p,
+      (nlpStats.values || []).concat(nlpStats.dates || []),
+      'ws-nlp-value-date',
+      L.nlpValuesDates
+    );
+  }
+
+  function highlightNlpAdverbs(p, nlpStats) {
+    if (!nlpStats || !nlpStats.adverbs || !nlpStats.adverbs.length) return;
+    highlightTermListInNode(p, nlpStats.adverbs, 'ws-nlp-adverb', L.nlpAdverbs);
   }
 
   function highlightConnectors(p) {
@@ -2120,11 +3126,12 @@
     ldEl.textContent = L.diversity + ': ' + ldPct + '%';
     note.appendChild(ldEl);
 
-    // Long sentence alert
+    // Long sentence alert (with hover-to-highlight)
     if (stats.maxSentLen > SENT_LONG) {
       var sentEl = document.createElement('div');
       sentEl.className = 'ws-sent-alert';
       sentEl.textContent = L.longSent + ': ' + stats.maxSentLen + L.wSuffix;
+      addHoverHighlight(sentEl, note, '.ws-long-sentence', 'ws-long-sentence-active');
       note.appendChild(sentEl);
     }
 
@@ -2135,14 +3142,6 @@
       passEl.textContent = L.passive + ': ' + stats.passiveCount;
       addHoverHighlight(passEl, note, '.ws-passive', 'ws-passive-active');
       note.appendChild(passEl);
-    }
-
-    if (stats.hedgeCount > 0) {
-      var hedgeEl = document.createElement('div');
-      hedgeEl.className = 'ws-hedge-count';
-      hedgeEl.textContent = L.hedges + ': ' + stats.hedgeCount;
-      addHoverHighlight(hedgeEl, note, '.ws-hedge', 'ws-hedge-active');
-      note.appendChild(hedgeEl);
     }
 
     if (typeof stats.citationMarkers === 'number') {
@@ -2247,6 +3246,35 @@
       '</div>';
   }
 
+  function metricGroup(label) {
+    return '<div class="ws-doc-metric-group" data-ws-group>' +
+      '<button type="button" class="ws-doc-group-toggle" aria-expanded="true">' + escapeHTML(label) + '</button>' +
+      '</div>';
+  }
+
+  function metricSubgroup(label, url) {
+    var badge = url
+      ? '<a class="ws-pkg-badge" href="' + escapeHTML(url) + '" target="_blank" rel="noopener noreferrer">' + escapeHTML(label) + '</a>'
+      : '<span class="ws-pkg-badge ws-pkg-builtin">' + escapeHTML(label) + '</span>';
+    return '<div class="ws-doc-metric-subgroup">' + badge + '</div>';
+  }
+
+  function metricRegexSearch() {
+    return '<div class="ws-doc-metric ws-doc-metric-search" data-ws-regex-block title="' + escapeHTML(L.regexSearchDesc) + '">' +
+      '<span class="ws-doc-metric-label">' + L.regexSearch + '</span>' +
+      '<div class="ws-doc-regex-row">' +
+        '<input type="text" class="ws-doc-regex-input" placeholder="' + escapeHTML(L.regexPlaceholder) + '" spellcheck="false" />' +
+        '<button type="button" class="ws-doc-regex-btn ws-doc-regex-apply">' + L.regexApply + '</button>' +
+        '<button type="button" class="ws-doc-regex-btn ws-doc-regex-clear">' + L.regexClear + '</button>' +
+      '</div>' +
+      '<div class="ws-doc-regex-scope ws-doc-regex-scope-hidden">' +
+        '<label><input type="checkbox" class="ws-doc-regex-scope-paragraph" checked /> ' + L.parag + '</label>' +
+        '<label><input type="checkbox" class="ws-doc-regex-scope-sentence" checked /> ' + L.sentP + '</label>' +
+      '</div>' +
+      '<span class="ws-doc-regex-count">0 ' + L.regexMatches + '</span>' +
+    '</div>';
+  }
+
   function sectionSummary(id, title, statsList, totalWords, sectionText) {
     var sentLens = [];
     var passive = 0;
@@ -2324,23 +3352,8 @@
         var focus = item.dataset.wsFocus;
         var cls = 'ws-focus-' + focus;
         var active = document.body.classList.contains(cls);
-        [
-          'ws-focus-passive', 'ws-focus-long', 'ws-focus-repeated', 'ws-focus-nominal',
-          'ws-focus-connectors', 'ws-focus-connectors-add', 'ws-focus-connectors-contrast',
-          'ws-focus-connectors-cause', 'ws-focus-connectors-conclusion', 'ws-focus-connectors-time',
-          'ws-focus-noverb', 'ws-focus-hedge', 'ws-focus-evidence', 'ws-focus-cohesion',
-          'ws-focus-evidence-hardcoded', 'ws-focus-modal', 'ws-focus-firstperson', 'ws-focus-citation-start',
-          'ws-focus-evidence-parameterized'
-        ].forEach(function (c) {
-          document.body.classList.remove(c);
-        });
-        metrics.querySelectorAll('.ws-doc-metric-active').forEach(function (m) {
-          m.classList.remove('ws-doc-metric-active');
-        });
-        if (!active) {
-          document.body.classList.add(cls);
-          item.classList.add('ws-doc-metric-active');
-        }
+        document.body.classList.toggle(cls, !active);
+        item.classList.toggle('ws-doc-metric-active', !active);
         refreshHighlightTooltips(document);
       });
     });
@@ -2355,6 +3368,274 @@
         if (!target) return;
         target.scrollIntoView({ behavior: 'smooth', block: 'start' });
       });
+    });
+  }
+
+  function wireMetricGroups(metrics) {
+    var rows = Array.from(metrics.children || []);
+    var groups = [];
+    var current = null;
+    rows.forEach(function (row) {
+      if (row.classList.contains('ws-doc-metric-group')) {
+        current = { header: row, items: [] };
+        groups.push(current);
+      } else if (current) {
+        current.items.push(row);
+      }
+    });
+    groups.forEach(function (group) {
+      var btn = group.header.querySelector('.ws-doc-group-toggle');
+      if (!btn) return;
+      btn.addEventListener('click', function () {
+        var expanded = btn.getAttribute('aria-expanded') !== 'false';
+        var next = !expanded;
+        btn.setAttribute('aria-expanded', next ? 'true' : 'false');
+        group.header.classList.toggle('ws-doc-metric-group-collapsed', !next);
+        group.items.forEach(function (item) {
+          item.classList.toggle('ws-group-item-hidden', !next);
+        });
+      });
+    });
+  }
+
+  function parseRegexInput(raw) {
+    var value = String(raw || '').trim();
+    if (!value) return null;
+    var m = value.match(/^\/(.*)\/([dgimsuy]*)$/);
+    var src;
+    var flags;
+    if (m) {
+      src = m[1];
+      flags = m[2] || '';
+    } else {
+      src = value;
+      flags = 'i';
+    }
+    if (flags.indexOf('g') === -1) flags += 'g';
+    return new RegExp(src, flags);
+  }
+
+  function clearRegexMatches(root) {
+    root.querySelectorAll('.ws-regex-match').forEach(function (span) {
+      var parent = span.parentNode;
+      if (!parent) return;
+      while (span.firstChild) {
+        parent.insertBefore(span.firstChild, span);
+      }
+      parent.removeChild(span);
+      parent.normalize();
+    });
+  }
+
+  function normalizeBlockBounds(text, start, end) {
+    while (start < end && /\s/.test(text.charAt(start))) start += 1;
+    while (end > start && /\s/.test(text.charAt(end - 1))) end -= 1;
+    return [start, end];
+  }
+
+  function getSentenceBlocks(text) {
+    var src = String(text || '');
+    var blocks = [];
+    var re = /[^.!?]+[.!?]+(?:\s+|$)|[^.!?]+$/g;
+    var m;
+    while ((m = re.exec(src)) !== null) {
+      var start = m.index;
+      var end = m.index + m[0].length;
+      var bounds = normalizeBlockBounds(src, start, end);
+      if (bounds[1] > bounds[0]) blocks.push({ start: bounds[0], end: bounds[1] });
+    }
+    return blocks;
+  }
+
+  function findRegexRangesInBlocks(text, re, blocks) {
+    var src = String(text || '');
+    var ranges = [];
+    (blocks || []).forEach(function (block) {
+      var start = Math.max(0, Number(block.start) || 0);
+      var end = Math.min(src.length, Number(block.end) || 0);
+      if (end <= start) return;
+      var segment = src.slice(start, end);
+      re.lastIndex = 0;
+      var m;
+      while ((m = re.exec(segment)) !== null) {
+        if (!m[0]) {
+          re.lastIndex += 1;
+          continue;
+        }
+        ranges.push([start + m.index, start + m.index + m[0].length]);
+      }
+    });
+    return ranges;
+  }
+
+  function mergeRanges(ranges) {
+    if (!ranges || !ranges.length) return [];
+    var sorted = ranges.slice().sort(function (a, b) { return a[0] - b[0] || a[1] - b[1]; });
+    var out = [sorted[0].slice()];
+    for (var i = 1; i < sorted.length; i++) {
+      var last = out[out.length - 1];
+      var cur = sorted[i];
+      if (cur[0] <= last[1]) last[1] = Math.max(last[1], cur[1]);
+      else out.push(cur.slice());
+    }
+    return out;
+  }
+
+  function textNodesWithOffsets(root) {
+    var nodes = [];
+    var walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null);
+    var offset = 0;
+    var node;
+    while ((node = walker.nextNode())) {
+      var txt = node.textContent || '';
+      var len = txt.length;
+      if (!len) continue;
+      nodes.push({ node: node, start: offset, end: offset + len });
+      offset += len;
+    }
+    return nodes;
+  }
+
+  function resolveTextOffset(nodes, pos) {
+    for (var i = 0; i < nodes.length; i++) {
+      if (pos <= nodes[i].end) {
+        return { node: nodes[i].node, offset: Math.max(0, pos - nodes[i].start) };
+      }
+    }
+    if (!nodes.length) return null;
+    var last = nodes[nodes.length - 1];
+    return { node: last.node, offset: (last.node.textContent || '').length };
+  }
+
+  function highlightRegexRangesInParagraph(p, ranges, title) {
+    var merged = mergeRanges(ranges);
+    if (!merged.length) return 0;
+    var map = textNodesWithOffsets(p);
+    if (!map.length) return 0;
+    var total = 0;
+    for (var i = 0; i < map.length; i++) {
+      var entry = map[i];
+      var text = entry.node.textContent || '';
+      if (!text) continue;
+      var local = [];
+      for (var j = 0; j < merged.length; j++) {
+        var s = Math.max(merged[j][0], entry.start);
+        var e = Math.min(merged[j][1], entry.end);
+        if (e > s) local.push([s - entry.start, e - entry.start]);
+      }
+      if (!local.length) continue;
+      var frag = document.createDocumentFragment();
+      var pos = 0;
+      for (var k = 0; k < local.length; k++) {
+        if (local[k][0] > pos) frag.appendChild(document.createTextNode(text.slice(pos, local[k][0])));
+        var span = document.createElement('span');
+        span.className = 'ws-regex-match';
+        markReason(span, 'regex', title || L.regexSearch);
+        span.textContent = text.slice(local[k][0], local[k][1]);
+        frag.appendChild(span);
+        pos = local[k][1];
+        total += 1;
+      }
+      if (pos < text.length) frag.appendChild(document.createTextNode(text.slice(pos)));
+      entry.node.parentNode.replaceChild(frag, entry.node);
+    }
+    return total;
+  }
+
+  function wireRegexSearch(metrics, root) {
+    var block = metrics.querySelector('[data-ws-regex-block]');
+    if (!block) return;
+    var input = block.querySelector('.ws-doc-regex-input');
+    var applyBtn = block.querySelector('.ws-doc-regex-apply');
+    var clearBtn = block.querySelector('.ws-doc-regex-clear');
+    var scopeWrap = block.querySelector('.ws-doc-regex-scope');
+    var scopeParagraph = block.querySelector('.ws-doc-regex-scope-paragraph');
+    var scopeSentence = block.querySelector('.ws-doc-regex-scope-sentence');
+    var countEl = block.querySelector('.ws-doc-regex-count');
+
+    function updateScopeVisibility() {
+      var raw = String(input.value || '');
+      var show = raw.indexOf('^') !== -1 || raw.indexOf('$') !== -1;
+      if (scopeWrap) scopeWrap.classList.toggle('ws-doc-regex-scope-hidden', !show);
+    }
+
+    function setCount(value) {
+      countEl.textContent = value + ' ' + L.regexMatches;
+    }
+
+    function applyRegex() {
+      clearRegexMatches(root);
+      document.body.classList.remove('ws-focus-regex');
+      block.classList.remove('ws-doc-regex-invalid');
+      var raw = input.value || '';
+      if (!raw.trim()) {
+        setCount(0);
+        refreshHighlightTooltips(document);
+        return;
+      }
+      var re;
+      try {
+        re = parseRegexInput(raw);
+      } catch (e) {
+        block.classList.add('ws-doc-regex-invalid');
+        countEl.textContent = L.regexInvalid;
+        return;
+      }
+      if (!re) {
+        setCount(0);
+        refreshHighlightTooltips(document);
+        return;
+      }
+      var total = 0;
+      root.querySelectorAll('.ws-wrapper > p').forEach(function (p) {
+        var text = p.textContent || '';
+        var blocks = [];
+        var useParagraph = scopeParagraph && scopeParagraph.checked;
+        var useSentence = scopeSentence && scopeSentence.checked;
+        if (!useParagraph && !useSentence) useParagraph = true;
+        if (useParagraph) {
+          var bounds = normalizeBlockBounds(text, 0, text.length);
+          if (bounds[1] > bounds[0]) blocks.push({ start: bounds[0], end: bounds[1] });
+        }
+        if (useSentence) {
+          blocks = blocks.concat(getSentenceBlocks(text));
+        }
+        var ranges = findRegexRangesInBlocks(text, re, blocks);
+        total += highlightRegexRangesInParagraph(p, ranges, L.regexSearch + ': ' + raw);
+      });
+      setCount(total);
+      if (total > 0) document.body.classList.add('ws-focus-regex');
+      refreshHighlightTooltips(document);
+    }
+
+    function clearRegex() {
+      clearRegexMatches(root);
+      input.value = '';
+      setCount(0);
+      block.classList.remove('ws-doc-regex-invalid');
+      document.body.classList.remove('ws-focus-regex');
+      updateScopeVisibility();
+      refreshHighlightTooltips(document);
+    }
+
+    applyBtn.addEventListener('click', applyRegex);
+    clearBtn.addEventListener('click', clearRegex);
+    input.addEventListener('input', function () {
+      updateScopeVisibility();
+    });
+    input.addEventListener('keydown', function (evt) {
+      if (evt.key === 'Enter') {
+        evt.preventDefault();
+        applyRegex();
+      }
+    });
+    updateScopeVisibility();
+  }
+
+  function highlightItalicText(p) {
+    p.querySelectorAll('em, i').forEach(function (el) {
+      el.classList.add('ws-italic-text');
+      markReason(el, 'italic', L.italicText);
     });
   }
 
@@ -2376,7 +3657,10 @@
       '- ' + L.passiveTotal + ': ' + r.passiveTotal,
       '- ' + L.passiveDensity + ': ' + r.passiveDensity + '/1000' + L.wSuffix,
       '- ' + L.longSentenceRate + ': ' + r.longSentenceRate + '%',
-      '- ' + L.topRepeated + ': ' + (r.topRepeated.length ? r.topRepeated.join(', ') : '0'),
+      '- ' + L.repeatedTerms + ': ' + r.repeatedTermCount + (r.topRepeated.length ? ' | ' + r.topRepeated.join(', ') : ''),
+      '- ' + L.longParagraphs + ': ' + r.longParagraphCount,
+      '- ' + L.citationGaps + ': ' + r.citationGapCount,
+      '- ' + L.resultsCitations + ': ' + r.resultsCitationCount,
       '- ' + L.connectors + ': ' + r.connectors,
       '- ' + L.nominalization + ': ' + r.nominalizations,
       '- ' + L.readability + ' (' + L.flesch + '): ' + r.readabilityFlesch,
@@ -2387,6 +3671,24 @@
       '- ' + L.undefinedAcronyms + ': ' + (r.undefinedAcronyms.length ? r.undefinedAcronyms.slice(0, 8).map(function (x) { return x.acronym + ' ×' + x.count; }).join(', ') : '0'),
       '- ' + L.emphaticPunct + ': ' + r.emphaticPunct,
       '- ' + L.evidence + ': ' + r.evidenceMarkers + ' (' + L.evidenceDensity + ': ' + r.evidenceDensity + '/1000' + L.wSuffix + ')',
+      '- ' + L.nlpEngine + ': ' + r.nlpStatus,
+      '- ' + L.nlpNominalLoad + ': ' + r.nlpNominalLoadCount,
+      '- ' + L.nlpWeakVerbs + ': ' + r.nlpWeakVerbCount,
+      '- ' + L.nlpNounStacks + ': ' + r.nlpNounStackCount,
+      '- ' + L.nlpTopics + ': ' + (r.nlpTopics.length ? r.nlpTopics.join(', ') : '0'),
+      '- ' + L.nlpEntities + ': ' + r.nlpEntityCount + (r.nlpEntities.length ? ' | ' + r.nlpEntities.join(', ') : ''),
+      '- ' + L.nlpValuesDates + ': ' + r.nlpDateValueCount,
+      '- ' + L.nlpAdverbs + ': ' + r.nlpAdverbCount + (r.nlpAdverbs.length ? ' | ' + r.nlpAdverbs.join(', ') : ''),
+      '- ' + L.nlpNounVerbRatio + ': ' + r.nlpNounVerbRatio,
+      '- ' + L.nlpVerbDiversity + ': ' + r.nlpVerbDiversity + '%',
+      '- ' + L.nlpKeyTerms + ': ' + (r.nlpKeyTerms.length ? r.nlpKeyTerms.join(', ') : '0'),
+      (LANG === 'en' && r.winkAvailable ? '- ' + L.nlpWinkReadingEase + ': ' + r.winkReadingEase : null),
+      (LANG === 'en' && r.winkAvailable ? '- ' + L.nlpWinkGradeLevel + ': ' + r.winkGradeLevel : null),
+      (LANG === 'en' && r.winkAvailable ? '- ' + L.nlpWinkAvgWords + ': ' + r.winkAvgWordsPerSentence : null),
+      (LANG === 'en' && r.winkAvailable ? '- ' + L.nlpWinkReadTime + ': ' + r.winkReadingTimeSecs + 's' : null),
+      (LANG === 'en' && r.winkAvailable ? '- ' + L.nlpWinkComplexWords + ': ' + r.winkComplexWordCount + (r.winkComplexWords.length ? ' | ' + r.winkComplexWords.join(', ') : '') : null),
+      (LANG === 'en' && r.winkAvailable ? '- ' + L.nlpWinkModalVerbs + ': ' + r.winkModalCount + (r.winkModalTerms.length ? ' | ' + r.winkModalTerms.join(', ') : '') : null),
+      (LANG === 'en' && r.winkAvailable ? '- ' + L.nlpWinkPassive + ': ' + r.winkPassiveSentenceCount : null),
       '- ' + L.termVariants + ': ' + (r.termVariants.length ? r.termVariants.slice(0, 6).map(function (x) { return x.forms.slice(0, 3).join('/') + ' ×' + x.count; }).join(', ') : '0'),
       '- ' + L.cohesionGaps + ': ' + r.cohesionGaps,
       '- ' + L.abstractCoverage + ': ' + r.abstractCoverage.score + '%',
@@ -2396,7 +3698,7 @@
       '- ' + L.noVerb + ': ' + r.noClearVerb,
       '',
       'PRIORIDADES (P1/P2/P3)',
-    ];
+    ].filter(Boolean);
 
     r.sections.forEach(function (s) {
       var pr = 'P3';
@@ -2440,15 +3742,13 @@
   }
 
   function analysisBadgeText() {
-    var total = ANALYSIS_TELEMETRY.hits + ANALYSIS_TELEMETRY.misses;
-    var hitRate = total > 0 ? Math.round((ANALYSIS_TELEMETRY.hits / total) * 100) : 0;
     return L.analysisEngine + ': ' + analysisModeLabel(ANALYSIS_TELEMETRY.mode) +
-      ' • ' + L.analysisCache + ' ' + hitRate + '%' +
       ' • ' + L.analysisTime + ' ' + Math.max(0, Math.round(ANALYSIS_TELEMETRY.durationMs)) + 'ms';
   }
 
-  function buildDocStats(root, totalWords, statsList, sections, docText) {
+  function buildDocStats(root, totalWords, statsList, sections, docText, winkStats) {
     if (totalWords === 0) return;
+    winkStats = winkStats || {};
     var minutes = Math.max(1, Math.round(totalWords / READ_WPM));
 
     var sentenceLengths = [];
@@ -2468,7 +3768,18 @@
     var passiveDensity = totalWords ? (passiveTotal / totalWords) * 1000 : 0;
     var longSentenceCount = sentenceLengths.filter(function (n) { return n > SENT_LONG; }).length;
     var longSentenceRate = sentenceLengths.length ? (longSentenceCount / sentenceLengths.length) * 100 : 0;
-    var topRepeated = getGlobalFrequent(docText, 5);
+    var globalRepeatedItems = getGlobalRepeatedItems(docText, 3, 0);
+    var topRepeated = globalRepeatedItems.slice(0, 5).map(function (item) {
+      return item.text + ' ×' + item.count;
+    });
+    var repeatedTermCount = globalRepeatedItems.length;
+    var longParagraphCount = statsList.filter(function (stats) { return stats.paraLong; }).length;
+    var citationGapCount = statsList.filter(function (stats) {
+      return stats.needsCitation && !stats.citationMarkers;
+    }).length;
+    var resultsCitationCount = statsList.filter(function (stats) {
+      return stats.resultsCitation && stats.citationMarkers > 0;
+    }).length;
     var connectorCount = countConnectors(docText);
     var connectorByCat = countConnectorCategories(docText);
     var nominalizationCount = countNominalizations(docText);
@@ -2477,7 +3788,6 @@
     var hedgeCount = statsList.reduce(function (sum, stats) { return sum + (stats.hedgeCount || 0); }, 0);
     var complexSentenceCount = statsList.reduce(function (sum, stats) { return sum + (stats.complexSentenceCount || 0); }, 0);
     var allSentences = statsList.reduce(function (all, stats) { return all.concat(stats.sentences || []); }, []);
-    var repeatedStarts = getSentenceStartRepeats(allSentences);
     var undefinedAcronyms = getUndefinedAcronyms(allSentences);
     var readability = computeReadability(totalWords, allSentences.length, totalSyllables, complexWordCount);
     var emphaticPunct = countEmphaticPunctuation(docText);
@@ -2500,19 +3810,83 @@
     var hedgeDensity = totalWords ? (hedgeCount / totalWords) * 1000 : 0;
     var complexSentenceRate = allSentences.length ? (complexSentenceCount / allSentences.length) * 100 : 0;
     var pronounAmbigCount = getPronounAmbiguities(allSentences);
-    var modalVerbCount = countModalVerbs(docText);
+    var modalVerbCount = root.querySelectorAll('.ws-modal').length;
     var firstPersonCount = countFirstPerson(docText);
     var allParaTexts = statsList.map(function (s) { return s.text || ''; }).filter(Boolean);
     var paraOpeningRepeats = getParaOpeningRepeats(allParaTexts);
+    var repeatedStarts = paraOpeningRepeats.map(function (item) {
+      return { start: item.word, count: item.count };
+    });
     var citationSentStartCount = countCitationSentStart(allSentences);
     var citationSentEndCount = countCitationSentEnd(allSentences);
     var abstractWordCount = getAbstractWordCount(sections);
     var unitInconsistency = getUnitInconsistency(docText);
+    var italicTextCount = root.querySelectorAll('.ws-wrapper p .ws-italic-text').length;
     var sectionBalance = getSectionBalance(sections);
     var referenceUsage = getReferenceUsage(root);
     var avgSectionScore = sections.length
       ? Math.round(sections.reduce(function (sum, s) { return sum + (s.score || 0); }, 0) / sections.length)
       : 0;
+    var nlpTotals = statsList.reduce(function (acc, stats) {
+      var n = stats.nlpStats || {};
+      acc.nounCount += n.nounCount || 0;
+      acc.verbCount += n.verbCount || 0;
+      acc.adverbCount += n.adverbCount || 0;
+      acc.topicCount += n.topicCount || 0;
+      acc.entityCount += n.entityCount || 0;
+      acc.dateValueCount += n.dateValueCount || 0;
+      acc.nominalLoadCount += n.nominalLoadCount || 0;
+      acc.weakVerbCount += n.weakVerbCount || 0;
+      acc.nounStackCount += n.nounStackCount || 0;
+      acc.verbInstances += n.verbCount || 0;
+      acc.verbDiversitySum += (n.verbDiversity || 0) * (n.verbCount || 0);
+      acc.contractionCount += n.contractionCount || 0;
+      acc.questionCount += n.questionCount || 0;
+      (n.keyTerms || []).forEach(function (term) {
+        var parts = String(term).split(/\s+\xd7/);
+        var key = parts[0];
+        var count = Number(parts[1]) || 1;
+        if (key) acc.keyTerms[key] = (acc.keyTerms[key] || 0) + count;
+      });
+      ['topics', 'people', 'organizations', 'places', 'dates', 'values', 'adverbs'].forEach(function (name) {
+        (n[name] || []).forEach(function (item) {
+          var key = item.text;
+          if (key) acc[name][key] = (acc[name][key] || 0) + (Number(item.count) || 1);
+        });
+      });
+      return acc;
+    }, {
+      nounCount: 0, verbCount: 0, adverbCount: 0, topicCount: 0, entityCount: 0, dateValueCount: 0,
+      nominalLoadCount: 0, weakVerbCount: 0, nounStackCount: 0, verbInstances: 0, verbDiversitySum: 0,
+      contractionCount: 0, questionCount: 0,
+      keyTerms: {}, topics: {}, people: {}, organizations: {}, places: {}, dates: {}, values: {}, adverbs: {}
+    });
+    function topNlpMap(map, limit) {
+      return Object.keys(map)
+        .sort(function (a, b) { return map[b] - map[a] || a.localeCompare(b); })
+        .slice(0, limit || 6)
+        .map(function (k) { return { text: k, count: map[k] }; });
+    }
+    var nlpKeyTerms = Object.keys(nlpTotals.keyTerms)
+      .sort(function (a, b) { return nlpTotals.keyTerms[b] - nlpTotals.keyTerms[a] || a.localeCompare(b); })
+      .slice(0, 6)
+      .map(function (k) { return k + ' \xd7' + nlpTotals.keyTerms[k]; });
+    var nlpTopics = displayNlpItems(topNlpMap(nlpTotals.topics, 6));
+    var entityMap = {};
+    [nlpTotals.people, nlpTotals.organizations, nlpTotals.places].forEach(function (src) {
+      Object.keys(src).forEach(function (k) { entityMap[k] = (entityMap[k] || 0) + src[k]; });
+    });
+    var nlpEntities = displayNlpItems(topNlpMap(entityMap, 6));
+    var nlpAdverbs = displayNlpItems(topNlpMap(nlpTotals.adverbs, 6));
+    var nlpNounVerbRatio = nlpTotals.verbCount ? nlpTotals.nounCount / nlpTotals.verbCount : nlpTotals.nounCount ? nlpTotals.nounCount : 0;
+    var nlpVerbDiversity = nlpTotals.verbInstances ? nlpTotals.verbDiversitySum / nlpTotals.verbInstances : 1;
+    var nlpStatusLabel = NLP_STATUS === 'loaded'
+      ? L.nlpLoaded
+      : NLP_STATUS === 'disabled'
+        ? L.nlpDisabled
+        : NLP_STATUS === 'unavailable'
+          ? L.nlpUnavailable
+          : L.nlpFallback;
 
     window.WritingStatsReport = {
       words: totalWords,
@@ -2527,6 +3901,10 @@
       passiveDensity: round1(passiveDensity),
       longSentenceRate: round1(longSentenceRate),
       topRepeated: topRepeated,
+      repeatedTermCount: repeatedTermCount,
+      longParagraphCount: longParagraphCount,
+      citationGapCount: citationGapCount,
+      resultsCitationCount: resultsCitationCount,
       connectors: connectorCount,
       connectorByCat: connectorByCat,
       nominalizations: nominalizationCount,
@@ -2567,6 +3945,33 @@
       referencesUsed: referenceUsage.used.length,
       referencesUnused: referenceUsage.unused,
       citationsTotal: referenceUsage.markerCount,
+      nlpStatus: NLP_STATUS,
+      nlpNounVerbRatio: round1(nlpNounVerbRatio),
+      nlpVerbDiversity: round1(nlpVerbDiversity * 100),
+      nlpNominalLoadCount: nlpTotals.nominalLoadCount,
+      nlpWeakVerbCount: nlpTotals.weakVerbCount,
+      nlpNounStackCount: nlpTotals.nounStackCount,
+      nlpKeyTerms: nlpKeyTerms,
+      nlpTopicCount: nlpTotals.topicCount,
+      nlpTopics: nlpTopics,
+      nlpEntityCount: nlpTotals.entityCount,
+      nlpEntities: nlpEntities,
+      nlpDateValueCount: nlpTotals.dateValueCount,
+      nlpAdverbCount: nlpTotals.adverbCount,
+      nlpAdverbs: nlpAdverbs,
+      nlpContractionCount: nlpTotals.contractionCount,
+      nlpQuestionCount: nlpTotals.questionCount,
+      winkAvailable: !!winkStats.winkAvailable,
+      winkStatus: WINK_STATUS,
+      winkReadingEase: winkStats.fleschReadingEase,
+      winkGradeLevel: winkStats.fleschKincaidGrade,
+      winkAvgWordsPerSentence: winkStats.avgWordsPerSentence,
+      winkReadingTimeSecs: winkStats.readingTimeSecs || 0,
+      winkComplexWordCount: winkStats.complexWordCount || 0,
+      winkComplexWords: displayNlpItems((winkStats.complexWords || []).slice(0, 6)),
+      winkModalCount: winkStats.modalCount || 0,
+      winkModalTerms: displayNlpItems((winkStats.modalTerms || []).slice(0, 6)),
+      winkPassiveSentenceCount: winkStats.passiveSentenceCount || 0,
       sections: sections,
     };
 
@@ -2581,34 +3986,87 @@
         escapeHTML(analysisBadgeText()) +
       '</span>';
 
+    var rhythmHtml = sections.length > 0 ? scaledBlocks(sections) : '—';
+    var methodPassiveCount = sections
+      .filter(function (s) { return s.isMethods; })
+      .reduce(function (sum, s) { return sum + s.passive; }, 0);
+    var passiveDistribRatio = passiveTotal > 0 ? methodPassiveCount / passiveTotal : 0;
+    var passiveDistribNote = passiveDistribRatio >= 0.45 ? L.passiveExpected : L.passiveSpread;
+    var denseSectionsList = sections.slice().sort(function (a, b) { return b.score - a.score; }).slice(0, 2);
+    var denseText = denseSectionsList.length
+      ? denseSectionsList.map(function (s) { return escapeHTML(s.title) + ' (' + s.score + '/100)'; }).join(', ')
+      : L.noDenseSections;
+
     var metrics = document.createElement('div');
     metrics.className = 'ws-doc-metrics';
     metrics.innerHTML =
+      // ── Frases ──────────────────────────────────────────────────────────────
+      metricGroup(L.groupSentences) +
       metricItem(L.avgSentence, round1(mean(sentenceLengths)) + L.wSuffix, null, L.avgSentenceDesc) +
       metricItem(L.sentenceVar, round1(sentVar) + ' / σ ' + round1(sentStd) + L.wSuffix, null, L.sentenceVarDesc) +
-      metricItem(L.avgParagraph, round1(mean(paraLengths)) + L.wSuffix, null, L.avgParagraphDesc) +
       metricItem(L.longestSentence, maxSentLen + L.wSuffix, 'long', L.longestSentenceDesc) +
+      metricItem(L.longSentenceRate, round1(longSentenceRate) + '%', 'long', L.longSentRateDesc) +
+      metricItem(L.complexSent, complexSentenceCount + ' (' + round1(complexSentenceRate) + '%)', 'complexsent', L.complexSentDesc) +
+      metricItem(L.noVerb, noVerbCount, 'noverb', L.noVerbDesc) +
+      // ── Parágrafos & Seções ──────────────────────────────────────────────────
+      metricGroup(L.groupParagraphs) +
+      metricItem(L.avgParagraph, round1(mean(paraLengths)) + L.wSuffix, null, L.avgParagraphDesc) +
+      metricItem(L.longParagraphs, longParagraphCount, 'paragraph-long', L.longParagraphsDesc) +
+      metricItem(L.paraOpeningRepeat, paraOpeningRepeats.length ? paraOpeningRepeats.slice(0, 3).map(function (x) { return x.word + ' \xd7' + x.count; }).join(', ') : '0', null, L.paraOpeningRepeatDesc) +
+      metricItem(L.cohesionGaps, cohesionGaps, 'cohesion', L.cohesionGapsDesc) +
+      metricItem(L.sectionScore, avgSectionScore + '/100', null, L.sectionScoreDesc) +
+      metricItem(L.sectionBalance, sectionBalance.cv + (sectionBalance.outliers.length ? ' | ' + sectionBalance.outliers.slice(0, 2).join(', ') : ''), null, L.sectionBalanceDesc) +
+      metricItem(L.denseSections, denseText, null, null) +
+      metricItem(L.rhythm, rhythmHtml, null, L.rhythmTitle) +
+      // ── Legibilidade ─────────────────────────────────────────────────────────
+      metricGroup(L.groupReadability) +
+      metricItem(L.readability + ' (' + L.flesch + ')', readability.flesch, null, L.fleschDesc) +
+      metricItem(L.grade, readability.grade, null, L.gradeDesc) +
+      metricItem(L.fog, readability.fog, null, L.fogDesc) +
+      // ── Vocabulário ──────────────────────────────────────────────────────────
+      metricGroup(L.groupVocabulary) +
       metricItem(L.docDiversity, lexDiv + '%', null, L.docDiversityDesc) +
+      metricItem(L.repeatedTerms, repeatedTermCount + (topRepeated.length ? ' | ' + topRepeated.join(', ') : ''), 'repeated', L.repeatedTermsDesc) +
+      metricItem(L.repeatedStarts, repeatedStarts.length ? repeatedStarts.slice(0, 3).map(function (x) { return x.start + ' \xd7' + x.count; }).join(', ') : '0', 'repeated-start', L.repeatedStartsDesc) +
+      metricItem(L.nominalization, nominalizationCount, 'nominal', L.nominalizationDesc) +
+      metricItem(L.termVariants, termVariants.length ? termVariants.slice(0, 3).map(function (x) { return x.forms.slice(0, 2).join('/'); }).join(', ') : '0', null, L.termVariantsDesc) +
+      metricItem(L.unitConsistency, unitInconsistency.length ? unitInconsistency.join('; ') : '0', null, L.unitConsistencyDesc) +
+      metricItem(L.undefinedAcronyms, undefinedAcronyms.length ? undefinedAcronyms.slice(0, 4).map(function (x) { return x.acronym + ' \xd7' + x.count; }).join(', ') : '0', null, L.undefinedAcronymsDesc) +
+      // ── Voz & Tom ────────────────────────────────────────────────────────────
+      metricGroup(L.groupVoice) +
       metricItem(L.passiveTotal, passiveTotal, 'passive', L.passiveTotalDesc) +
       metricItem(L.passiveDensity, round1(passiveDensity) + '/1000' + L.wSuffix, 'passive', L.passiveDensityDesc) +
-      metricItem(L.longSentenceRate, round1(longSentenceRate) + '%', 'long', L.longSentRateDesc) +
-      metricItem(L.topRepeated, topRepeated.length ? topRepeated.join(', ') : '0', 'repeated', L.topRepeatedDesc) +
+      metricItem(L.passive, passiveDistribNote, null, null) +
+      metricItem(L.hedges, hedgeCount, 'hedge', L.hedgeDesc + ' | ' + L.hedgeDensity + ': ' + round1(hedgeDensity) + '/1000' + L.wSuffix) +
+      metricItem(L.pronounAmbig, pronounAmbigCount, 'pronounambig', L.pronounAmbigDesc) +
+      metricItem(L.modalVerbs, modalVerbCount, 'modal', L.modalVerbsDesc) +
+      metricItem(L.firstPerson, firstPersonCount, 'firstperson', L.firstPersonDesc) +
+      metricItem(L.colloquial, colloquialCount, 'colloquial', L.colloquialDesc) +
+      metricItem(L.emphaticPunct, emphaticPunct, null, L.emphaticPunctDesc) +
+      // ── Conectores ───────────────────────────────────────────────────────────
+      metricGroup(L.groupConnectors) +
       metricItem(L.connectors, connectorCount, 'connectors', L.connectorsDesc) +
       metricItem(L.connectorAdd, connectorByCat.add || 0, 'connectors-add', L.connectorAddDesc) +
       metricItem(L.connectorContrast, connectorByCat.contrast || 0, 'connectors-contrast', L.connectorContrastDesc) +
       metricItem(L.connectorCause, connectorByCat.cause || 0, 'connectors-cause', L.connectorCauseDesc) +
       metricItem(L.connectorConclusion, connectorByCat.conclusion || 0, 'connectors-conclusion', L.connectorConclusionDesc) +
       metricItem(L.connectorTime, connectorByCat.time || 0, 'connectors-time', L.connectorTimeDesc) +
-      metricItem(L.nominalization, nominalizationCount, 'nominal', L.nominalizationDesc) +
-      metricItem(L.readability + ' (' + L.flesch + ')', readability.flesch, null, L.fleschDesc) +
-      metricItem(L.grade, readability.grade, null, L.gradeDesc) +
-      metricItem(L.fog, readability.fog, null, L.fogDesc) +
-      metricItem(L.complexSent, complexSentenceCount + ' (' + round1(complexSentenceRate) + '%)', null, L.complexSentDesc) +
-      metricItem(L.hedges, hedgeCount, 'hedge', L.hedgeDesc + ' | ' + L.hedgeDensity + ': ' + round1(hedgeDensity) + '/1000' + L.wSuffix) +
-      metricItem(L.undefinedAcronyms, undefinedAcronyms.length ? undefinedAcronyms.slice(0, 4).map(function (x) { return x.acronym + ' ×' + x.count; }).join(', ') : '0', null, L.undefinedAcronymsDesc) +
-      metricItem(L.emphaticPunct, emphaticPunct, null, L.emphaticPunctDesc) +
+      // ── Citações & Referências ───────────────────────────────────────────────
+      metricGroup(L.groupCitations) +
+      metricItem(L.citationsTotal, referenceUsage.markerCount, null, L.citationsTotalDesc) +
+      metricItem(L.referencesUsed, referenceUsage.used.length + ' / ' + referenceUsage.defined, null,
+        L.referencesUsedDesc +
+        (referenceUsage.unused.length ? ' | ' + (LANG === 'pt' ? 'n\u00e3o usadas' : 'unused') + ': ' + referenceUsage.unused.join(', ') : '') +
+        (referenceUsage.undefinedKeys.length ? ' | ' + (LANG === 'pt' ? 'n\u00e3o definidas' : 'undefined') + ': ' + referenceUsage.undefinedKeys.join(', ') : '')) +
+      metricItem(L.citationSentStart, citationSentStartCount, 'citation-start', L.citationSentStartDesc) +
+      metricItem(L.citationSentEnd, citationSentEndCount, null, L.citationSentEndDesc) +
+      metricItem(L.citationGaps, citationGapCount, 'citation-low', L.citationGapsDesc) +
+      metricItem(L.resultsCitations, resultsCitationCount, 'results-citation', L.resultsCitationsDesc) +
+      // ── Evidências ───────────────────────────────────────────────────────────
+      metricGroup(L.groupEvidence) +
       metricItem(L.evidence, evidenceCited, 'evidence', L.evidenceCitedDesc + ' | ' + L.evidenceDensity + ': ' + round1(evidenceDensity) + '/1000' + L.wSuffix) +
       metricItem(L.evidenceHardcoded, evidenceHardcoded, 'evidence-hardcoded', L.evidenceHardcodedDesc) +
+      metricItem(L.evidenceUnparameterized, evidenceUnparameterized, 'evidence-unparameterized', L.evidenceUnparameterizedDesc) +
       (VARIABLE_COUNT > 0
         ? metricItem(L.evidenceParameterized, evidenceParameterized + ' / ' + (evidenceParameterized + evidenceUnparameterized), 'evidence-parameterized', L.evidenceParameterizedDesc) +
           metricItem(L.variableCount, usedVarCount + ' / ' + VARIABLE_COUNT, null,
@@ -2617,34 +4075,52 @@
               ? ' | \u26a0\ufe0f ' + (LANG === 'pt' ? 'n\u00e3o usadas' : 'unused') + ': ' + varUsage.unused.join(', ')
               : ''))
         : '') +
-      metricItem(L.termVariants, termVariants.length ? termVariants.slice(0, 3).map(function (x) { return x.forms.slice(0, 2).join('/'); }).join(', ') : '0', null, L.termVariantsDesc) +
-      metricItem(L.cohesionGaps, cohesionGaps, 'cohesion', L.cohesionGapsDesc) +
-      metricItem(L.abstractCoverage, abstractCoverage.score + '%', null, L.abstractCoverageDesc + (abstractCoverage.missing.length ? (' | missing: ' + abstractCoverage.missing.join(', ')) : '')) +
-      metricItem(L.colloquial, colloquialCount, null, L.colloquialDesc) +
-      metricItem(L.repeatedStarts, repeatedStarts.length ? repeatedStarts.slice(0, 3).map(function (x) { return x.start + ' \xd7' + x.count; }).join(', ') : '0', null, L.repeatedStartsDesc) +
-      metricItem(L.sectionScore, avgSectionScore + '/100', null, L.sectionScoreDesc) +
-      metricItem(L.noVerb, noVerbCount, 'noverb', L.noVerbDesc) +
-      metricItem(L.pronounAmbig, pronounAmbigCount, null, L.pronounAmbigDesc) +
-      metricItem(L.modalVerbs, modalVerbCount, 'modal', L.modalVerbsDesc) +
-      metricItem(L.firstPerson, firstPersonCount, 'firstperson', L.firstPersonDesc) +
-      metricItem(L.citationSentStart, citationSentStartCount, 'citation-start', L.citationSentStartDesc) +
-      metricItem(L.citationSentEnd, citationSentEndCount, null, L.citationSentEndDesc) +
-      metricItem(L.paraOpeningRepeat, paraOpeningRepeats.length ? paraOpeningRepeats.slice(0, 3).map(function (x) { return x.word + ' \xd7' + x.count; }).join(', ') : '0', null, L.paraOpeningRepeatDesc) +
+      // ── NLP científico ─────────────────────────────────────────────────────
+      metricGroup(L.groupNlp) +
+      metricItem(L.nlpEngine, nlpStatusLabel, null, NLP_ERROR ? (nlpStatusLabel + ' | ' + NLP_ERROR) : nlpStatusLabel) +
+      metricSubgroup(LANG === 'pt' ? 'interno' : 'built-in', null) +
+      metricItem(L.nlpNominalLoad, nlpTotals.nominalLoadCount, 'nlp-nominal-load', L.nlpNominalLoadDesc) +
+      metricItem(L.nlpWeakVerbs, nlpTotals.weakVerbCount, 'nlp-weakverb', L.nlpWeakVerbsDesc) +
+      metricItem(L.nlpNounStacks, nlpTotals.nounStackCount, 'nlp-nounstack', L.nlpNounStacksDesc) +
+      metricSubgroup('compromise', 'https://compromisenlp.com') +
+      metricItem(L.nlpTopics, nlpTopics.length ? nlpTopics.join(', ') : '0', 'nlp-topics', L.nlpTopicsDesc) +
+      metricItem(L.nlpEntities, nlpTotals.entityCount + (nlpEntities.length ? ' | ' + nlpEntities.join(', ') : ''), 'nlp-entities', L.nlpEntitiesDesc) +
+      metricItem(L.nlpValuesDates, nlpTotals.dateValueCount, 'nlp-values-dates', L.nlpValuesDatesDesc) +
+      metricItem(L.nlpAdverbs, nlpTotals.adverbCount + (nlpAdverbs.length ? ' | ' + nlpAdverbs.join(', ') : ''), 'nlp-adverbs', L.nlpAdverbsDesc) +
+      (LANG === 'en' ? metricItem(L.nlpContractions, nlpTotals.contractionCount, null, L.nlpContractionsDesc) : '') +
+      metricItem(L.nlpQuestions, nlpTotals.questionCount, null, L.nlpQuestionsDesc) +
+      metricItem(L.nlpNounVerbRatio, round1(nlpNounVerbRatio), null, L.nlpNounVerbRatioDesc) +
+      metricItem(L.nlpVerbDiversity, round1(nlpVerbDiversity * 100) + '%', null, L.nlpVerbDiversityDesc) +
+      metricItem(L.nlpKeyTerms, nlpKeyTerms.length ? nlpKeyTerms.join(', ') : '0', null, L.nlpKeyTermsDesc) +
+      (LANG === 'en' && winkStats.winkAvailable
+        ? metricSubgroup('wink-nlp', 'https://winkjs.org/wink-nlp/') +
+          metricItem(L.nlpWinkReadingEase, winkStats.fleschReadingEase, null, L.nlpWinkReadingEaseDesc) +
+          metricItem(L.nlpWinkGradeLevel, winkStats.fleschKincaidGrade, null, L.nlpWinkGradeLevelDesc) +
+          metricItem(L.nlpWinkAvgWords, winkStats.avgWordsPerSentence, null, L.nlpWinkAvgWordsDesc) +
+          metricItem(L.nlpWinkReadTime, (winkStats.readingTimeSecs || 0) + 's', null, L.nlpWinkReadTimeDesc) +
+          metricItem(L.nlpWinkComplexWords, (winkStats.complexWordCount || 0) + ((winkStats.complexWords || []).length ? ' | ' + displayNlpItems((winkStats.complexWords || []).slice(0, 4)) : ''), 'wink-complex', L.nlpWinkComplexWordsDesc) +
+          metricItem(L.nlpWinkComplexDensity, winkStats.complexWordDensity != null ? winkStats.complexWordDensity + '%' : '—', null, L.nlpWinkComplexDensityDesc) +
+          metricItem(L.nlpWinkModalVerbs, (winkStats.modalCount || 0) + ((winkStats.modalTerms || []).length ? ' | ' + displayNlpItems((winkStats.modalTerms || []).slice(0, 4)) : ''), 'wink-modal', L.nlpWinkModalVerbsDesc) +
+          metricItem(L.nlpWinkPassive, winkStats.passiveSentenceCount || 0, 'wink-passive', L.nlpWinkPassiveDesc) +
+          metricItem(L.nlpWinkWeakOpeners, winkStats.weakOpenerCount || 0, 'wink-weak-opener', L.nlpWinkWeakOpenersDesc) +
+          metricItem(L.nlpWinkVerbDiversity, winkStats.verbLemmaDiversity != null ? winkStats.verbLemmaDiversity + '%' : '—', null, L.nlpWinkVerbDiversityDesc)
+        : '') +
+      // ── Resumo ───────────────────────────────────────────────────────────────
+      metricGroup(L.groupAbstract) +
       metricItem(L.abstractWordCount, abstractWordCount + ' ' + L.words, null, L.abstractWordCountDesc) +
-      metricItem(L.unitConsistency, unitInconsistency.length ? unitInconsistency.join('; ') : '0', null, L.unitConsistencyDesc) +
-      metricItem(L.referencesUsed, referenceUsage.used.length + ' / ' + referenceUsage.defined, null,
-        L.referencesUsedDesc +
-        (referenceUsage.unused.length ? ' | ' + (LANG === 'pt' ? 'não usadas' : 'unused') + ': ' + referenceUsage.unused.join(', ') : '') +
-        (referenceUsage.undefinedKeys.length ? ' | ' + (LANG === 'pt' ? 'não definidas' : 'undefined') + ': ' + referenceUsage.undefinedKeys.join(', ') : '')) +
-      metricItem(L.citationsTotal, referenceUsage.markerCount, null, L.citationsTotalDesc) +
-      metricItem(L.sectionBalance, sectionBalance.cv + (sectionBalance.outliers.length ? ' | ' + sectionBalance.outliers.slice(0, 2).join(', ') : ''), null, L.sectionBalanceDesc) +
-      buildDiagnostics(sections, passiveTotal, longSentenceRate);
+      metricItem(L.abstractCoverage, abstractCoverage.score + '%', null, L.abstractCoverageDesc + (abstractCoverage.missing.length ? (' | missing: ' + abstractCoverage.missing.join(', ')) : '')) +
+      // ── Busca & Seleção ─────────────────────────────────────────────────────
+      metricGroup(L.groupSearchSelection) +
+      metricItem(L.italicText, italicTextCount, 'italic', L.italicTextDesc) +
+      metricRegexSearch();
 
     var anchor = document.getElementById('title-block-header') || root.querySelector('section');
     if (anchor) {
       anchor.after(badge);
       badge.after(metrics);
+      wireMetricGroups(metrics);
       wireMetricFocus(metrics);
+      wireRegexSearch(metrics, root);
       wireRhythmNavigation(metrics);
     }
   }
@@ -2653,12 +4129,14 @@
 
   function addFocusMode(allWrappers) {
     allWrappers.forEach(function (w) {
-      w.addEventListener('mouseenter', function () {
+      var note = w.querySelector('.ws-note');
+      if (!note) return;
+      note.addEventListener('mouseenter', function () {
         allWrappers.forEach(function (other) {
           if (other !== w) other.classList.add('ws-dimmed');
         });
       });
-      w.addEventListener('mouseleave', function () {
+      note.addEventListener('mouseleave', function () {
         allWrappers.forEach(function (other) { other.classList.remove('ws-dimmed'); });
       });
     });
@@ -2740,6 +4218,16 @@
       loadingPill.textContent = L.analysisPreparing;
       loadingAnchor.after(loadingPill);
     }
+    if (NLP_CDN_ENABLED) {
+      NLP_LIB = detectGlobalNlp();
+      NLP_STATUS = NLP_LIB ? 'loaded' : 'unavailable';
+      if (!NLP_LIB) ensureNlpEngine();
+    } else {
+      NLP_STATUS = 'disabled';
+    }
+      var winkPromise = ensureWinkEngine();
+
+    await winkPromise;
 
     var totalDocWords = 0;
     var allWrappers   = [];
@@ -2748,6 +4236,19 @@
     var allSections   = [];
 
     var sections = Array.from(root.querySelectorAll('section.level2'));
+    var preAnalysisText = sections.map(function (section) {
+      return Array.from(section.querySelectorAll(':scope > p')).map(function (p) {
+        return p.innerText || p.textContent || '';
+      }).join('\n\n');
+    }).join('\n\n');
+    var globalParaOpeningSet = new Set(getParaOpeningRepeats(sections.reduce(function (acc, section) {
+      return acc.concat(Array.from(section.querySelectorAll(':scope > p')).map(function (p) {
+        return p.innerText || p.textContent || '';
+      }));
+    }, [])).map(function (item) { return item.word; }));
+    var globalRepeatedSet = new Set(getGlobalRepeatedItems(preAnalysisText, 3, 0).map(function (item) {
+      return item.text;
+    }));
     for (var sIdx = 0; sIdx < sections.length; sIdx++) {
       var section = sections[sIdx];
       var paras = Array.from(section.querySelectorAll(':scope > p'));
@@ -2783,6 +4284,9 @@
         if (!isFinite(lexDiv) || lexDiv <= 0) lexDiv = getLexDiv(text);
         var repeated     = row.repeated && typeof row.repeated === 'object' ? row.repeated : getIntraRepeated(text);
         var repeatedSet  = new Set(Object.keys(repeated));
+        globalRepeatedSet.forEach(function (word) {
+          if (new RegExp('\\b' + word + '\\b', 'i').test(text)) repeatedSet.add(word);
+        });
         var passiveCount = Number(row.passiveCount);
         if (!isFinite(passiveCount) || passiveCount < 0) passiveCount = countPassive(text);
         var syllableCount = Number(row.syllableCount);
@@ -2793,6 +4297,7 @@
         if (!isFinite(hedgeCount) || hedgeCount < 0) hedgeCount = countHedges(text);
         var complexSentenceCount = Number(row.complexSentenceCount);
         if (!isFinite(complexSentenceCount) || complexSentenceCount < 0) complexSentenceCount = countComplexSentences(sentences);
+        var nlpStats = analyzeScientificNlp(text, sentences);
         var paraLong     = wordCount > PARA_LONG;
 
         var crossInPara = Array.from(crossWords)
@@ -2821,15 +4326,31 @@
         // Order matters: long sentences → passive → repeated words
         if (maxSentLen > SENT_LONG) wrapLongSentences(p, SENT_LONG);
         wrapNoVerbSentences(p);
+        highlightComplexSentences(p);
+        if (LANG === 'en' && WINK_NLP && nlpStats && nlpStats.winkComplexWordCount > 0) highlightWinkComplexWords(p, nlpStats);
+        if (LANG === 'en' && WINK_NLP && nlpStats && nlpStats.winkModalCount > 0) highlightWinkModalVerbs(p, nlpStats);
+        if (LANG === 'en' && WINK_NLP && nlpStats && nlpStats.passiveSentenceCount > 0) highlightWinkPassiveSentences(p);
+        if (LANG === 'en' && WINK_NLP && nlpStats && nlpStats.winkWeakOpenerCount > 0) highlightWinkWeakOpeners(p);
+        highlightRepeatedStarts(p, globalParaOpeningSet);
+        if (nlpStats.nominalLoadCount > 0) highlightNlpNominalLoad(p);
         if (passiveCount > 0)       highlightPatternInNode(p, PASSIVE_PATTERNS, 'ws-passive');
         highlightConnectors(p);
         highlightNominalizations(p);
         if (hedgeCount > 0) highlightHedges(p);
+        if (countColloquialisms(text) > 0) highlightColloquial(p);
+        highlightItalicText(p);
+        if (nlpStats.weakVerbCount > 0) highlightNlpWeakVerbs(p);
+        if (nlpStats.nounStackCount > 0) highlightNlpNounStacks(p);
+        if (nlpStats.topicCount > 0) highlightNlpTopics(p, nlpStats);
+        if (nlpStats.entityCount > 0) highlightNlpEntities(p, nlpStats);
+        if (nlpStats.dateValueCount > 0) highlightNlpValuesDates(p, nlpStats);
+        if (nlpStats.adverbCount > 0) highlightNlpAdverbs(p, nlpStats);
         if (repeatedSet.size > 0)   highlightInNode(p, repeatedSet, 'ws-repeated');
         highlightEvidenceInParagraph(p);
         highlightModalVerbs(p);
         highlightFirstPerson(p);
         highlightCitationSentStart(p);
+        highlightPronounAmbig(p);
         refreshHighlightTooltips(p);
 
         var stats = {
@@ -2847,6 +4368,7 @@
           complexWordCount: complexWordCount,
           hedgeCount: hedgeCount,
           complexSentenceCount: complexSentenceCount,
+          nlpStats: nlpStats,
         };
         stats.alert = hasParagraphAlert(stats, inMethods);
         stats.critical = paraLong || maxSentLen > SENT_LONG || maxRepeatedCount(repeated) >= REPEATED_STRONG ||
@@ -2883,7 +4405,10 @@
       buildSectionStats(section, statsList, sectionWords, summary);
     }
 
-    buildDocStats(root, totalDocWords, allStats, allSections, allTexts.join('\n\n'));
+    await winkPromise;
+    var _docText = allTexts.join('\n\n');
+    var _winkStats = analyzeWinkNlp(_docText);
+    buildDocStats(root, totalDocWords, allStats, allSections, _docText, _winkStats);
     if (loadingPill && loadingPill.parentNode) loadingPill.remove();
     addFocusMode(allWrappers);
     buildControls();

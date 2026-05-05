@@ -283,8 +283,16 @@ end
 function Meta(meta)
   if quarto.doc.is_format("html") then
     local cfg = meta["scientific-writing"] or {}
+    local nlp_cdn_enabled = meta_bool(cfg["nlp-cdn"], true)
+    local nlp_cdn_url = js_json(cfg["nlp-cdn-url"], '"https://cdnjs.cloudflare.com/ajax/libs/nlp_compromise/4.8.2/nlp_compromise.min.js"')
+    local nlp_cdn_script = ""
+    if nlp_cdn_enabled then
+      local src = nlp_cdn_url:gsub('^"', ''):gsub('"$', '')
+      nlp_cdn_script = string.format('<script src="%s" async crossorigin="anonymous"></script>\n', src)
+    end
 
     local script = string.format([[
+%s
 <script>
 window.WritingStatsConfig = {
   sentenceLong: %s,
@@ -303,10 +311,13 @@ window.WritingStatsConfig = {
   variableCount: %s,
   variableEntries: %s,
   sourceEvidenceTokens: %s,
-  referenceKeys: %s
+  referenceKeys: %s,
+  nlpCdn: %s,
+  nlpCdnUrl: %s
 };
 </script>
 ]],
+      nlp_cdn_script,
       meta_num(cfg["sentence-long"], 30),
       meta_num(cfg["paragraph-long"], 150),
       meta_num(cfg["passive-threshold"], 3),
@@ -323,7 +334,9 @@ window.WritingStatsConfig = {
       tostring(vars_data.count),
       json_encode(vars_data.variables),
       json_encode(source_evidence_tokens),
-      json_encode(ref_keys)
+      json_encode(ref_keys),
+      js_bool(nlp_cdn_enabled),
+      nlp_cdn_url
     )
 
     quarto.doc.include_text("in-header", script)

@@ -15,6 +15,32 @@
   opacity: 0.42;
 }
 
+/* ── Note hover: bring focused note to front, dim others ─────────────────── */
+body:has(.ws-note:hover) .ws-wrapper {
+  opacity: 0.35;
+  transition: opacity 0.18s ease;
+}
+body:has(.ws-note:hover) .ws-wrapper:has(.ws-note:hover) {
+  opacity: 1;
+  z-index: 20;
+}
+body:has(.ws-note:hover) .ws-wrapper:has(.ws-note:hover) .ws-note {
+  z-index: 20;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.18);
+  border-left-width: 4px;
+}
+
+/* ── Passive hover-highlight: always visible even when annotations hidden ── */
+.ws-passive.ws-passive-active,
+.ws-wink-passive.ws-wink-passive-active {
+  background: #7dd3fc !important;
+  border-bottom: 2px wavy #0369a1 !important;
+  color: #082f49 !important;
+  font-weight: 700 !important;
+  outline: none;
+  padding-bottom: 1px;
+}
+
 /* ── Long sentence highlight ────────────────────────────────────────────── */
 .ws-long-sentence {
   background-color: #fef3c7;
@@ -22,6 +48,13 @@
   border-radius: 2px;
   padding-bottom: 1px;
   transition: background-color 0.2s, border-color 0.2s;
+}
+
+.ws-long-sentence.ws-long-sentence-active {
+  background-color: #fde68a !important;
+  border-bottom: 2px solid #b45309 !important;
+  color: #451a03 !important;
+  font-weight: 700 !important;
 }
 
 /* ── Repeated word highlight ────────────────────────────────────────────── */
@@ -41,19 +74,13 @@
 }
 
 /* ── Passive voice highlight ────────────────────────────────────────────── */
-.ws-passive {
+.ws-passive,
+.ws-wink-passive {
   background: #e0f2fe;
   border-bottom: 2px wavy #0284c7;
   border-radius: 2px;
   padding-bottom: 1px;
   transition: background 0.15s, border-color 0.15s;
-}
-
-.ws-passive.ws-passive-active {
-  background: #7dd3fc;
-  border-bottom-color: #0369a1;
-  color: #082f49;
-  font-weight: 700;
 }
 
 .ws-nominalization {
@@ -101,16 +128,42 @@
   border-bottom-color: #1d4ed8;
 }
 
-.ws-modal {
+.ws-modal,
+.ws-wink-modal {
   background: #f5f3ff;
   border-bottom: 1px dotted #7c3aed;
   border-radius: 2px;
   padding: 0 1px;
 }
 
-.ws-modal:hover {
+.ws-modal:hover,
+.ws-wink-modal:hover {
   background: #ede9fe;
   border-bottom-color: #5b21b6;
+}
+
+.ws-wink-complex {
+  background: #fef3c7;
+  border-bottom: 1px dotted #d97706;
+  border-radius: 2px;
+  padding: 0 1px;
+}
+
+.ws-wink-complex:hover {
+  background: #fde68a;
+  border-bottom-color: #b45309;
+}
+
+.ws-wink-weak-opener {
+  background: #fdf2f8;
+  border-bottom: 1px dotted #db2777;
+  border-radius: 2px;
+  padding: 0 1px;
+}
+
+.ws-wink-weak-opener:hover {
+  background: #fce7f3;
+  border-bottom-color: #9d174d;
 }
 
 .ws-firstperson {
@@ -176,6 +229,157 @@
   font-weight: 600;
 }
 
+.ws-colloquial {
+  background: #fef3c7;
+  border-bottom: 1px dotted #d97706;
+  border-radius: 2px;
+  padding: 0 1px;
+}
+
+.ws-colloquial:hover {
+  background: #fde68a;
+  border-bottom-color: #b45309;
+}
+
+.ws-complex-sent {
+  background-color: #ede9fe;
+  border-bottom: 2px dashed #7c3aed;
+  border-radius: 2px;
+  padding-bottom: 1px;
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+.ws-repeated-start {
+  background-color: #fce7f3;
+  border-bottom: 2px dashed #db2777;
+  border-radius: 2px;
+  padding-bottom: 1px;
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+.ws-pronoun-ambig {
+  background: #fff7ed;
+  border-bottom: 1px dotted #ea580c;
+  border-radius: 2px;
+  padding: 0 1px;
+}
+
+.ws-pronoun-ambig:hover {
+  background: #ffedd5;
+  border-bottom-color: #c2410c;
+}
+
+.ws-nlp-nominal-load {
+  background: #f1f5f9;
+  border-bottom: 2px dashed #475569;
+  border-radius: 2px;
+  padding-bottom: 1px;
+}
+
+.ws-nlp-weak-verb {
+  background: #fef9c3;
+  border-bottom: 1px dotted #ca8a04;
+  border-radius: 2px;
+  padding: 0 1px;
+}
+
+.ws-nlp-noun-stack {
+  background: #e0f2fe;
+  border-bottom: 1px solid #0284c7;
+  border-radius: 2px;
+  padding: 0 1px;
+}
+
+.ws-nlp-topic {
+  background: #f0fdf4;
+  border-bottom: 1px solid #16a34a;
+  border-radius: 2px;
+  padding: 0 1px;
+}
+
+.ws-nlp-entity {
+  background: #eef2ff;
+  border-bottom: 1px solid #4f46e5;
+  border-radius: 2px;
+  padding: 0 1px;
+}
+
+.ws-nlp-value-date {
+  background: #ecfeff;
+  border-bottom: 1px solid #0891b2;
+  border-radius: 2px;
+  padding: 0 1px;
+}
+
+.ws-nlp-adverb {
+  background: #fff7ed;
+  border-bottom: 1px dotted #ea580c;
+  border-radius: 2px;
+  padding: 0 1px;
+}
+
+/* Keep the manuscript visually clean until a metric is selected. */
+.ws-long-sentence,
+.ws-repeated,
+.ws-passive,
+.ws-passive.ws-passive-active,
+.ws-wink-passive,
+.ws-wink-passive.ws-wink-passive-active,
+.ws-nominalization,
+.ws-no-verb,
+.ws-evidence,
+.ws-evidence:hover,
+.ws-evidence-hardcoded,
+.ws-evidence-hardcoded:hover,
+.ws-evidence-parameterized,
+.ws-evidence-parameterized:hover,
+.ws-modal,
+.ws-modal:hover,
+.ws-wink-modal,
+.ws-wink-modal:hover,
+.ws-wink-complex,
+.ws-wink-complex:hover,
+.ws-wink-weak-opener,
+.ws-wink-weak-opener:hover,
+.ws-firstperson,
+.ws-firstperson:hover,
+.ws-citation-start,
+.ws-citation-start:hover,
+.ws-connector,
+.ws-hedge,
+.ws-hedge:hover,
+.ws-hedge.ws-hedge-active,
+.ws-colloquial,
+.ws-colloquial:hover,
+.ws-complex-sent,
+.ws-repeated-start,
+.ws-pronoun-ambig,
+.ws-pronoun-ambig:hover,
+.ws-nlp-nominal-load,
+.ws-nlp-weak-verb,
+.ws-nlp-noun-stack,
+.ws-nlp-topic,
+.ws-nlp-entity,
+.ws-nlp-value-date,
+.ws-nlp-adverb {
+  background: transparent;
+  border-bottom-color: transparent;
+  outline-color: transparent;
+  box-shadow: none;
+  color: inherit;
+  font-weight: inherit;
+}
+
+.ws-para-long,
+.ws-cohesion-gap,
+.ws-citation-low,
+.ws-results-citation {
+  border-left-color: transparent;
+  padding-left: 0;
+  margin-left: 0;
+  background: transparent;
+}
+
 /* ── Margin note ────────────────────────────────────────────────────────── */
 .ws-note {
   position: absolute;
@@ -228,7 +432,14 @@
 .ws-sent-alert {
   color: #b45309;
   margin-top: 0.05rem;
+  cursor: pointer;
+  border-radius: 3px;
+  padding: 0 3px;
+  margin-left: -3px;
+  transition: background 0.1s;
 }
+
+.ws-sent-alert:hover { background: #fef3c7; }
 
 .ws-passive-count {
   color: #0369a1;
@@ -419,6 +630,170 @@
   overflow-wrap: anywhere;
 }
 
+.ws-doc-metric-group {
+  grid-column: 1 / -1;
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  font-weight: 700;
+  color: #9ca3af;
+  padding: 0.35rem 0 0;
+  border-top: 1px solid #f3f4f6;
+}
+
+.ws-doc-metric-group:first-child {
+  padding-top: 0;
+  border-top: none;
+}
+
+.ws-doc-metric-subgroup {
+  grid-column: 1 / -1;
+  padding: 0.3rem 0 0.1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.ws-doc-metric-subgroup::before {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: #e5e7eb;
+}
+
+.ws-pkg-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.55rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 0.12rem 0.45rem;
+  border-radius: 3px;
+  white-space: nowrap;
+  color: #fff;
+  text-decoration: none;
+  background: #7c3aed;
+  transition: opacity 0.15s;
+}
+
+.ws-pkg-badge:hover {
+  opacity: 0.82;
+}
+
+.ws-pkg-builtin {
+  background: #64748b;
+  cursor: default;
+}
+
+.ws-doc-group-toggle {
+  all: unset;
+  display: block;
+  width: 100%;
+  cursor: pointer;
+  color: inherit;
+  font: inherit;
+  text-transform: inherit;
+  letter-spacing: inherit;
+  position: relative;
+  padding-right: 1rem;
+}
+
+.ws-doc-group-toggle::after {
+  content: '\25be';
+  position: absolute;
+  right: 0;
+  top: 0;
+  color: #94a3b8;
+  transition: transform 0.15s ease;
+}
+
+.ws-doc-metric-group-collapsed .ws-doc-group-toggle::after {
+  transform: rotate(-90deg);
+}
+
+.ws-group-item-hidden {
+  display: none !important;
+}
+
+.ws-doc-metric-search {
+  grid-column: 1 / -1;
+}
+
+.ws-doc-regex-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 0.35rem;
+  margin-top: 0.3rem;
+}
+
+.ws-doc-regex-input {
+  width: 100%;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  padding: 0.32rem 0.45rem;
+  font-size: 0.76rem;
+  font-family: ui-monospace, "Cascadia Code", "Fira Code", monospace;
+}
+
+.ws-doc-regex-input:focus-visible {
+  outline: 2px solid #93c5fd;
+  outline-offset: 1px;
+  border-color: #60a5fa;
+}
+
+.ws-doc-regex-btn {
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  padding: 0.32rem 0.5rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  background: #f8fafc;
+  color: #374151;
+  cursor: pointer;
+}
+
+.ws-doc-regex-btn:hover {
+  background: #eef2ff;
+  border-color: #c7d2fe;
+}
+
+.ws-doc-regex-count {
+  display: block;
+  margin-top: 0.3rem;
+  font-size: 0.7rem;
+  color: #64748b;
+}
+
+.ws-doc-regex-scope {
+  display: flex;
+  gap: 0.8rem;
+  margin-top: 0.35rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.ws-doc-regex-scope-hidden {
+  display: none;
+}
+
+.ws-doc-regex-scope label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.7rem;
+  color: #475569;
+  cursor: pointer;
+}
+
+.ws-doc-regex-invalid .ws-doc-regex-input {
+  border-color: #ef4444;
+}
+
+.ws-doc-regex-invalid .ws-doc-regex-count {
+  color: #b91c1c;
+}
+
 .ws-doc-diagnostics {
   grid-column: 1 / -1;
   display: grid;
@@ -562,6 +937,7 @@ body.ws-annotations-hidden .ws-wrapper {
 body.ws-annotations-hidden .ws-repeated,
 body.ws-annotations-hidden .ws-long-sentence,
 body.ws-annotations-hidden .ws-passive,
+body.ws-annotations-hidden .ws-wink-passive,
 body.ws-annotations-hidden .ws-nominalization,
 body.ws-annotations-hidden .ws-no-verb,
 body.ws-annotations-hidden .ws-connector,
@@ -570,8 +946,22 @@ body.ws-annotations-hidden .ws-evidence,
 body.ws-annotations-hidden .ws-evidence-hardcoded,
 body.ws-annotations-hidden .ws-evidence-parameterized,
 body.ws-annotations-hidden .ws-modal,
+body.ws-annotations-hidden .ws-wink-modal,
+body.ws-annotations-hidden .ws-wink-complex,
+body.ws-annotations-hidden .ws-wink-weak-opener,
 body.ws-annotations-hidden .ws-firstperson,
-body.ws-annotations-hidden .ws-citation-start {
+body.ws-annotations-hidden .ws-citation-start,
+body.ws-annotations-hidden .ws-colloquial,
+body.ws-annotations-hidden .ws-complex-sent,
+body.ws-annotations-hidden .ws-repeated-start,
+body.ws-annotations-hidden .ws-pronoun-ambig,
+body.ws-annotations-hidden .ws-nlp-nominal-load,
+body.ws-annotations-hidden .ws-nlp-weak-verb,
+body.ws-annotations-hidden .ws-nlp-noun-stack,
+body.ws-annotations-hidden .ws-nlp-topic,
+body.ws-annotations-hidden .ws-nlp-entity,
+body.ws-annotations-hidden .ws-nlp-value-date,
+body.ws-annotations-hidden .ws-nlp-adverb {
   background: none !important;
   border: 0 !important;
   border-bottom: 0 !important;
@@ -608,6 +998,7 @@ body.ws-final-review .ws-wrapper:not(.ws-has-critical) .ws-note {
 
 body.ws-final-review .ws-wrapper:not(.ws-has-critical) .ws-repeated,
 body.ws-final-review .ws-wrapper:not(.ws-has-critical) .ws-passive,
+body.ws-final-review .ws-wrapper:not(.ws-has-critical) .ws-wink-passive,
 body.ws-final-review .ws-wrapper:not(.ws-has-critical) .ws-long-sentence,
 body.ws-final-review .ws-wrapper:not(.ws-has-critical) .ws-nominalization,
 body.ws-final-review .ws-wrapper:not(.ws-has-critical) .ws-connector,
@@ -615,7 +1006,21 @@ body.ws-final-review .ws-wrapper:not(.ws-has-critical) .ws-hedge,
 body.ws-final-review .ws-wrapper:not(.ws-has-critical) .ws-no-verb,
 body.ws-final-review .ws-wrapper:not(.ws-has-critical) .ws-evidence,
 body.ws-final-review .ws-wrapper:not(.ws-has-critical) .ws-evidence-hardcoded,
-body.ws-final-review .ws-wrapper:not(.ws-has-critical) .ws-evidence-parameterized {
+body.ws-final-review .ws-wrapper:not(.ws-has-critical) .ws-evidence-parameterized,
+body.ws-final-review .ws-wrapper:not(.ws-has-critical) .ws-wink-modal,
+body.ws-final-review .ws-wrapper:not(.ws-has-critical) .ws-wink-complex,
+body.ws-final-review .ws-wrapper:not(.ws-has-critical) .ws-wink-weak-opener,
+body.ws-final-review .ws-wrapper:not(.ws-has-critical) .ws-colloquial,
+body.ws-final-review .ws-wrapper:not(.ws-has-critical) .ws-complex-sent,
+body.ws-final-review .ws-wrapper:not(.ws-has-critical) .ws-repeated-start,
+body.ws-final-review .ws-wrapper:not(.ws-has-critical) .ws-pronoun-ambig,
+body.ws-final-review .ws-wrapper:not(.ws-has-critical) .ws-nlp-nominal-load,
+body.ws-final-review .ws-wrapper:not(.ws-has-critical) .ws-nlp-weak-verb,
+body.ws-final-review .ws-wrapper:not(.ws-has-critical) .ws-nlp-noun-stack,
+body.ws-final-review .ws-wrapper:not(.ws-has-critical) .ws-nlp-topic,
+body.ws-final-review .ws-wrapper:not(.ws-has-critical) .ws-nlp-entity,
+body.ws-final-review .ws-wrapper:not(.ws-has-critical) .ws-nlp-value-date,
+body.ws-final-review .ws-wrapper:not(.ws-has-critical) .ws-nlp-adverb {
   background: none !important;
   border-bottom: none !important;
   outline: none !important;
@@ -633,6 +1038,7 @@ body.ws-final-review .ws-wrapper:not(.ws-has-critical) .ws-results-citation {
 
 body.ws-alerts-only .ws-wrapper:not(.ws-has-alert) .ws-repeated,
 body.ws-alerts-only .ws-wrapper:not(.ws-has-alert) .ws-passive,
+body.ws-alerts-only .ws-wrapper:not(.ws-has-alert) .ws-wink-passive,
 body.ws-alerts-only .ws-wrapper:not(.ws-has-alert) .ws-long-sentence,
 body.ws-alerts-only .ws-wrapper:not(.ws-has-alert) .ws-nominalization,
 body.ws-alerts-only .ws-wrapper:not(.ws-has-alert) .ws-connector,
@@ -640,19 +1046,35 @@ body.ws-alerts-only .ws-wrapper:not(.ws-has-alert) .ws-hedge,
 body.ws-alerts-only .ws-wrapper:not(.ws-has-alert) .ws-no-verb,
 body.ws-alerts-only .ws-wrapper:not(.ws-has-alert) .ws-evidence,
 body.ws-alerts-only .ws-wrapper:not(.ws-has-alert) .ws-evidence-hardcoded,
-body.ws-alerts-only .ws-wrapper:not(.ws-has-alert) .ws-evidence-parameterized {
+body.ws-alerts-only .ws-wrapper:not(.ws-has-alert) .ws-evidence-parameterized,
+body.ws-alerts-only .ws-wrapper:not(.ws-has-alert) .ws-wink-modal,
+body.ws-alerts-only .ws-wrapper:not(.ws-has-alert) .ws-wink-complex,
+body.ws-alerts-only .ws-wrapper:not(.ws-has-alert) .ws-wink-weak-opener,
+body.ws-alerts-only .ws-wrapper:not(.ws-has-alert) .ws-colloquial,
+body.ws-alerts-only .ws-wrapper:not(.ws-has-alert) .ws-complex-sent,
+body.ws-alerts-only .ws-wrapper:not(.ws-has-alert) .ws-repeated-start,
+body.ws-alerts-only .ws-wrapper:not(.ws-has-alert) .ws-pronoun-ambig,
+body.ws-alerts-only .ws-wrapper:not(.ws-has-alert) .ws-nlp-nominal-load,
+body.ws-alerts-only .ws-wrapper:not(.ws-has-alert) .ws-nlp-weak-verb,
+body.ws-alerts-only .ws-wrapper:not(.ws-has-alert) .ws-nlp-noun-stack,
+body.ws-alerts-only .ws-wrapper:not(.ws-has-alert) .ws-nlp-topic,
+body.ws-alerts-only .ws-wrapper:not(.ws-has-alert) .ws-nlp-entity,
+body.ws-alerts-only .ws-wrapper:not(.ws-has-alert) .ws-nlp-value-date,
+body.ws-alerts-only .ws-wrapper:not(.ws-has-alert) .ws-nlp-adverb {
   background: none !important;
   border-bottom: none !important;
   outline: none !important;
   padding: 0 !important;
 }
 
-body.ws-compact-panel .ws-doc-metric:nth-child(n+5),
+body.ws-compact-panel .ws-doc-metric:nth-child(n+6),
+body.ws-compact-panel .ws-doc-metric-group,
 body.ws-compact-panel .ws-doc-diagnostics {
   display: none;
 }
 
 body.ws-focus-passive .ws-wrapper,
+body.ws-focus-wink-passive .ws-wrapper,
 body.ws-focus-long .ws-wrapper,
 body.ws-focus-repeated .ws-wrapper,
 body.ws-focus-nominal .ws-wrapper,
@@ -667,14 +1089,34 @@ body.ws-focus-hedge .ws-wrapper,
 body.ws-focus-evidence .ws-wrapper,
 body.ws-focus-cohesion .ws-wrapper,
 body.ws-focus-evidence-hardcoded .ws-wrapper,
+body.ws-focus-evidence-unparameterized .ws-wrapper,
 body.ws-focus-modal .ws-wrapper,
+body.ws-focus-wink-modal .ws-wrapper,
+body.ws-focus-wink-complex .ws-wrapper,
 body.ws-focus-firstperson .ws-wrapper,
 body.ws-focus-citation-start .ws-wrapper,
-body.ws-focus-evidence-parameterized .ws-wrapper {
+body.ws-focus-evidence-parameterized .ws-wrapper,
+body.ws-focus-colloquial .ws-wrapper,
+body.ws-focus-complexsent .ws-wrapper,
+body.ws-focus-repeated-start .ws-wrapper,
+body.ws-focus-pronounambig .ws-wrapper,
+body.ws-focus-nlp-nominal-load .ws-wrapper,
+body.ws-focus-nlp-weakverb .ws-wrapper,
+body.ws-focus-nlp-nounstack .ws-wrapper,
+body.ws-focus-nlp-topics .ws-wrapper,
+body.ws-focus-nlp-entities .ws-wrapper,
+body.ws-focus-nlp-values-dates .ws-wrapper,
+body.ws-focus-nlp-adverbs .ws-wrapper,
+body.ws-focus-paragraph-long .ws-wrapper,
+body.ws-focus-citation-low .ws-wrapper,
+body.ws-focus-italic .ws-wrapper,
+body.ws-focus-regex .ws-wrapper,
+body.ws-focus-results-citation .ws-wrapper {
   opacity: 0.35;
 }
 
 body.ws-focus-passive .ws-wrapper:has(.ws-passive),
+body.ws-focus-wink-passive .ws-wrapper:has(.ws-wink-passive),
 body.ws-focus-long .ws-wrapper:has(.ws-long-sentence),
 body.ws-focus-repeated .ws-wrapper:has(.ws-repeated),
 body.ws-focus-nominal .ws-wrapper:has(.ws-nominalization),
@@ -689,11 +1131,65 @@ body.ws-focus-hedge .ws-wrapper:has(.ws-hedge),
 body.ws-focus-evidence .ws-wrapper:has(.ws-evidence),
 body.ws-focus-cohesion .ws-wrapper:has(.ws-cohesion-gap),
 body.ws-focus-evidence-hardcoded .ws-wrapper:has(.ws-evidence-hardcoded),
+body.ws-focus-evidence-unparameterized .ws-wrapper:has(.ws-evidence),
+body.ws-focus-evidence-unparameterized .ws-wrapper:has(.ws-evidence-hardcoded),
 body.ws-focus-modal .ws-wrapper:has(.ws-modal),
+body.ws-focus-wink-modal .ws-wrapper:has(.ws-wink-modal),
+body.ws-focus-wink-complex .ws-wrapper:has(.ws-wink-complex),
+body.ws-focus-wink-weak-opener .ws-wrapper:has(.ws-wink-weak-opener),
 body.ws-focus-firstperson .ws-wrapper:has(.ws-firstperson),
 body.ws-focus-citation-start .ws-wrapper:has(.ws-citation-start),
-body.ws-focus-evidence-parameterized .ws-wrapper:has(.ws-evidence-parameterized) {
+body.ws-focus-evidence-parameterized .ws-wrapper:has(.ws-evidence-parameterized),
+body.ws-focus-colloquial .ws-wrapper:has(.ws-colloquial),
+body.ws-focus-complexsent .ws-wrapper:has(.ws-complex-sent),
+body.ws-focus-repeated-start .ws-wrapper:has(.ws-repeated-start),
+body.ws-focus-pronounambig .ws-wrapper:has(.ws-pronoun-ambig),
+body.ws-focus-nlp-nominal-load .ws-wrapper:has(.ws-nlp-nominal-load),
+body.ws-focus-nlp-weakverb .ws-wrapper:has(.ws-nlp-weak-verb),
+body.ws-focus-nlp-nounstack .ws-wrapper:has(.ws-nlp-noun-stack),
+body.ws-focus-nlp-topics .ws-wrapper:has(.ws-nlp-topic),
+body.ws-focus-nlp-entities .ws-wrapper:has(.ws-nlp-entity),
+body.ws-focus-nlp-values-dates .ws-wrapper:has(.ws-nlp-value-date),
+body.ws-focus-nlp-adverbs .ws-wrapper:has(.ws-nlp-adverb),
+body.ws-focus-paragraph-long .ws-wrapper.ws-para-long,
+body.ws-focus-citation-low .ws-wrapper:has(.ws-citation-low),
+body.ws-focus-italic .ws-wrapper:has(.ws-italic-text),
+body.ws-focus-regex .ws-wrapper:has(.ws-regex-match),
+body.ws-focus-results-citation .ws-wrapper:has(.ws-results-citation) {
   opacity: 1;
+}
+
+body.ws-focus-long .ws-long-sentence {
+  background-color: #fef3c7;
+  border-bottom-color: #d97706;
+}
+
+body.ws-focus-repeated .ws-repeated {
+  background-color: #fee2e2;
+  outline-color: #fca5a5;
+}
+
+.ws-repeated.ws-active,
+body.ws-focus-repeated .ws-repeated.ws-active {
+  background-color: #f87171;
+  outline-color: #dc2626;
+  color: #450a0a;
+  font-weight: 700;
+}
+
+body.ws-focus-passive .ws-passive {
+  background: #e0f2fe;
+  border-bottom-color: #0284c7;
+}
+
+body.ws-focus-wink-passive .ws-wink-passive {
+  background: #e0f2fe;
+  border-bottom-color: #0284c7;
+}
+
+body.ws-focus-wink-weak-opener .ws-wink-weak-opener {
+  background: #fce7f3;
+  border-bottom-color: #9d174d;
 }
 
 body.ws-focus-nominal .ws-nominalization {
@@ -751,6 +1247,12 @@ body.ws-focus-evidence-hardcoded .ws-evidence-hardcoded {
   border-bottom-color: #c2410c;
 }
 
+body.ws-focus-evidence-unparameterized .ws-evidence,
+body.ws-focus-evidence-unparameterized .ws-evidence-hardcoded {
+  background: #ffedd5;
+  border-bottom-color: #c2410c;
+}
+
 body.ws-focus-modal .ws-modal {
   background: #ede9fe;
   border-bottom-color: #5b21b6;
@@ -771,9 +1273,99 @@ body.ws-focus-evidence-parameterized .ws-evidence-parameterized {
   border-bottom-color: #1d4ed8;
 }
 
+body.ws-focus-colloquial .ws-colloquial {
+  background: #fde68a;
+  border-bottom-color: #b45309;
+}
+
+body.ws-focus-complexsent .ws-complex-sent {
+  background-color: #ddd6fe;
+  border-bottom-color: #5b21b6;
+}
+
+body.ws-focus-repeated-start .ws-repeated-start {
+  background-color: #fbcfe8;
+  border-bottom-color: #9d174d;
+}
+
+body.ws-focus-pronounambig .ws-pronoun-ambig {
+  background: #ffedd5;
+  border-bottom-color: #c2410c;
+}
+
+body.ws-focus-nlp-nominal-load .ws-nlp-nominal-load {
+  background: #e2e8f0;
+  border-bottom-color: #334155;
+}
+
+body.ws-focus-nlp-weakverb .ws-nlp-weak-verb {
+  background: #fde68a;
+  border-bottom-color: #a16207;
+}
+
+body.ws-focus-nlp-nounstack .ws-nlp-noun-stack {
+  background: #bae6fd;
+  border-bottom-color: #0369a1;
+}
+
+body.ws-focus-nlp-topics .ws-nlp-topic {
+  background: #bbf7d0;
+  border-bottom-color: #15803d;
+}
+
+body.ws-focus-nlp-entities .ws-nlp-entity {
+  background: #c7d2fe;
+  border-bottom-color: #4338ca;
+}
+
+body.ws-focus-nlp-values-dates .ws-nlp-value-date {
+  background: #a5f3fc;
+  border-bottom-color: #0e7490;
+}
+
+body.ws-focus-nlp-adverbs .ws-nlp-adverb {
+  background: #ffedd5;
+  border-bottom-color: #c2410c;
+}
+
 body.ws-focus-cohesion .ws-cohesion-gap {
   border-left-color: #d97706;
+  padding-left: 0.5rem;
+  margin-left: -0.5rem;
   background: linear-gradient(to right, #fef3c7 0%, transparent 8rem);
+}
+
+body.ws-focus-paragraph-long .ws-wrapper.ws-para-long {
+  border-left-color: #dc2626;
+  padding-left: 0.55rem;
+}
+
+body.ws-focus-citation-low .ws-citation-low {
+  border-left-color: #dc2626;
+  padding-left: 0.5rem;
+  margin-left: -0.5rem;
+  background: linear-gradient(to right, #fff1f2 0%, transparent 8rem);
+}
+
+body.ws-focus-results-citation .ws-results-citation {
+  border-left-color: #f97316;
+  padding-left: 0.5rem;
+  margin-left: -0.5rem;
+  background: linear-gradient(to right, #fff7ed 0%, transparent 8rem);
+}
+
+body.ws-focus-italic .ws-italic-text {
+  background: #fef3c7;
+  border-bottom: 1px solid #d97706;
+  border-radius: 2px;
+  padding: 0 1px;
+}
+
+body.ws-focus-regex .ws-regex-match {
+  background: #fde68a;
+  border-bottom: 2px solid #ca8a04;
+  border-radius: 2px;
+  padding: 0;
 }
 
 /* ── Responsive: stack notes below paragraph on narrow screens ───────────── */
@@ -834,8 +1426,22 @@ body.ws-focus-cohesion .ws-cohesion-gap {
   .ws-evidence-hardcoded,
   .ws-evidence-parameterized,
   .ws-modal,
+  .ws-wink-modal,
+  .ws-wink-complex,
+  .ws-wink-weak-opener,
   .ws-firstperson,
-  .ws-citation-start {
+  .ws-citation-start,
+  .ws-colloquial,
+  .ws-complex-sent,
+  .ws-repeated-start,
+  .ws-pronoun-ambig,
+  .ws-nlp-nominal-load,
+  .ws-nlp-weak-verb,
+  .ws-nlp-noun-stack,
+  .ws-nlp-topic,
+  .ws-nlp-entity,
+  .ws-nlp-value-date,
+  .ws-nlp-adverb {
     background: none !important;
     border: 0 !important;
     outline: 0 !important;

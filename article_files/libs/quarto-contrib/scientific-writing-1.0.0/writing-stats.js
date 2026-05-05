@@ -92,7 +92,7 @@
     pt: {
       wSuffix: 'p', sent: 'frase', sentP: 'frases',
       diversity: '🔵 diversidade', longSent: '🟡 frase longa',
-      passive: '〰 passiva', repeated: 'repetidas:', cross: 'recorrente na seção:',
+      passive: 'voz passiva', repeated: 'repetidas:', cross: 'recorrente na seção:',
       readTime: 'min de leitura', words: 'palavras', parag: 'parágrafo', paragP: 'parágrafos',
       alert: 'alerta', alertP: 'alertas', observation: 'observação', observationP: 'observações',
       hideBtn: 'ocultar anotações', showBtn: 'mostrar anotações',
@@ -121,7 +121,7 @@
     en: {
       wSuffix: 'w', sent: 'sentence', sentP: 'sentences',
       diversity: '🔵 diversity', longSent: '🟡 long sentence',
-      passive: '〰 passive', repeated: 'repeated:', cross: 'recurrent in section:',
+      passive: 'passive voice', repeated: 'repeated:', cross: 'recurrent in section:',
       readTime: 'min read', words: 'words', parag: 'paragraph', paragP: 'paragraphs',
       alert: 'alert', alertP: 'alerts', observation: 'observation', observationP: 'observations',
       hideBtn: 'hide notes', showBtn: 'show notes',
