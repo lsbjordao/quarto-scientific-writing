@@ -98,6 +98,24 @@ body:has(.ws-note:hover) .ws-wrapper:has(.ws-note:hover) .ws-note {
   background: #ecfdf5;
   border-bottom: 1px solid #059669;
   border-radius: 2px;
+}
+
+.ws-wordy {
+  background-color: #f5f3ff;
+  border-bottom: 2px dotted #7c3aed;
+  border-radius: 2px;
+}
+
+.ws-acronym-first {
+  background-color: #fff1f2;
+  border-bottom: 2px solid #e11d48;
+  border-radius: 2px;
+}
+
+.ws-tense-warn {
+  border-bottom: 2px wavy #ea580c;
+}
+
   padding: 0 1px;
 }
 
@@ -1131,6 +1149,7 @@ body.ws-focus-connectors-conclusion .ws-wrapper,
 body.ws-focus-connectors-time .ws-wrapper,
 body.ws-focus-noverb .ws-wrapper,
 body.ws-focus-hedge .ws-wrapper,
+body.ws-focus-wordy .ws-wrapper,
 body.ws-focus-evidence .ws-wrapper,
 body.ws-focus-cohesion .ws-wrapper,
 body.ws-focus-evidence-hardcoded .ws-wrapper,
@@ -1180,6 +1199,7 @@ body.ws-focus-connectors-conclusion .ws-wrapper:has(.ws-connector-conclusion),
 body.ws-focus-connectors-time .ws-wrapper:has(.ws-connector-time),
 body.ws-focus-noverb .ws-wrapper:has(.ws-no-verb),
 body.ws-focus-hedge .ws-wrapper:has(.ws-hedge),
+body.ws-focus-wordy .ws-wrapper:has(.ws-wordy),
 body.ws-focus-evidence .ws-wrapper:has(.ws-evidence),
 body.ws-focus-cohesion .ws-wrapper:has(.ws-cohesion-gap),
 body.ws-focus-evidence-hardcoded .ws-wrapper:has(.ws-evidence-hardcoded),
@@ -1318,6 +1338,11 @@ body.ws-focus-noverb .ws-no-verb {
 body.ws-focus-hedge .ws-hedge {
   background: #fde68a;
   border-bottom-color: #a16207;
+}
+
+body.ws-focus-wordy .ws-wordy {
+  background: #ede9fe;
+  border-bottom-color: #7c3aed;
 }
 
 body.ws-focus-evidence .ws-evidence {

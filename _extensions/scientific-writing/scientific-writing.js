@@ -243,8 +243,14 @@
       reasonLexLow: 'diversidade lexical baixa', reasonRepeat: 'repetição forte',
       reasonPassive: 'muita voz passiva',
       reasonHedge: 'atenuadores excessivos',
+      reasonWordy: 'prolixidade',
       reasonFewCitations: 'poucas citações na seção',
       reasonResultsCitation: 'citação em Resultados',
+      wordyPhrases: 'expressões prolixas',
+      wordyPhrasesDesc: 'Expressões que podem ser simplificadas para maior clareza.',
+      tenseWarning: 'tempo verbal inadequado',
+      tenseWarningDesc: 'O tempo verbal predominante nesta seção parece divergir do padrão esperado para este tipo de seção científica.',
+      acronymFirstUse: 'sigla sem definição inicial',
       analysisPreparing: 'analisando texto...', analysisEngine: 'motor JS-only',
       analysisLoadingNlp: 'carregando NLP via CDN...',
       analysisWorker: 'worker', analysisSync: 'direto', analysisCache: 'cache', analysisTime: 'tempo',
@@ -798,6 +804,66 @@
       var pattern = safe.indexOf(' ') >= 0 ? safe : ('\\b' + safe + '\\b');
       return new RegExp(pattern, 'gi');
     });
+  }
+
+  function getWordyPhrasesMap() {
+    if (LANG === 'en') {
+      return {
+        'at this point in time': 'now',
+        'due to the fact that': 'because',
+        'in order to': 'to',
+        'in the event that': 'if',
+        'prior to': 'before',
+        'subsequent to': 'after',
+        'a large number of': 'many',
+        'a small number of': 'few',
+        'in the near future': 'soon',
+        'it is important to note that': '',
+        'it is possible that': 'may',
+        'it should be noted that': '',
+        'has the ability to': 'can',
+        'take into consideration': 'consider',
+        'with the exception of': 'except',
+        'for the purpose of': 'for',
+        'by means of': 'by',
+        'in the case of': 'if',
+        'in view of the fact that': 'because',
+        'on a regular basis': 'regularly'
+      };
+    }
+    return {
+      'no que diz respeito a': 'sobre',
+      'com o objetivo de': 'para',
+      'devido ao fato de que': 'porque',
+      'em nível de': '',
+      'no sentido de': 'para',
+      'a nível de': '',
+      'com relação a': 'sobre',
+      'de modo a': 'para',
+      'tendo em vista que': 'pois',
+      'por meio de': 'por',
+      'no que tange a': 'sobre',
+      'em função de': 'por',
+      'fazer a verificação': 'verificar',
+      'dar início a': 'iniciar',
+      'proceder à análise': 'analisar'
+    };
+  }
+
+  function getWordyPhrasesRegexes() {
+    var map = getWordyPhrasesMap();
+    return Object.keys(map).map(function (phrase) {
+      var safe = phrase.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      var pattern = phrase.indexOf(' ') >= 0 ? safe : ('\\b' + safe + '\\b');
+      return { re: new RegExp(pattern, 'gi'), suggestion: map[phrase] };
+    });
+  }
+
+  function countWordyPhrases(text) {
+    return getWordyPhrasesRegexes().reduce(function (sum, item) {
+      var m = text.match(item.re);
+      return sum + (m ? m.length : 0);
+    }, 0);
   }
 
   function countHedges(text) {
@@ -2445,6 +2511,7 @@
       syllableCount: countSyllablesText(text),
       complexWordCount: countComplexWords(text),
       hedgeCount: countHedges(text),
+      wordyCount: countWordyPhrases(text),
       complexSentenceCount: countComplexSentences(sentences),
     };
   }
@@ -2468,6 +2535,7 @@
       "  var stopSet = toSet(p.stopWords || []);",
       "  var excludedSet = toSet(p.excludedTerms || []);",
       "  var hedgeTerms = p.hedgeTerms || [];",
+      "  var wordyPhrases = p.wordyPhrases || [];",
       "  var passivePatterns = [];",
       "  (p.passivePatterns || []).forEach(function (src) { try { passivePatterns.push(new RegExp(src, 'gi')); } catch (e) {} });",
       "  function countWords(text) { return (String(text || '').match(/\\S+/g) || []).length; }",
@@ -2504,6 +2572,17 @@
       "      if (!t) return sum;",
       "      var safe = t.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&');",
       "      var re = t.indexOf(' ') >= 0 ? new RegExp(safe, 'gi') : new RegExp('\\\\b' + safe + '\\\\b', 'gi');",
+      "      var m = source.match(re);",
+      "      return sum + (m ? m.length : 0);",
+      "    }, 0);",
+      "  }",
+      "  function countWordyPhrases(text) {",
+      "    var source = String(text || '').toLowerCase();",
+      "    return wordyPhrases.reduce(function (sum, phrase) {",
+      "      var p = String(phrase || '').toLowerCase().trim();",
+      "      if (!p) return sum;",
+      "      var safe = p.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&');",
+      "      var re = p.indexOf(' ') >= 0 ? new RegExp(safe, 'gi') : new RegExp('\\\\b' + safe + '\\\\b', 'gi');",
       "      var m = source.match(re);",
       "      return sum + (m ? m.length : 0);",
       "    }, 0);",
@@ -2574,6 +2653,7 @@
       "      syllableCount: countSyllablesText(text),",
       "      complexWordCount: countComplexWords(text),",
       "      hedgeCount: countHedges(text),",
+      "      wordyCount: countWordyPhrases(text),",
       "      complexSentenceCount: countComplexSentences(sentences)",
       "    };",
       "  });",
@@ -2677,7 +2757,8 @@
           stopWords: Array.from(STOP_WORDS),
           excludedTerms: Array.from(EXCLUDED_TERMS),
           passivePatterns: PASSIVE_PATTERNS.map(function (re) { return re.source; }),
-          hedgeTerms: getHedgeTerms()
+          hedgeTerms: getHedgeTerms(),
+          wordyPhrases: Object.keys(getWordyPhrasesMap())
         }
       });
     });
@@ -2828,6 +2909,9 @@
     if ((stats.hedgeCount || 0) >= HEDGE_ALERT) {
       reasons.push(L.reasonHedge + ': ' + stats.hedgeCount);
     }
+    if ((stats.wordyCount || 0) > 0) {
+      reasons.push(L.reasonWordy + ': ' + stats.wordyCount);
+    }
     if (stats.needsCitation && !stats.citationMarkers) {
       reasons.push(L.reasonFewCitations);
     }
@@ -2869,6 +2953,7 @@
     'ws-nominalization': 'nominal',
     'ws-no-verb': 'noverb',
     'ws-hedge': 'hedge',
+    'ws-wordy': 'wordy',
     'ws-evidence': 'evidence',
     'ws-evidence-hardcoded': 'evidence-hardcoded',
     'ws-evidence-parameterized': 'evidence-parameterized',
@@ -3459,6 +3544,14 @@
     highlightRegexInNode(p, re, 'ws-pronoun-ambig', L.pronounAmbig);
   }
 
+  function highlightWordyPhrases(p) {
+    var regexes = getWordyPhrasesRegexes();
+    regexes.forEach(function (item) {
+      var title = L.wordyPhrases + (item.suggestion ? ' \u2192 ' + item.suggestion : '');
+      highlightRegexInNode(p, item.re, 'ws-wordy', title);
+    });
+  }
+
   function highlightNlpNominalLoad(p) {
     var title = L.nlpNominalLoad;
     var marked = p.innerHTML.replace(
@@ -3623,6 +3716,15 @@
       passEl.textContent = L.passive + ': ' + stats.passiveCount;
       addHoverHighlight(passEl, note, '.ws-passive, .ws-wink-passive', 'ws-passive-active');
       note.appendChild(passEl);
+    }
+
+    // Wordy phrases
+    if ((stats.wordyCount || 0) > 0) {
+      var wordyEl = document.createElement('div');
+      wordyEl.className = 'ws-wordy-count';
+      wordyEl.textContent = L.wordyPhrases + ': ' + stats.wordyCount;
+      addHoverHighlight(wordyEl, note, '.ws-wordy', 'ws-wordy-active');
+      note.appendChild(wordyEl);
     }
 
     if (typeof stats.citationMarkers === 'number') {
@@ -4442,6 +4544,7 @@
     var totalSyllables = statsList.reduce(function (sum, stats) { return sum + (stats.syllableCount || 0); }, 0);
     var complexWordCount = statsList.reduce(function (sum, stats) { return sum + (stats.complexWordCount || 0); }, 0);
     var hedgeCount = statsList.reduce(function (sum, stats) { return sum + (stats.hedgeCount || 0); }, 0);
+    var wordyCount = statsList.reduce(function (sum, stats) { return sum + (stats.wordyCount || 0); }, 0);
     var complexSentenceCount = statsList.reduce(function (sum, stats) { return sum + (stats.complexSentenceCount || 0); }, 0);
     var allSentences = statsList.reduce(function (all, stats) { return all.concat(stats.sentences || []); }, []);
     var undefinedAcronyms = getUndefinedAcronyms(allSentences);
@@ -4775,6 +4878,7 @@
       metricItem(L.passiveDensity, round1(passiveDensity) + '/1000' + L.wSuffix, 'passive', L.passiveDensityDesc) +
       metricItem(L.passive, passiveDistribNote, null, null) +
       metricItem(L.hedges, hedgeCount, 'hedge', L.hedgeDesc + ' | ' + L.hedgeDensity + ': ' + round1(hedgeDensity) + '/1000' + L.wSuffix) +
+      metricItem(L.wordyPhrases, wordyCount, 'wordy', L.wordyPhrasesDesc) +
       metricItem(L.pronounAmbig, pronounAmbigCount, 'pronounambig', L.pronounAmbigDesc) +
       metricItem(L.modalVerbs, modalVerbCount, 'modal', L.modalVerbsDesc) +
       metricItem(L.firstPerson, firstPersonCount, 'firstperson', L.firstPersonDesc) +
@@ -5113,6 +5217,9 @@
         highlightConnectors(p);
         highlightNominalizations(p);
         if (hedgeCount > 0) highlightHedges(p);
+        var wordyCount = Number(row.wordyCount);
+        if (!isFinite(wordyCount) || wordyCount < 0) wordyCount = countWordyPhrases(text);
+        if (wordyCount > 0) highlightWordyPhrases(p);
         if (countColloquialisms(text) > 0) highlightColloquial(p);
         highlightItalicText(p);
         if (nlpStats.nounStackCount > 0) highlightNlpNounStacks(p);
@@ -5142,6 +5249,7 @@
           syllableCount: syllableCount,
           complexWordCount: complexWordCount,
           hedgeCount: hedgeCount,
+          wordyCount: wordyCount,
           complexSentenceCount: complexSentenceCount,
           nlpStats: nlpStats,
         };
