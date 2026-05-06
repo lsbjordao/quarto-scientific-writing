@@ -206,7 +206,7 @@
   var L = {
     pt: {
       wSuffix: 'p', sent: 'frase', sentP: 'frases',
-      diversity: '🔵 diversidade', longSent: '🟡 frase longa',
+      diversity: 'diversidade', longSent: '🟡 frase longa',
       passive: 'voz passiva', repeated: 'repetidas:', cross: 'recorrente na seção:',
       readTime: 'min de leitura', words: 'palavras', parag: 'parágrafo', paragP: 'parágrafos',
       alert: 'alerta', alertP: 'alertas', observation: 'observação', observationP: 'observações',
@@ -450,7 +450,7 @@
     },
     en: {
       wSuffix: 'w', sent: 'sentence', sentP: 'sentences',
-      diversity: '🔵 diversity', longSent: '🟡 long sentence',
+      diversity: 'diversity', longSent: '🟡 long sentence',
       passive: 'passive voice', repeated: 'repeated:', cross: 'recurrent in section:',
       readTime: 'min read', words: 'words', parag: 'paragraph', paragP: 'paragraphs',
       alert: 'alert', alertP: 'alerts', observation: 'observation', observationP: 'observations',
@@ -3480,7 +3480,6 @@
     var hdr = document.createElement('div');
     hdr.className = 'ws-count' + (stats.paraLong ? ' ws-count-red' : '');
     hdr.textContent =
-      (stats.alert ? '🔴 ' : '') +
       stats.wordCount + L.wSuffix + ' · ' +
       nSent + ' ' + (nSent === 1 ? L.sent : L.sentP);
     if (stats.alertReasons && stats.alertReasons.length) hdr.title = note.title;
