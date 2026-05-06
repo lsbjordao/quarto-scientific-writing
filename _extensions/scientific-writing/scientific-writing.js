@@ -444,6 +444,18 @@
       referencesUsedDesc: 'Entradas do ref.bib citadas no manuscrito.',
       citationsTotal: 'citações',
       citationsTotalDesc: 'Marcadores de citação detectados no texto.',
+      figuresTotal: 'figuras',
+      figuresTotalDesc: 'Quantidade total de figuras com identificador fig- no documento.',
+      figureCrossRefs: 'cross-ref de figuras',
+      figureCrossRefsDesc: 'Cobertura de referências cruzadas para figuras (referenciadas/total).',
+      figureRefOrder: 'ordem refs figuras break',
+      figureRefOrderDesc: 'Quantidade de quebras de ordem nas referências de figuras (ex.: Figura 2 citada antes da Figura 1).',
+      tablesTotal: 'tabelas',
+      tablesTotalDesc: 'Quantidade total de tabelas com identificador tbl- no documento.',
+      tableCrossRefs: 'cross-ref de tabelas',
+      tableCrossRefsDesc: 'Cobertura de referências cruzadas para tabelas (referenciadas/total).',
+      tableRefOrder: 'ordem refs tabelas break',
+      tableRefOrderDesc: 'Quantidade de quebras de ordem nas referências de tabelas (ex.: Tabela 2 citada antes da Tabela 1).',
       citations: 'citações',
       noCitationsIntroDiscussion: 'Introdução/Discussão sem citação neste parágrafo.',
       resultsCitationDesc: 'Resultados com citação: verifique se é realmente necessário.',
@@ -688,6 +700,18 @@
       referencesUsedDesc: 'ref.bib entries cited in the manuscript.',
       citationsTotal: 'citations',
       citationsTotalDesc: 'Citation markers detected in the text.',
+      figuresTotal: 'figures',
+      figuresTotalDesc: 'Total number of figures with fig- identifiers in the document.',
+      figureCrossRefs: 'figure cross-refs',
+      figureCrossRefsDesc: 'Cross-reference coverage for figures (referenced/total).',
+      figureRefOrder: 'figure ref order break',
+      figureRefOrderDesc: 'Number of figure reference order breaks (e.g., Figure 2 cited before Figure 1).',
+      tablesTotal: 'tables',
+      tablesTotalDesc: 'Total number of tables with tbl- identifiers in the document.',
+      tableCrossRefs: 'table cross-refs',
+      tableCrossRefsDesc: 'Cross-reference coverage for tables (referenced/total).',
+      tableRefOrder: 'table ref order break',
+      tableRefOrderDesc: 'Number of table reference order breaks (e.g., Table 2 cited before Table 1).',
       citations: 'citations',
       noCitationsIntroDiscussion: 'Introduction/Discussion paragraph without citation.',
       resultsCitationDesc: 'Results paragraph with citation: verify whether it is necessary.',
@@ -1961,6 +1985,85 @@
     };
   }
 
+  function getCrossRefUsage(root) {
+    var scope = root || document;
+    scope.querySelectorAll('.ws-xref-order-fig, .ws-xref-order-tbl').forEach(function (el) {
+      el.classList.remove('ws-xref-order-fig', 'ws-xref-order-tbl');
+      if (el.dataset && (el.dataset.wsFocus === 'figure-ref-order' || el.dataset.wsFocus === 'table-ref-order')) {
+        delete el.dataset.wsFocus;
+        delete el.dataset.wsReason;
+      }
+    });
+
+    var figureTargets = new Set();
+    var tableTargets = new Set();
+
+    scope.querySelectorAll('[id^="fig-"]').forEach(function (node) {
+      var id = String(node.id || '').trim();
+      if (id) figureTargets.add(id);
+    });
+    scope.querySelectorAll('[id^="tbl-"]').forEach(function (node) {
+      var id = String(node.id || '').trim();
+      if (id) tableTargets.add(id);
+    });
+
+    var figureRefs = new Set();
+    var tableRefs = new Set();
+    scope.querySelectorAll('a[href^="#fig-"]').forEach(function (a) {
+      var id = String(a.getAttribute('href') || '').replace(/^#/, '').trim();
+      if (id) figureRefs.add(id);
+    });
+    scope.querySelectorAll('a[href^="#tbl-"]').forEach(function (a) {
+      var id = String(a.getAttribute('href') || '').replace(/^#/, '').trim();
+      if (id) tableRefs.add(id);
+    });
+
+    var figureReferenced = Array.from(figureTargets).filter(function (id) { return figureRefs.has(id); });
+    var tableReferenced = Array.from(tableTargets).filter(function (id) { return tableRefs.has(id); });
+    var figureMissing = Array.from(figureTargets).filter(function (id) { return !figureRefs.has(id); });
+    var tableMissing = Array.from(tableTargets).filter(function (id) { return !tableRefs.has(id); });
+
+    function getRefNumber(node) {
+      var txt = String((node && node.textContent) || '').trim();
+      var m = txt.match(/(\d+)(?!.*\d)/);
+      return m ? Number(m[1]) : null;
+    }
+
+    function getOrderIssues(selector, cls, focusKey, title) {
+      var prev = null;
+      var issues = [];
+      scope.querySelectorAll(selector).forEach(function (a) {
+        var n = getRefNumber(a);
+        if (n == null) return;
+        if (prev != null && n < prev) {
+          var issue = prev + '→' + n;
+          issues.push(issue);
+          a.classList.add(cls);
+          markReason(a, focusKey, title + ' (' + issue + ')');
+        }
+        prev = n;
+      });
+      return {
+        count: issues.length,
+        examples: issues.slice(0, 5),
+      };
+    }
+
+    var figureOrder = getOrderIssues('a[href^="#fig-"]', 'ws-xref-order-fig', 'figure-ref-order', L.figureRefOrder);
+    var tableOrder = getOrderIssues('a[href^="#tbl-"]', 'ws-xref-order-tbl', 'table-ref-order', L.tableRefOrder);
+
+    return {
+      figureCount: figureTargets.size,
+      figureReferenced: figureReferenced.length,
+      figureMissing: figureMissing,
+      figureOrder: figureOrder,
+      tableCount: tableTargets.size,
+      tableReferenced: tableReferenced.length,
+      tableMissing: tableMissing,
+      tableOrder: tableOrder,
+    };
+  }
+
   function getAbstractWordCount(sectionSummaries) {
     var abs = (sectionSummaries || []).find(function (s) { return isAbstractLikeTitle(s.title || ''); });
     return abs ? (abs.words || 0) : 0;
@@ -2783,6 +2886,8 @@
     'ws-nlp-entity': 'nlp-entities',
     'ws-nlp-value-date': 'nlp-values-dates',
     'ws-nlp-adverb': 'nlp-adverbs',
+    'ws-xref-order-fig': 'figure-ref-order',
+    'ws-xref-order-tbl': 'table-ref-order',
     'ws-wink-passive': 'wink-passive',
     'ws-wink-complex': 'wink-complex',
     'ws-wink-modal': 'wink-modal',
@@ -3516,7 +3621,7 @@
       var passEl = document.createElement('div');
       passEl.className = 'ws-passive-count';
       passEl.textContent = L.passive + ': ' + stats.passiveCount;
-      addHoverHighlight(passEl, note, '.ws-passive', 'ws-passive-active');
+      addHoverHighlight(passEl, note, '.ws-passive, .ws-wink-passive', 'ws-passive-active');
       note.appendChild(passEl);
     }
 
@@ -4172,6 +4277,12 @@
       '- ' + L.longParagraphs + ': ' + r.longParagraphCount,
       '- ' + L.citationGaps + ': ' + r.citationGapCount,
       '- ' + L.resultsCitations + ': ' + r.resultsCitationCount,
+      '- ' + L.figuresTotal + ': ' + r.figuresTotal,
+      '- ' + L.figureCrossRefs + ': ' + r.figureCrossRefs + ' / ' + r.figuresTotal,
+      '- ' + L.figureRefOrder + ': ' + (r.figureRefOrderIssues || 0) + ((r.figureRefOrderExamples && r.figureRefOrderExamples.length) ? ' | ' + r.figureRefOrderExamples.join(', ') : ''),
+      '- ' + L.tablesTotal + ': ' + r.tablesTotal,
+      '- ' + L.tableCrossRefs + ': ' + r.tableCrossRefs + ' / ' + r.tablesTotal,
+      '- ' + L.tableRefOrder + ': ' + (r.tableRefOrderIssues || 0) + ((r.tableRefOrderExamples && r.tableRefOrderExamples.length) ? ' | ' + r.tableRefOrderExamples.join(', ') : ''),
       '- ' + L.connectors + ': ' + r.connectors,
       '- ' + L.nominalization + ': ' + r.nominalizations,
       '- ' + L.readability + ' (' + L.flesch + '): ' + r.readabilityFlesch,
@@ -4369,6 +4480,7 @@
     var italicTextCount = root.querySelectorAll('.ws-wrapper p .ws-italic-text').length;
     var sectionBalance = getSectionBalance(sections);
     var referenceUsage = getReferenceUsage(root);
+    var crossRefUsage = getCrossRefUsage(root);
     var avgSectionScore = sections.length
       ? Math.round(sections.reduce(function (sum, s) { return sum + (s.score || 0); }, 0) / sections.length)
       : 0;
@@ -4533,6 +4645,16 @@
       referencesUsed: referenceUsage.used.length,
       referencesUnused: referenceUsage.unused,
       citationsTotal: referenceUsage.markerCount,
+      figuresTotal: crossRefUsage.figureCount,
+      figureCrossRefs: crossRefUsage.figureReferenced,
+      figureCrossRefsMissing: crossRefUsage.figureMissing,
+      figureRefOrderIssues: crossRefUsage.figureOrder.count,
+      figureRefOrderExamples: crossRefUsage.figureOrder.examples,
+      tablesTotal: crossRefUsage.tableCount,
+      tableCrossRefs: crossRefUsage.tableReferenced,
+      tableCrossRefsMissing: crossRefUsage.tableMissing,
+      tableRefOrderIssues: crossRefUsage.tableOrder.count,
+      tableRefOrderExamples: crossRefUsage.tableOrder.examples,
       nlpStatus: NLP_STATUS,
       nlpNounVerbRatio: round1(nlpNounVerbRatio),
       nlpNounDensity: nlpNounDensity,
@@ -4673,6 +4795,20 @@
         L.referencesUsedDesc +
         (referenceUsage.unused.length ? ' | ' + (LANG === 'pt' ? 'n\u00e3o usadas' : 'unused') + ': ' + referenceUsage.unused.join(', ') : '') +
         (referenceUsage.undefinedKeys.length ? ' | ' + (LANG === 'pt' ? 'n\u00e3o definidas' : 'undefined') + ': ' + referenceUsage.undefinedKeys.join(', ') : '')) +
+      metricItem(L.figuresTotal, crossRefUsage.figureCount, null, L.figuresTotalDesc) +
+      metricItem(L.figureCrossRefs, crossRefUsage.figureReferenced + ' / ' + crossRefUsage.figureCount, null,
+        L.figureCrossRefsDesc +
+        (crossRefUsage.figureMissing.length ? ' | ' + (LANG === 'pt' ? 'sem referência' : 'unreferenced') + ': ' + crossRefUsage.figureMissing.join(', ') : '')) +
+      metricItem(L.figureRefOrder, crossRefUsage.figureOrder.count === 0 ? 'ok' : crossRefUsage.figureOrder.count, 'figure-ref-order',
+        L.figureRefOrderDesc +
+        (crossRefUsage.figureOrder.examples.length ? ' | ' + (LANG === 'pt' ? 'quebras' : 'breaks') + ': ' + crossRefUsage.figureOrder.examples.join(', ') : '')) +
+      metricItem(L.tablesTotal, crossRefUsage.tableCount, null, L.tablesTotalDesc) +
+      metricItem(L.tableCrossRefs, crossRefUsage.tableReferenced + ' / ' + crossRefUsage.tableCount, null,
+        L.tableCrossRefsDesc +
+        (crossRefUsage.tableMissing.length ? ' | ' + (LANG === 'pt' ? 'sem referência' : 'unreferenced') + ': ' + crossRefUsage.tableMissing.join(', ') : '')) +
+      metricItem(L.tableRefOrder, crossRefUsage.tableOrder.count === 0 ? 'ok' : crossRefUsage.tableOrder.count, 'table-ref-order',
+        L.tableRefOrderDesc +
+        (crossRefUsage.tableOrder.examples.length ? ' | ' + (LANG === 'pt' ? 'quebras' : 'breaks') + ': ' + crossRefUsage.tableOrder.examples.join(', ') : '')) +
       metricItem(L.citationSentStart, citationSentStartCount, 'citation-start', L.citationSentStartDesc) +
       metricItem(L.citationSentEnd, citationSentEndCount, null, L.citationSentEndDesc) +
       metricItem(L.citationGaps, citationGapCount, 'citation-low', L.citationGapsDesc) +
@@ -4964,6 +5100,7 @@
         if (nlpStats.nominalLoadCount > 0) highlightNlpNominalLoad(p);
         if (nlpStats.weakVerbCount > 0) highlightNlpWeakVerbs(p);
         if (LANG === 'en' && WINK_NLP && nlpStats && nlpStats.passiveSentenceCount > 0) highlightWinkPassiveSentences(p);
+        if (passiveCount > 0)       highlightPatternInNode(p, PASSIVE_PATTERNS, 'ws-passive');
         // Now run functions that preserve highlights
         if (LANG === 'en' && WINK_NLP && nlpStats && nlpStats.winkComplexWordCount > 0) highlightWinkComplexWords(p, nlpStats);
         if (LANG === 'en' && WINK_NLP && nlpStats && nlpStats.winkModalCount > 0) highlightWinkModalVerbs(p, nlpStats);
@@ -4973,7 +5110,6 @@
         if (LANG === 'en' && WINK_NLP && nlpStats && nlpStats.winkProperNounCount > 0) highlightWinkProperNouns(p, nlpStats);
 
         highlightRepeatedStarts(p, globalParaOpeningSet);
-        if (passiveCount > 0)       highlightPatternInNode(p, PASSIVE_PATTERNS, 'ws-passive');
         highlightConnectors(p);
         highlightNominalizations(p);
         if (hedgeCount > 0) highlightHedges(p);

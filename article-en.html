@@ -71,13 +71,13 @@ window.WritingStatsConfig = {
   hedgeThreshold: 4,
   defaultCompact: false,
   defaultAlertsOnly: false,
-  sectionGoals: {"Abstract":{"maxAvgSentence":["24"],"maxLongSentenceRate":["18"]},"Discussion":{"minLexicalDiversity":["0.58"]},"Materials and Methods":{"maxPassivePer1000":["30"]}},
+  sectionGoals: {"Materials and Methods":{"maxPassivePer1000":["30"]},"Discussion":{"minLexicalDiversity":["0.58"]},"Abstract":{"maxLongSentenceRate":["18"],"maxAvgSentence":["24"]}},
   ignoreTerms: [["bean"],["phaseolus"],["vulgaris"]],
   connectorAmbiguityMode: ["balanced"],
   connectorAmbiguityOverrides: {"as":["strict"],"since":["lenient"],"then":["balanced"]},
   variableCount: 30,
   variableEntries: [{"name":"n_tratamentos","value":"4"},{"name":"n_repeticoes","value":"5"},{"name":"n_unidades","value":"20"},{"name":"n_dias","value":"30"},{"name":"profundidade_semeadura","value":"3"},{"name":"temp_baixa","value":"15"},{"name":"temp_media_baixa","value":"20"},{"name":"temp_otima","value":"25"},{"name":"temp_alta","value":"30"},{"name":"incremento_25","value":"2.3"},{"name":"incremento_15","value":"0.8"},{"name":"area_foliar_deficit","value":"62"},{"name":"temp_max_area_foliar_min","value":"23"},{"name":"temp_max_area_foliar_max","value":"27"},{"name":"alpha_tukey","value":"5"},{"name":"n_treatments","value":"4"},{"name":"n_replicates","value":"5"},{"name":"n_units","value":"20"},{"name":"n_days","value":"30"},{"name":"sowing_depth_cm","value":"3"},{"name":"temp_low_c","value":"15"},{"name":"temp_mid_low_c","value":"20"},{"name":"temp_optimal_c","value":"25"},{"name":"temp_high_c","value":"30"},{"name":"growth_increment_optimal_cm_day","value":"2.3"},{"name":"growth_increment_low_cm_day","value":"0.8"},{"name":"leaf_area_deficit_pct","value":"62"},{"name":"leaf_area_temp_min_c","value":"23"},{"name":"leaf_area_temp_max_c","value":"27"},{"name":"tukey_alpha_pct","value":"5"}],
-  sourceEvidenceTokens: [{"value":"15"},{"value":"20"},{"value":"25"},{"value":"30"},{"name":"n_days","value":"30"},{"name":"n_replicates","value":"5"},{"value":"25"},{"value":"15"},{"value":"15"},{"value":"20"},{"value":"25"},{"value":"30"},{"name":"n_replicates","value":"5"},{"value":"20"},{"name":"sowing_depth_cm","value":"3"},{"name":"n_days","value":"30"},{"name":"tukey_alpha_pct","value":"5"},{"value":"25"},{"value":"2.3"},{"value":"15"},{"value":"0.8"},{"value":"20"},{"value":"30"},{"value":"25"},{"value":"25"},{"value":"15"},{"value":"25"},{"value":"30"},{"value":"23"},{"value":"27"},{"value":"15"},{"name":"leaf_area_deficit_pct","value":"62"},{"value":"25"},{"value":"15"},{"value":"30"},{"value":"25"},{"value":"15"},{"value":"30"},{"value":"25"},{"value":"15"},{"value":"30"},{"value":"25"}],
+  sourceEvidenceTokens: [{"value":"15"},{"value":"20"},{"value":"25"},{"value":"30"},{"name":"n_days","value":"30"},{"name":"n_replicates","value":"5"},{"value":"25"},{"value":"15"},{"value":"2015"},{"value":"15"},{"value":"20"},{"value":"25"},{"value":"30"},{"name":"n_replicates","value":"5"},{"value":"20"},{"name":"sowing_depth_cm","value":"3"},{"name":"n_days","value":"30"},{"name":"tukey_alpha_pct","value":"5"},{"value":"25"},{"value":"2.3"},{"value":"15"},{"value":"0.8"},{"value":"20"},{"value":"30"},{"value":"25"},{"value":"25"},{"value":"15"},{"value":"25"},{"value":"30"},{"value":"23"},{"value":"27"},{"value":"15"},{"name":"leaf_area_deficit_pct","value":"62"},{"value":"25"},{"value":"15"},{"value":"30"},{"value":"1"},{"value":"15"},{"value":"5"},{"value":"1"},{"value":"2"},{"value":"20"},{"value":"5"},{"value":"1"},{"value":"3"},{"value":"25"},{"value":"5"},{"value":"1"},{"value":"4"},{"value":"30"},{"value":"5"},{"value":"1"},{"value":"30"},{"value":"15"},{"value":"0.8"},{"value":"38"},{"value":"42"},{"value":"20"},{"value":"1.5"},{"value":"74"},{"value":"79"},{"value":"25"},{"value":"2.3"},{"value":"100"},{"value":"100"},{"value":"30"},{"value":"1.9"},{"value":"88"},{"value":"91"},{"value":"25"},{"value":"15"},{"value":"30"},{"value":"25"},{"value":"15"},{"value":"30"},{"value":"25"}],
   referenceKeys: ["taiz2017plant","hatfield2015temperature","wahid2007heat","porch2001effects","sage2007temperature","rcore2024"],
   nlpCdn: true,
   nlpCdnUrl: "https://cdnjs.cloudflare.com/ajax/libs/nlp_compromise/4.8.2/nlp_compromise.min.js"
@@ -149,7 +149,7 @@ window.WritingStatsConfig = {
 </section>
 <section id="introduction" class="level1">
 <h1>Introduction</h1>
-<p>Temperature is one of the most important abiotic factors controlling plant growth and development. It affects the rate of metabolic reactions, enzyme activity, water and nutrient uptake, cell expansion, and net photosynthesis. In annual crops, small thermal differences during the early stages can alter stand establishment, crop-cycle duration, and the plant’s ability to intercept radiation throughout development.</p>
+<p>Temperature is one of the most important abiotic factors controlling plant growth and development. It affects the rate of metabolic reactions, enzyme activity, water and nutrient uptake, cell expansion, and net photosynthesis. In annual crops, small thermal differences during the early stages can alter stand establishment, crop-cycle duration, and the plant’s ability to intercept radiation throughout development <span class="citation" data-cites="hatfield2015temperature">[@hatfield2015temperature]</span>.</p>
 <p>Common bean (<em>Phaseolus vulgaris</em> L.) is a major food crop in tropical and subtropical regions. In addition to its economic importance, it has strong social relevance because it is part of the basic diet of many populations. However, crop productivity is often limited by unfavorable environmental conditions, including temperatures below or above the optimal range for germination and vegetative growth.</p>
 <p>During emergence and the first weeks of development, common bean plants are highly sensitive to thermal variation. Low temperatures tend to reduce emergence speed, limit leaf expansion, and extend the time required to form an efficient canopy. High temperatures, in contrast, may increase evaporative demand, intensify reserve consumption, and disrupt the balance between vegetative growth and metabolic maintenance.</p>
 <p>Although the suitable temperature range for common bean is widely discussed in technical recommendations, it remains useful to experimentally demonstrate how different temperatures affect simple growth components. Controlled trials make it possible to isolate thermal effects from other field factors, such as water availability, soil fertility, incoming radiation, and pest pressure. Therefore, this study aimed to evaluate the early growth of common bean plants submitted to different temperature regimes under protected cultivation.</p>
@@ -167,6 +167,123 @@ window.WritingStatsConfig = {
 <p>Leaf number also increased with temperature up to 25°C. Plants maintained at 15°C showed lower leaf emission and a visible delay in the expansion of the first trifoliate leaves. At 25°C, plants displayed greater uniformity among replicates and a more vigorous vegetative architecture. At 30°C, although leaf emission remained relatively high, some plants showed smaller leaves and early signs of reduced turgor during the warmest hours of the day.</p>
 <p>Leaf area followed a quadratic response to temperature, with maximum values estimated between 23°C and 27°C. Plants grown at 15°C had leaf area 62% lower than plants grown in the optimal range. This result shows that temperature affects not only leaf number but also the expansion capacity of each leaf blade. Because leaf area determines light interception, its reduction tends to limit later biomass accumulation.</p>
 <p>Shoot dry mass followed a trend similar to leaf area. The highest accumulation was recorded at 25°C, while the lowest value occurred at 15°C. The 30°C treatment did not sharply reduce dry mass, but it showed greater variability among replicates. This variability suggests that higher temperatures may amplify individual differences in vigor or small differences in water availability, even under controlled conditions.</p>
+<p>To intentionally stress-test cross-reference ordering, Figures <a href="#fig-demo-second" class="quarto-xref">Figure&nbsp;2</a> and <a href="#fig-demo-temp" class="quarto-xref">Figure&nbsp;1</a> are cited in reverse order, and Tables <a href="#tbl-demo-growth" class="quarto-xref">Table&nbsp;2</a> and <a href="#tbl-demo-treatments" class="quarto-xref">Table&nbsp;1</a> are also cited in reverse order.</p>
+<div id="fig-demo-temp" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Demonstration placeholder PNG used to test figure counting and cross-references.">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-demo-temp-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="assets/example-figure.png" class="img-fluid figure-img" alt="Demonstration placeholder PNG used to test figure counting and cross-references.">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-demo-temp-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;1: Demonstration placeholder image for the extension metrics panel.
+</figcaption>
+</figure>
+</div>
+<div id="fig-demo-second" class="quarto-float quarto-figure quarto-figure-center anchored" alt="Second placeholder PNG for intentional cross-reference ordering errors.">
+<figure class="quarto-float quarto-float-fig figure">
+<div aria-describedby="fig-demo-second-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="assets/example-figure.png" class="img-fluid figure-img" alt="Second placeholder PNG for intentional cross-reference ordering errors.">
+</div>
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig" id="fig-demo-second-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Figure&nbsp;2: Second demonstration placeholder image (same asset) used only to test cross-reference order checks.
+</figcaption>
+</figure>
+</div>
+<div id="tbl-demo-treatments" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-demo-treatments-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;1: Demonstration thermal treatments and replication structure.
+</figcaption>
+<div aria-describedby="tbl-demo-treatments-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<thead>
+<tr class="header">
+<th>Treatment</th>
+<th style="text-align: right;">Temperature (°C)</th>
+<th style="text-align: right;">Replicates</th>
+<th style="text-align: right;">Units per replicate</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>T1</td>
+<td style="text-align: right;">15</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">1 pot</td>
+</tr>
+<tr class="even">
+<td>T2</td>
+<td style="text-align: right;">20</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">1 pot</td>
+</tr>
+<tr class="odd">
+<td>T3</td>
+<td style="text-align: right;">25</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">1 pot</td>
+</tr>
+<tr class="even">
+<td>T4</td>
+<td style="text-align: right;">30</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">1 pot</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
+<div id="tbl-demo-growth" class="quarto-float quarto-figure quarto-figure-center anchored">
+<figure class="quarto-float quarto-float-tbl figure">
+<figcaption class="quarto-float-caption-top quarto-float-caption quarto-float-tbl" id="tbl-demo-growth-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+Table&nbsp;2: Demonstration growth summary after 30 days.
+</figcaption>
+<div aria-describedby="tbl-demo-growth-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<table class="caption-top table">
+<colgroup>
+<col style="width: 20%">
+<col style="width: 26%">
+<col style="width: 26%">
+<col style="width: 26%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Treatment</th>
+<th style="text-align: right;">Height increment (cm/day)</th>
+<th style="text-align: right;">Relative leaf area (%)</th>
+<th style="text-align: right;">Relative shoot dry mass (%)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>15°C</td>
+<td style="text-align: right;">0.8</td>
+<td style="text-align: right;">38</td>
+<td style="text-align: right;">42</td>
+</tr>
+<tr class="even">
+<td>20°C</td>
+<td style="text-align: right;">1.5</td>
+<td style="text-align: right;">74</td>
+<td style="text-align: right;">79</td>
+</tr>
+<tr class="odd">
+<td>25°C</td>
+<td style="text-align: right;">2.3</td>
+<td style="text-align: right;">100</td>
+<td style="text-align: right;">100</td>
+</tr>
+<tr class="even">
+<td>30°C</td>
+<td style="text-align: right;">1.9</td>
+<td style="text-align: right;">88</td>
+<td style="text-align: right;">91</td>
+</tr>
+</tbody>
+</table>
+</div>
+</figure>
+</div>
 </section>
 <section id="discussion" class="level1">
 <h1>Discussion</h1>

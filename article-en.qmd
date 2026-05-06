@@ -42,7 +42,7 @@ The results showed a super significant plant response to the temperature gradien
 
 # Introduction
 
-Temperature is one of the most important abiotic factors controlling plant growth and development. It affects the rate of metabolic reactions, enzyme activity, water and nutrient uptake, cell expansion, and net photosynthesis. In annual crops, small thermal differences during the early stages can alter stand establishment, crop-cycle duration, and the plant's ability to intercept radiation throughout development.
+Temperature is one of the most important abiotic factors controlling plant growth and development. It affects the rate of metabolic reactions, enzyme activity, water and nutrient uptake, cell expansion, and net photosynthesis. In annual crops, small thermal differences during the early stages can alter stand establishment, crop-cycle duration, and the plant's ability to intercept radiation throughout development [@hatfield2015temperature].
 
 Common bean (*Phaseolus vulgaris* L.) is a major food crop in tropical and subtropical regions. In addition to its economic importance, it has strong social relevance because it is part of the basic diet of many populations. However, crop productivity is often limited by unfavorable environmental conditions, including temperatures below or above the optimal range for germination and vegetative growth.
 
@@ -69,6 +69,30 @@ Leaf number also increased with temperature up to 25°C. Plants maintained at 15
 Leaf area followed a quadratic response to temperature, with maximum values estimated between 23°C and 27°C. Plants grown at 15°C had leaf area {{< var leaf_area_deficit_pct >}}% lower than plants grown in the optimal range. This result shows that temperature affects not only leaf number but also the expansion capacity of each leaf blade. Because leaf area determines light interception, its reduction tends to limit later biomass accumulation.
 
 Shoot dry mass followed a trend similar to leaf area. The highest accumulation was recorded at 25°C, while the lowest value occurred at 15°C. The 30°C treatment did not sharply reduce dry mass, but it showed greater variability among replicates. This variability suggests that higher temperatures may amplify individual differences in vigor or small differences in water availability, even under controlled conditions.
+
+To intentionally stress-test cross-reference ordering, Figures @fig-demo-second and @fig-demo-temp are cited in reverse order, and Tables @tbl-demo-growth and @tbl-demo-treatments are also cited in reverse order.
+
+![Demonstration placeholder image for the extension metrics panel.](assets/example-figure.png){#fig-demo-temp fig-alt="Demonstration placeholder PNG used to test figure counting and cross-references."}
+
+![Second demonstration placeholder image (same asset) used only to test cross-reference order checks.](assets/example-figure.png){#fig-demo-second fig-alt="Second placeholder PNG for intentional cross-reference ordering errors."}
+
+Table: Demonstration thermal treatments and replication structure. {#tbl-demo-treatments}
+
+| Treatment | Temperature (°C) | Replicates | Units per replicate |
+|---|---:|---:|---:|
+| T1 | 15 | 5 | 1 pot |
+| T2 | 20 | 5 | 1 pot |
+| T3 | 25 | 5 | 1 pot |
+| T4 | 30 | 5 | 1 pot |
+
+Table: Demonstration growth summary after 30 days. {#tbl-demo-growth}
+
+| Treatment | Height increment (cm/day) | Relative leaf area (%) | Relative shoot dry mass (%) |
+|---|---:|---:|---:|
+| 15°C | 0.8 | 38 | 42 |
+| 20°C | 1.5 | 74 | 79 |
+| 25°C | 2.3 | 100 | 100 |
+| 30°C | 1.9 | 88 | 91 |
 
 # Discussion
 
