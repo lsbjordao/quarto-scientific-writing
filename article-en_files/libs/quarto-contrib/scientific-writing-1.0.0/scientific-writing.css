@@ -154,16 +154,53 @@ body:has(.ws-note:hover) .ws-wrapper:has(.ws-note:hover) .ws-note {
   border-bottom-color: #b45309;
 }
 
-.ws-wink-weak-opener {
-  background: #fdf2f8;
-  border-bottom: 1px dotted #db2777;
+
+.ws-wink-pronoun {
+  background: #eff6ff;
+  border-bottom: 1px dotted #2563eb;
   border-radius: 2px;
   padding: 0 1px;
 }
 
-.ws-wink-weak-opener:hover {
-  background: #fce7f3;
-  border-bottom-color: #9d174d;
+.ws-wink-pronoun:hover {
+  background: #dbeafe;
+  border-bottom-color: #1d4ed8;
+}
+
+.ws-wink-auxiliary {
+  background: #ecfdf5;
+  border-bottom: 1px dotted #059669;
+  border-radius: 2px;
+  padding: 0 1px;
+}
+
+.ws-wink-auxiliary:hover {
+  background: #d1fae5;
+  border-bottom-color: #047857;
+}
+
+.ws-wink-numeric {
+  background: #fffbeb;
+  border-bottom: 1px dotted #d97706;
+  border-radius: 2px;
+  padding: 0 1px;
+}
+
+.ws-wink-numeric:hover {
+  background: #fef3c7;
+  border-bottom-color: #b45309;
+}
+
+.ws-wink-propn {
+  background: #eef2ff;
+  border-bottom: 1px dotted #4f46e5;
+  border-radius: 2px;
+  padding: 0 1px;
+}
+
+.ws-wink-propn:hover {
+  background: #e0e7ff;
+  border-bottom-color: #4338ca;
 }
 
 .ws-firstperson {
@@ -339,8 +376,14 @@ body:has(.ws-note:hover) .ws-wrapper:has(.ws-note:hover) .ws-note {
 .ws-wink-modal:hover,
 .ws-wink-complex,
 .ws-wink-complex:hover,
-.ws-wink-weak-opener,
-.ws-wink-weak-opener:hover,
+.ws-wink-pronoun,
+.ws-wink-pronoun:hover,
+.ws-wink-auxiliary,
+.ws-wink-auxiliary:hover,
+.ws-wink-numeric,
+.ws-wink-numeric:hover,
+.ws-wink-propn,
+.ws-wink-propn:hover,
 .ws-firstperson,
 .ws-firstperson:hover,
 .ws-citation-start,
@@ -948,7 +991,7 @@ body.ws-annotations-hidden .ws-evidence-parameterized,
 body.ws-annotations-hidden .ws-modal,
 body.ws-annotations-hidden .ws-wink-modal,
 body.ws-annotations-hidden .ws-wink-complex,
-body.ws-annotations-hidden .ws-wink-weak-opener,
+
 body.ws-annotations-hidden .ws-firstperson,
 body.ws-annotations-hidden .ws-citation-start,
 body.ws-annotations-hidden .ws-colloquial,
@@ -1009,7 +1052,7 @@ body.ws-final-review .ws-wrapper:not(.ws-has-critical) .ws-evidence-hardcoded,
 body.ws-final-review .ws-wrapper:not(.ws-has-critical) .ws-evidence-parameterized,
 body.ws-final-review .ws-wrapper:not(.ws-has-critical) .ws-wink-modal,
 body.ws-final-review .ws-wrapper:not(.ws-has-critical) .ws-wink-complex,
-body.ws-final-review .ws-wrapper:not(.ws-has-critical) .ws-wink-weak-opener,
+
 body.ws-final-review .ws-wrapper:not(.ws-has-critical) .ws-colloquial,
 body.ws-final-review .ws-wrapper:not(.ws-has-critical) .ws-complex-sent,
 body.ws-final-review .ws-wrapper:not(.ws-has-critical) .ws-repeated-start,
@@ -1049,7 +1092,7 @@ body.ws-alerts-only .ws-wrapper:not(.ws-has-alert) .ws-evidence-hardcoded,
 body.ws-alerts-only .ws-wrapper:not(.ws-has-alert) .ws-evidence-parameterized,
 body.ws-alerts-only .ws-wrapper:not(.ws-has-alert) .ws-wink-modal,
 body.ws-alerts-only .ws-wrapper:not(.ws-has-alert) .ws-wink-complex,
-body.ws-alerts-only .ws-wrapper:not(.ws-has-alert) .ws-wink-weak-opener,
+
 body.ws-alerts-only .ws-wrapper:not(.ws-has-alert) .ws-colloquial,
 body.ws-alerts-only .ws-wrapper:not(.ws-has-alert) .ws-complex-sent,
 body.ws-alerts-only .ws-wrapper:not(.ws-has-alert) .ws-repeated-start,
@@ -1093,6 +1136,11 @@ body.ws-focus-evidence-unparameterized .ws-wrapper,
 body.ws-focus-modal .ws-wrapper,
 body.ws-focus-wink-modal .ws-wrapper,
 body.ws-focus-wink-complex .ws-wrapper,
+body.ws-focus-wink-weak-opener .ws-wrapper,
+body.ws-focus-wink-pronoun .ws-wrapper,
+body.ws-focus-wink-auxiliary .ws-wrapper,
+body.ws-focus-wink-numeric .ws-wrapper,
+body.ws-focus-wink-propn .ws-wrapper,
 body.ws-focus-firstperson .ws-wrapper,
 body.ws-focus-citation-start .ws-wrapper,
 body.ws-focus-evidence-parameterized .ws-wrapper,
@@ -1136,7 +1184,10 @@ body.ws-focus-evidence-unparameterized .ws-wrapper:has(.ws-evidence-hardcoded),
 body.ws-focus-modal .ws-wrapper:has(.ws-modal),
 body.ws-focus-wink-modal .ws-wrapper:has(.ws-wink-modal),
 body.ws-focus-wink-complex .ws-wrapper:has(.ws-wink-complex),
-body.ws-focus-wink-weak-opener .ws-wrapper:has(.ws-wink-weak-opener),
+body.ws-focus-wink-pronoun .ws-wrapper:has(.ws-wink-pronoun),
+body.ws-focus-wink-auxiliary .ws-wrapper:has(.ws-wink-auxiliary),
+body.ws-focus-wink-numeric .ws-wrapper:has(.ws-wink-numeric),
+body.ws-focus-wink-propn .ws-wrapper:has(.ws-wink-propn),
 body.ws-focus-firstperson .ws-wrapper:has(.ws-firstperson),
 body.ws-focus-citation-start .ws-wrapper:has(.ws-citation-start),
 body.ws-focus-evidence-parameterized .ws-wrapper:has(.ws-evidence-parameterized),
@@ -1187,9 +1238,29 @@ body.ws-focus-wink-passive .ws-wink-passive {
   border-bottom-color: #0284c7;
 }
 
-body.ws-focus-wink-weak-opener .ws-wink-weak-opener {
+
   background: #fce7f3;
   border-bottom-color: #9d174d;
+}
+
+body.ws-focus-wink-pronoun .ws-wink-pronoun {
+  background: #dbeafe;
+  border-bottom-color: #1d4ed8;
+}
+
+body.ws-focus-wink-auxiliary .ws-wink-auxiliary {
+  background: #d1fae5;
+  border-bottom-color: #047857;
+}
+
+body.ws-focus-wink-numeric .ws-wink-numeric {
+  background: #fef3c7;
+  border-bottom-color: #b45309;
+}
+
+body.ws-focus-wink-propn .ws-wink-propn {
+  background: #e0e7ff;
+  border-bottom-color: #4338ca;
 }
 
 body.ws-focus-nominal .ws-nominalization {

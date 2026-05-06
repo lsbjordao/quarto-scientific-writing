@@ -15,3 +15,20 @@ area_foliar_deficit: 62
 temp_max_area_foliar_min: 23
 temp_max_area_foliar_max: 27
 alpha_tukey: 5
+
+# English aliases — article-en.qmd
+n_treatments: 4
+n_replicates: 5
+n_units: 20
+n_days: 30
+sowing_depth_cm: 3
+temp_low_c: 15
+temp_mid_low_c: 20
+temp_optimal_c: 25
+temp_high_c: 30
+growth_increment_optimal_cm_day: 2.3
+growth_increment_low_cm_day: 0.8
+leaf_area_deficit_pct: 62
+leaf_area_temp_min_c: 23
+leaf_area_temp_max_c: 27
+tukey_alpha_pct: 5
