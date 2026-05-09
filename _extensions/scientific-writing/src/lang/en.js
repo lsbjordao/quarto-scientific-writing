@@ -48,6 +48,8 @@ var L_EN = {
   sourceConnectTitle: 'Connect the source .qmd file to apply spelling fixes',
   sourceConnectedTitle: 'Connected source file',
   sourceUnsupported: 'This browser does not support direct source-file editing. Use Chrome or Edge on a local/secure page.',
+  sourceMustBeQmd: 'Choose a .qmd file.',
+  sourceDoesNotMatch: 'The selected .qmd does not appear to be the source for this HTML.',
   sourceNotConnected: 'Connect the .qmd source to apply fixes.',
   sourceReady: 'Source ready',
   sourceApplying: 'Applying to source...',

@@ -54,6 +54,8 @@ var L_PT = {
   sourceConnectTitle: 'Conectar o arquivo .qmd fonte para aplicar correções ortográficas',
   sourceConnectedTitle: 'Arquivo fonte conectado',
   sourceUnsupported: 'Este navegador não permite editar o arquivo fonte diretamente. Use Chrome ou Edge em uma página local/segura.',
+  sourceMustBeQmd: 'Escolha um arquivo .qmd.',
+  sourceDoesNotMatch: 'O .qmd selecionado não parece ser a fonte deste HTML.',
   sourceNotConnected: 'Conecte o .qmd fonte para aplicar correções.',
   sourceReady: 'Fonte pronta',
   sourceApplying: 'Aplicando no fonte...',

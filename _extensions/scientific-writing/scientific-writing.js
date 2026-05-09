@@ -289,6 +289,8 @@ var L_PT = {
   sourceConnectTitle: 'Conectar o arquivo .qmd fonte para aplicar correções ortográficas',
   sourceConnectedTitle: 'Arquivo fonte conectado',
   sourceUnsupported: 'Este navegador não permite editar o arquivo fonte diretamente. Use Chrome ou Edge em uma página local/segura.',
+  sourceMustBeQmd: 'Escolha um arquivo .qmd.',
+  sourceDoesNotMatch: 'O .qmd selecionado não parece ser a fonte deste HTML.',
   sourceNotConnected: 'Conecte o .qmd fonte para aplicar correções.',
   sourceReady: 'Fonte pronta',
   sourceApplying: 'Aplicando no fonte...',
@@ -572,6 +574,8 @@ var L_EN = {
   sourceConnectTitle: 'Connect the source .qmd file to apply spelling fixes',
   sourceConnectedTitle: 'Connected source file',
   sourceUnsupported: 'This browser does not support direct source-file editing. Use Chrome or Edge on a local/secure page.',
+  sourceMustBeQmd: 'Choose a .qmd file.',
+  sourceDoesNotMatch: 'The selected .qmd does not appear to be the source for this HTML.',
   sourceNotConnected: 'Connect the .qmd source to apply fixes.',
   sourceReady: 'Source ready',
   sourceApplying: 'Applying to source...',
@@ -3744,6 +3748,8 @@ var L_EN = {
   var SPELLING_SOURCE_BUTTON = null;
   var SPELLING_TOOLTIP = null;
   var SPELLING_TOOLTIP_TARGET = null;
+  var SPELLING_TOAST = null;
+  var SPELLING_TOAST_TIMER = null;
 
   function spellingLabelFor(match, word) {
     var replacements = Array.isArray(match.replacements)
@@ -3941,6 +3947,42 @@ var L_EN = {
     return typeof window.showOpenFilePicker === 'function';
   }
 
+  function sourceValidationText() {
+    var root =
+      document.getElementById('quarto-document-content') ||
+      document.querySelector('main') ||
+      document.body;
+    return normalizeSourceContext((root.innerText || root.textContent || '')).toLowerCase();
+  }
+
+  function validateSpellingSourceFile(name, content) {
+    if (!/\.qmd$/i.test(String(name || ''))) {
+      throw new Error(L.sourceMustBeQmd || 'Choose a .qmd file.');
+    }
+
+    var source = normalizeSourceContext(content).toLowerCase();
+    var rendered = sourceValidationText();
+    var title = (document.querySelector('h1.title, .quarto-title h1, #title-block-header h1') || {}).textContent || '';
+    var checks = [];
+    if (title) checks.push(normalizeSourceContext(title).toLowerCase());
+
+    var paras = Array.from(document.querySelectorAll('#quarto-document-content p, main p'))
+      .map(function (p) { return normalizeSourceContext(p.innerText || p.textContent || '').toLowerCase(); })
+      .filter(function (s) { return s.length >= 35; })
+      .slice(0, 4);
+    paras.forEach(function (p) {
+      checks.push(p.slice(0, Math.min(90, p.length)));
+    });
+
+    var passed = checks.filter(function (needle) {
+      return needle && (source.indexOf(needle) !== -1 || rendered.indexOf(needle) !== -1 && source.indexOf(needle.slice(0, 45)) !== -1);
+    }).length;
+
+    if (!checks.length || passed < Math.min(2, checks.length)) {
+      throw new Error(L.sourceDoesNotMatch || 'The selected .qmd does not appear to be the source for this HTML.');
+    }
+  }
+
   function setSpellingSourceButtonState() {
     if (!SPELLING_SOURCE_BUTTON) return;
     SPELLING_SOURCE_BUTTON.textContent = SPELLING_SOURCE_HANDLE
@@ -3952,6 +3994,21 @@ var L_EN = {
       : (L.sourceConnectTitle || 'Connect the source .qmd file');
   }
 
+  function showSpellingToast(message, level) {
+    if (!message) return;
+    if (!SPELLING_TOAST) {
+      SPELLING_TOAST = document.createElement('div');
+      SPELLING_TOAST.className = 'ws-toast';
+      document.body.appendChild(SPELLING_TOAST);
+    }
+    SPELLING_TOAST.textContent = message;
+    SPELLING_TOAST.className = 'ws-toast ws-toast-visible ws-toast-' + (level || 'warn');
+    if (SPELLING_TOAST_TIMER) clearTimeout(SPELLING_TOAST_TIMER);
+    SPELLING_TOAST_TIMER = setTimeout(function () {
+      if (SPELLING_TOAST) SPELLING_TOAST.classList.remove('ws-toast-visible');
+    }, 4200);
+  }
+
   async function connectSpellingSourceFile() {
     if (!supportsSourceFileAccess()) {
       window.alert(L.sourceUnsupported || 'This browser does not allow direct source-file editing from the page.');
@@ -3960,12 +4017,18 @@ var L_EN = {
     var handles = await window.showOpenFilePicker({
       multiple: false,
       types: [{
-        description: 'Quarto / Markdown',
-        accept: { 'text/markdown': ['.qmd', '.md', '.markdown'] },
+        description: 'Quarto document',
+        accept: { 'text/markdown': ['.qmd'] },
       }],
+      excludeAcceptAllOption: true,
     });
-    SPELLING_SOURCE_HANDLE = handles && handles[0] || null;
-    SPELLING_SOURCE_NAME = SPELLING_SOURCE_HANDLE ? SPELLING_SOURCE_HANDLE.name : '';
+    var handle = handles && handles[0] || null;
+    if (!handle) return;
+    var file = await handle.getFile();
+    var content = await file.text();
+    validateSpellingSourceFile(handle.name || file.name, content);
+    SPELLING_SOURCE_HANDLE = handle;
+    SPELLING_SOURCE_NAME = SPELLING_SOURCE_HANDLE.name || file.name || '';
     setSpellingSourceButtonState();
   }
 
@@ -3980,6 +4043,7 @@ var L_EN = {
       SPELLING_SOURCE_BUTTON.addEventListener('click', function () {
         connectSpellingSourceFile().catch(function (err) {
           console.warn('[scientific-writing] source connect failed', err);
+          showSpellingToast(err && err.message ? err.message : String(err), 'warn');
         });
       });
     }
@@ -4052,6 +4116,7 @@ var L_EN = {
     ignore.textContent = L.ignoreSpellingBtn || 'ignore';
     ignore.addEventListener('click', function () {
       target.classList.add('ws-spelling-ignored');
+      target.classList.remove('ws-spelling');
       hideSpellingTooltip();
     });
     var ignoreSource = document.createElement('button');
@@ -4219,7 +4284,12 @@ var L_EN = {
   async function addSpellingIgnoreToSource(target, tip) {
     if (!SPELLING_SOURCE_HANDLE) {
       setSpellingTipStatus(tip, L.sourceNotConnected || 'Connect the .qmd source to apply fixes.');
-      await connectSpellingSourceFile();
+      await connectSpellingSourceFile().catch(function (err) {
+        var msg = err && err.message ? err.message : String(err);
+        setSpellingTipStatus(tip, msg, true);
+        showSpellingToast(msg, 'warn');
+        throw err;
+      });
       if (!SPELLING_SOURCE_HANDLE) {
         throw new Error(L.sourceNotConnected || 'Connect the .qmd source to apply fixes.');
       }
@@ -4249,7 +4319,12 @@ var L_EN = {
   async function applySpellingSuggestion(target, replacement, tip) {
     if (!SPELLING_SOURCE_HANDLE) {
       setSpellingTipStatus(tip, L.sourceNotConnected || 'Connect the .qmd source to apply fixes.');
-      await connectSpellingSourceFile();
+      await connectSpellingSourceFile().catch(function (err) {
+        var msg = err && err.message ? err.message : String(err);
+        setSpellingTipStatus(tip, msg, true);
+        showSpellingToast(msg, 'warn');
+        throw err;
+      });
       if (!SPELLING_SOURCE_HANDLE) {
         throw new Error(L.sourceNotConnected || 'Connect the .qmd source to apply fixes.');
       }

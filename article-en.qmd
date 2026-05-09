@@ -8,7 +8,7 @@ format:
     toc: true
     toc-location: left
     page-layout: article
-    theme: cosmo
+    theme: darkly
     embed-resources: true
 bibliography: ref.bib
 filters:
