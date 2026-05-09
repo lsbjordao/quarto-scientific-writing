@@ -70,7 +70,200 @@ local function parse_bib_file(content)
   return keys
 end
 
-local ref_keys = parse_bib_file(read_file("ref.bib"))
+-- Extract a single field value from a BibTeX entry body.
+-- Handles {value}, {{value}}, "value", and plain numbers.
+local function bib_field(body, name)
+  local p = '%f[%a]' .. name .. '%s*=%s*'
+  local v = body:match(p .. '{{(.-)}},?%s*\n')
+    or body:match(p .. '{([^{}]-)}')
+    or body:match(p .. '"([^"]-)"')
+    or body:match(p .. '(%d+)')
+  return v and v:match('^%s*(.-)%s*$') or nil
+end
+
+-- Parse all entries from a .bib file, returning only those with a DOI field.
+local function parse_bib_with_doi(content)
+  if not content then return {} end
+  local entries = {}
+  -- Split on @ to isolate each entry block
+  for block in content:gmatch("(@%w+%s*{[^@]+)") do
+    local etype, key = block:match("^@(%w+)%s*{%s*([^,%s]+)")
+    if not etype or not key then goto next_entry end
+    local body = block:sub(block:find(",") + 1)
+    local doi = bib_field(body, 'doi')
+    if not doi then goto next_entry end
+    table.insert(entries, {
+      key     = key,
+      doi     = doi:gsub('%s+', ''),
+      title   = bib_field(body, 'title'),
+      author  = bib_field(body, 'author'),
+      year    = bib_field(body, 'year'),
+      journal = bib_field(body, 'journal') or bib_field(body, 'booktitle'),
+      volume  = bib_field(body, 'volume'),
+      number  = bib_field(body, 'number'),
+      pages   = bib_field(body, 'pages'),
+    })
+    ::next_entry::
+  end
+  return entries
+end
+
+-- Fetch CrossRef metadata for a DOI via curl.
+-- Returns a decoded Lua table (the "message" object) or nil on failure.
+local function fetch_crossref(doi)
+  local safe = doi:gsub('[^%w%.%-%/%%:_;@]', '')
+  if safe == '' then return nil end
+  local cmd = 'curl -s -m 15 -H "User-Agent: quarto-scientific-writing/1.0" '
+    .. '"https://api.crossref.org/works/' .. safe .. '"'
+  local h = io.popen(cmd)
+  if not h then return nil end
+  local raw = h:read('*all')
+  h:close()
+  if not raw or #raw < 20 then return nil end
+  local ok, decoded = pcall(pandoc.json.decode, raw, false)
+  if not ok or type(decoded) ~= 'table' then return nil end
+  return decoded.message
+end
+
+-- Normalize a title string for comparison (strip HTML, braces, punctuation).
+local function norm_title(s)
+  if not s then return '' end
+  s = s:gsub('<[^>]+>', ' ')        -- strip HTML tags
+  s = s:gsub('&amp;', '&'):gsub('&lt;', '<'):gsub('&gt;', '>')
+  s = s:gsub('[{}]', '')
+  s = s:lower()
+  s = s:gsub('[%u2010%u2011%u2012%u2013%u2014]', '-')
+  s = s:gsub('([a-z])%d+', '%1')    -- "C3" → "C"
+  s = s:gsub('%f[%d]%d+%f[%D]', '') -- isolated digits
+  s = s:gsub('[^%w%s]', ' ')
+  s = s:gsub('%s+', ' ')
+  return s:match('^%s*(.-)%s*$')
+end
+
+local function norm_journal(s)
+  if not s then return '' end
+  return norm_title(s):gsub('%f[%a]and%f[%A]', ''):gsub('&', ''):gsub('%s+', ' '):match('^%s*(.-)%s*$')
+end
+
+local function family_name(s)
+  return (s or ''):lower():gsub('[^a-z]', '')
+end
+
+-- Compare a bib entry against CrossRef metadata.
+-- Returns an array of {field, status, bib, api} objects.
+local function compare_entry(entry, work)
+  local results = {}
+
+  -- Title
+  local bib_t = norm_title(entry.title or '')
+  local api_titles = work.title or {}
+  local title_ok = false
+  local api_title_raw = ''
+  for _, t in ipairs(api_titles) do
+    api_title_raw = t
+    if norm_title(t) == bib_t then title_ok = true; break end
+  end
+  if title_ok then
+    table.insert(results, { field='Title', status='ok' })
+  else
+    local api_clean = api_title_raw:gsub('<[^>]+>', ' '):gsub('&amp;', '&'):gsub('%s+', ' '):match('^%s*(.-)%s*$')
+    table.insert(results, { field='Title', status='error',
+      bib = entry.title or '', api = api_clean })
+  end
+
+  -- Year
+  local bib_y = tostring(entry.year or '')
+  local dp = work.published and work.published['date-parts']
+  local api_y = dp and dp[1] and string.format('%d', dp[1][1]) or nil
+  if not api_y then
+    table.insert(results, { field='Year', status='skip' })
+  elseif bib_y == api_y then
+    table.insert(results, { field='Year', status='ok', value=bib_y })
+  else
+    table.insert(results, { field='Year', status='error', bib=bib_y, api=api_y })
+  end
+
+  -- Authors
+  local api_authors = work.author or {}
+  if #api_authors == 0 then
+    table.insert(results, { field='Authors', status='skip' })
+  else
+    local bib_authors = {}
+    local author_str = entry.author or ''
+    local pos = 1
+    while pos <= #author_str do
+      local ms, me = author_str:find('%s+[Aa][Nn][Dd]%s+', pos)
+      local part = (ms and author_str:sub(pos, ms - 1) or author_str:sub(pos)):match('^%s*(.-)%s*$')
+      if #part > 0 then
+        local fam, giv = part:match('^([^,]+),(.+)$')
+        if fam then
+          table.insert(bib_authors, { family=fam:match('^%s*(.-)%s*$'), given=giv:match('^%s*(.-)%s*$') })
+        else
+          local words = {}
+          for w in part:gmatch('%S+') do table.insert(words, w) end
+          table.insert(bib_authors, { family=words[#words] or '', given=table.concat(words, ' ', 1, #words-1) })
+        end
+      end
+      if ms then pos = me + 1 else break end
+    end
+    local mismatches = {}
+    if #bib_authors ~= #api_authors then
+      table.insert(results, { field='Authors', status='warn',
+        bib = tostring(#bib_authors) .. ' authors',
+        api = tostring(#api_authors) .. ' authors' })
+    else
+      for i = 1, #bib_authors do
+        local bf = family_name(bib_authors[i].family)
+        local af = family_name((api_authors[i] or {}).family or '')
+        if bf ~= af then
+          table.insert(mismatches, tostring(i) .. '. ' .. (bib_authors[i].family or '?') .. ' ≠ ' .. (api_authors[i] and api_authors[i].family or '?'))
+        end
+      end
+      if #mismatches > 0 then
+        table.insert(results, { field='Authors', status='error', notes=mismatches })
+      else
+        table.insert(results, { field='Authors', status='ok', value=tostring(#bib_authors) })
+      end
+    end
+  end
+
+  -- Journal
+  local api_journal = (work['container-title'] or {})[1] or nil
+  if entry.journal and api_journal then
+    if norm_journal(entry.journal) == norm_journal(api_journal) then
+      table.insert(results, { field='Journal', status='ok' })
+    else
+      local api_j_clean = api_journal:gsub('&amp;', '&')
+      table.insert(results, { field='Journal', status='warn', bib=entry.journal, api=api_j_clean })
+    end
+  end
+
+  -- Volume
+  if entry.volume and work.volume then
+    local bib_v = tostring(entry.volume):match('^%s*(.-)%s*$')
+    local api_v = tostring(work.volume):match('^%s*(.-)%s*$')
+    if bib_v == api_v then
+      table.insert(results, { field='Volume', status='ok', value=bib_v })
+    else
+      table.insert(results, { field='Volume', status='error', bib=bib_v, api=api_v })
+    end
+  end
+
+  -- Pages
+  if entry.pages and work.page then
+    local norm_p = function(s) return s:gsub('%-%-', '-'):gsub('\xe2\x80\x93', '-'):match('^%s*(.-)%s*$') end
+    if norm_p(entry.pages) == norm_p(work.page) then
+      table.insert(results, { field='Pages', status='ok' })
+    else
+      table.insert(results, { field='Pages', status='warn', bib=entry.pages, api=work.page })
+    end
+  end
+
+  return results
+end
+
+local bib_content = read_file("ref.bib")
+local ref_keys = parse_bib_file(bib_content)
 
 local function read_input_source()
   local input = PANDOC_STATE and PANDOC_STATE.input_files and PANDOC_STATE.input_files[1]
@@ -291,6 +484,32 @@ function Meta(meta)
       nlp_cdn_script = string.format('<script src="%s" async crossorigin="anonymous"></script>\n', src)
     end
 
+    -- ── DOI validation via CrossRef ─────────────────────────────────────────
+    local doi_validation_enabled = meta_bool(cfg["doi-validation"], true)
+    local doi_results = {}  -- keyed by lowercase DOI
+
+    if doi_validation_enabled then
+      local bib_entries = parse_bib_with_doi(bib_content)
+      if #bib_entries > 0 then
+        io.stderr:write('[scientific-writing] Validating ' .. #bib_entries .. ' DOI(s) via CrossRef...\n')
+        for _, entry in ipairs(bib_entries) do
+          io.stderr:write('  @' .. entry.key .. ' (' .. entry.doi .. ')... ')
+          local work = fetch_crossref(entry.doi)
+          if work then
+            local comparison = compare_entry(entry, work)
+            doi_results[entry.doi:lower()] = comparison
+            local has_error = false
+            for _, r in ipairs(comparison) do
+              if r.status == 'error' then has_error = true; break end
+            end
+            io.stderr:write(has_error and 'ISSUES FOUND\n' or 'ok\n')
+          else
+            io.stderr:write('fetch failed\n')
+          end
+        end
+      end
+    end
+
     local script = string.format([[
 %s
 <script>
@@ -313,7 +532,8 @@ window.WritingStatsConfig = {
   sourceEvidenceTokens: %s,
   referenceKeys: %s,
   nlpCdn: %s,
-  nlpCdnUrl: %s
+  nlpCdnUrl: %s,
+  doiValidation: %s
 };
 </script>
 ]],
@@ -336,7 +556,8 @@ window.WritingStatsConfig = {
       json_encode(source_evidence_tokens),
       json_encode(ref_keys),
       js_bool(nlp_cdn_enabled),
-      nlp_cdn_url
+      nlp_cdn_url,
+      json_encode(doi_results)
     )
 
     quarto.doc.include_text("in-header", script)

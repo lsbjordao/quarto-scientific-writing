@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "node build.mjs"
+    "build": "node build.mjs && node build-scientific-writing.mjs",
+    "build:wink": "node build.mjs",
+    "build:scientific-writing": "node build-scientific-writing.mjs"
   },
   "dependencies": {
     "wink-nlp": "^2.4.0",

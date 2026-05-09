@@ -9,6 +9,8 @@ format:
     toc-location: left
     page-layout: article
     theme: cosmo
+    embed-resources: true
+bibliography: ref.bib
 filters:
   - scientific-writing
 scientific-writing:
@@ -42,11 +44,11 @@ The results showed a super significant plant response to the temperature gradien
 
 # Introduction
 
-Temperature is one of the most important abiotic factors controlling plant growth and development. It affects the rate of metabolic reactions, enzyme activity, water and nutrient uptake, cell expansion, and net photosynthesis. In annual crops, small thermal differences during the early stages can alter stand establishment, crop-cycle duration, and the plant's ability to intercept radiation throughout development [@hatfield2015temperature].
+Temperature is one of the most important abiotic factors controlling plant growth and development. It affects the rate of metabolic reactions, enzyme activity, water and nutrient uptake, cell expansion, and net photosynthesis [@taiz2017plant]. In annual crops, small thermal differences during the early stages can alter stand establishment, crop-cycle duration, and the plant's ability to intercept radiation throughout development [@hatfield2015temperature].
 
-Common bean (*Phaseolus vulgaris* L.) is a major food crop in tropical and subtropical regions. In addition to its economic importance, it has strong social relevance because it is part of the basic diet of many populations. However, crop productivity is often limited by unfavorable environmental conditions, including temperatures below or above the optimal range for germination and vegetative growth.
+Common bean (*Phaseolus vulgaris* L.) is a major food crop in tropical and subtropical regions. In addition to its economic importance, it has strong social relevance because it is part of the basic diet of many populations. However, crop productivity is often limited by unfavorable environmental conditions, including temperatures below or above the optimal range for germination and vegetative growth!
 
-During emergence and the first weeks of development, common bean plants are highly sensitive to thermal variation. Low temperatures tend to reduce emergence speed, limit leaf expansion, and extend the time required to form an efficient canopy. High temperatures, in contrast, may increase evaporative demand, intensify reserve consumption, and disrupt the balance between vegetative growth and metabolic maintenance.
+During emergence and the first weeks of development, common bean plants are highly sensitive to thermal variation. Low temperatures tend to reduce emergence speed, limit leaf expansion, and extend the time required to form an efficient canopy [@porch2001effects]. High temperatures, in contrast, may increase evaporative demand, intensify reserve consumption, and disrupt the balance between vegetative growth and metabolic maintenance [@wahid2007heat].
 
 Although the suitable temperature range for common bean is widely discussed in technical recommendations, it remains useful to experimentally demonstrate how different temperatures affect simple growth components. Controlled trials make it possible to isolate thermal effects from other field factors, such as water availability, soil fertility, incoming radiation, and pest pressure. Therefore, this study aimed to evaluate the early growth of common bean plants submitted to different temperature regimes under protected cultivation.
 
@@ -58,7 +60,7 @@ Seeds were visually selected for integrity and size uniformity. Sowing was perfo
 
 Hence, biometric evaluations were performed weekly. Plant height was measured from the collar to the apex of the main stem using a graduated ruler. Leaf number was recorded by counting fully expanded leaves. Leaf area was estimated from digital images obtained under standardized lighting and processed with image-analysis software. At the end of the experiment, shoots were harvested, placed in paper bags, and dried in an oven until constant mass.
 
-Data were submitted to analysis of variance. When treatment effects were significant, means were compared using Tukey's test at the {{< var tukey_alpha_pct >}}% probability level. Regression models were also fitted to describe the response of each variable to the temperature gradient. Analyses were performed in R, with each pot considered an experimental unit.
+We submitted the data to analysis of variance. When treatment effects were significant, means were compared using Tukey's test at the {{< var tukey_alpha_pct >}}% probability level. Regression models were also fitted to describe the response of each variable to the temperature gradient. Analyses were performed in R [@rcore2024], with each pot considered an experimental unit.
 
 # Results
 
@@ -66,11 +68,11 @@ Temperature significantly affected all biometric variables. The greatest plant-h
 
 Leaf number also increased with temperature up to 25°C. Plants maintained at 15°C showed lower leaf emission and a visible delay in the expansion of the first trifoliate leaves. At 25°C, plants displayed greater uniformity among replicates and a more vigorous vegetative architecture. At 30°C, although leaf emission remained relatively high, some plants showed smaller leaves and early signs of reduced turgor during the warmest hours of the day.
 
-Leaf area followed a quadratic response to temperature, with maximum values estimated between 23°C and 27°C. Plants grown at 15°C had leaf area {{< var leaf_area_deficit_pct >}}% lower than plants grown in the optimal range. This result shows that temperature affects not only leaf number but also the expansion capacity of each leaf blade. Because leaf area determines light interception, its reduction tends to limit later biomass accumulation.
+Leaf area followed a quadratic response to temperature, with maximum values estimated between 23°C and 27°C [@sage2007temperature]. Plants grown at 15°C had leaf area {{< var leaf_area_deficit_pct >}}% lower than plants grown in the optimal range. This result shows that temperature affects not only leaf number but also the expansion capacity of each leaf blade. Because leaf area determines light interception, its reduction tends to limit later biomass accumulation.
 
 Shoot dry mass followed a trend similar to leaf area. The highest accumulation was recorded at 25°C, while the lowest value occurred at 15°C. The 30°C treatment did not sharply reduce dry mass, but it showed greater variability among replicates. This variability suggests that higher temperatures may amplify individual differences in vigor or small differences in water availability, even under controlled conditions.
 
-To intentionally stress-test cross-reference ordering, Figures @fig-demo-second and @fig-demo-temp are cited in reverse order, and Tables @tbl-demo-growth and @tbl-demo-treatments are also cited in reverse order.
+To intentionally stress-test cross-reference ordering, Figures @fig-demo-second and @fig-demo-temp are cited in reverse order, and Tables @tbl-demo-growth and @tbl-demo-treatments are also cited in reverse order. I think this will help verify that the system correctly identifies and reports cross-reference ordering issues, as well as ensuring that figure and table numbering is consistent throughout the document.
 
 ![Demonstration placeholder image for the extension metrics panel.](assets/example-figure.png){#fig-demo-temp fig-alt="Demonstration placeholder PNG used to test figure counting and cross-references."}
 
@@ -100,7 +102,7 @@ The results confirm that early growth of common bean strongly depends on the the
 
 The growth reduction at 15°C can be attributed to lower enzyme activity and slower processes related to cell division and expansion. Under low temperatures, plants tend to show lower relative growth rate, delayed phenological development, and reduced capacity to rapidly form an active canopy. This behavior is especially relevant in regions where sowing occurs during seasonal transitions, when cold nights can limit emergence and early establishment.
 
-The performance observed at 30°C indicates that high temperatures do not always cause immediate growth reduction, but they may narrow the plant's physiological safety margin. Under this condition, small water deficits or additional temperature increases can intensify transpiration losses and reduce photosynthetic efficiency. Therefore, agronomic interpretation should consider not only mean temperature but also daily thermal amplitude, relative humidity, and water availability in the substrate.
+The performance observed at 30°C indicates that high temperatures do not always cause immediate growth reduction, but they may narrow the plant's physiological safety margin [@wahid2007heat]. Under this condition, small water deficits or additional temperature increases can intensify transpiration losses and reduce photosynthetic efficiency [@sage2007temperature]. Therefore, agronomic interpretation should consider not only mean temperature but also daily thermal amplitude, relative humidity, and water availability in the substrate.
 
 From a practical perspective, the results reinforce the need for careful sowing-date planning. In areas exposed to low temperatures at the beginning of the cycle, delayed sowing or the use of more adapted cultivars may reduce establishment risks. In warm regions, strategies such as adequate irrigation, soil cover, and the selection of periods with lower thermal stress can help maintain vegetative growth within a favorable range.
 

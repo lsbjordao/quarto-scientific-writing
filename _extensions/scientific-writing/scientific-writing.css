@@ -98,12 +98,14 @@ body:has(.ws-note:hover) .ws-wrapper:has(.ws-note:hover) .ws-note {
   background: #ecfdf5;
   border-bottom: 1px solid #059669;
   border-radius: 2px;
+  padding: 0 1px;
 }
 
 .ws-wordy {
   background-color: #f5f3ff;
   border-bottom: 2px dotted #7c3aed;
   border-radius: 2px;
+  padding: 0 1px;
 }
 
 .ws-acronym-first {
@@ -114,9 +116,6 @@ body:has(.ws-note:hover) .ws-wrapper:has(.ws-note:hover) .ws-note {
 
 .ws-tense-warn {
   border-bottom: 2px wavy #ea580c;
-}
-
-  padding: 0 1px;
 }
 
 .ws-evidence:hover {
@@ -463,7 +462,6 @@ body:has(.ws-note:hover) .ws-wrapper:has(.ws-note:hover) .ws-note {
 }
 
 .ws-note-alert {
-  border-left-color: #dc2626;
   background: #fff8f8;
   border-color: #fecaca;
   border-left-color: #dc2626;
@@ -1011,7 +1009,11 @@ body.ws-annotations-hidden .ws-evidence-parameterized,
 body.ws-annotations-hidden .ws-modal,
 body.ws-annotations-hidden .ws-wink-modal,
 body.ws-annotations-hidden .ws-wink-complex,
-
+body.ws-annotations-hidden .ws-wink-pronoun,
+body.ws-annotations-hidden .ws-wink-auxiliary,
+body.ws-annotations-hidden .ws-wink-numeric,
+body.ws-annotations-hidden .ws-wink-propn,
+body.ws-annotations-hidden .ws-wordy,
 body.ws-annotations-hidden .ws-firstperson,
 body.ws-annotations-hidden .ws-citation-start,
 body.ws-annotations-hidden .ws-colloquial,
@@ -1070,9 +1072,16 @@ body.ws-final-review .ws-wrapper:not(.ws-has-critical) .ws-no-verb,
 body.ws-final-review .ws-wrapper:not(.ws-has-critical) .ws-evidence,
 body.ws-final-review .ws-wrapper:not(.ws-has-critical) .ws-evidence-hardcoded,
 body.ws-final-review .ws-wrapper:not(.ws-has-critical) .ws-evidence-parameterized,
+body.ws-final-review .ws-wrapper:not(.ws-has-critical) .ws-modal,
 body.ws-final-review .ws-wrapper:not(.ws-has-critical) .ws-wink-modal,
 body.ws-final-review .ws-wrapper:not(.ws-has-critical) .ws-wink-complex,
-
+body.ws-final-review .ws-wrapper:not(.ws-has-critical) .ws-wink-pronoun,
+body.ws-final-review .ws-wrapper:not(.ws-has-critical) .ws-wink-auxiliary,
+body.ws-final-review .ws-wrapper:not(.ws-has-critical) .ws-wink-numeric,
+body.ws-final-review .ws-wrapper:not(.ws-has-critical) .ws-wink-propn,
+body.ws-final-review .ws-wrapper:not(.ws-has-critical) .ws-wordy,
+body.ws-final-review .ws-wrapper:not(.ws-has-critical) .ws-firstperson,
+body.ws-final-review .ws-wrapper:not(.ws-has-critical) .ws-citation-start,
 body.ws-final-review .ws-wrapper:not(.ws-has-critical) .ws-colloquial,
 body.ws-final-review .ws-wrapper:not(.ws-has-critical) .ws-complex-sent,
 body.ws-final-review .ws-wrapper:not(.ws-has-critical) .ws-repeated-start,
@@ -1110,9 +1119,16 @@ body.ws-alerts-only .ws-wrapper:not(.ws-has-alert) .ws-no-verb,
 body.ws-alerts-only .ws-wrapper:not(.ws-has-alert) .ws-evidence,
 body.ws-alerts-only .ws-wrapper:not(.ws-has-alert) .ws-evidence-hardcoded,
 body.ws-alerts-only .ws-wrapper:not(.ws-has-alert) .ws-evidence-parameterized,
+body.ws-alerts-only .ws-wrapper:not(.ws-has-alert) .ws-modal,
 body.ws-alerts-only .ws-wrapper:not(.ws-has-alert) .ws-wink-modal,
 body.ws-alerts-only .ws-wrapper:not(.ws-has-alert) .ws-wink-complex,
-
+body.ws-alerts-only .ws-wrapper:not(.ws-has-alert) .ws-wink-pronoun,
+body.ws-alerts-only .ws-wrapper:not(.ws-has-alert) .ws-wink-auxiliary,
+body.ws-alerts-only .ws-wrapper:not(.ws-has-alert) .ws-wink-numeric,
+body.ws-alerts-only .ws-wrapper:not(.ws-has-alert) .ws-wink-propn,
+body.ws-alerts-only .ws-wrapper:not(.ws-has-alert) .ws-wordy,
+body.ws-alerts-only .ws-wrapper:not(.ws-has-alert) .ws-firstperson,
+body.ws-alerts-only .ws-wrapper:not(.ws-has-alert) .ws-citation-start,
 body.ws-alerts-only .ws-wrapper:not(.ws-has-alert) .ws-colloquial,
 body.ws-alerts-only .ws-wrapper:not(.ws-has-alert) .ws-complex-sent,
 body.ws-alerts-only .ws-wrapper:not(.ws-has-alert) .ws-repeated-start,
@@ -1157,7 +1173,6 @@ body.ws-focus-evidence-unparameterized .ws-wrapper,
 body.ws-focus-modal .ws-wrapper,
 body.ws-focus-wink-modal .ws-wrapper,
 body.ws-focus-wink-complex .ws-wrapper,
-body.ws-focus-wink-weak-opener .ws-wrapper,
 body.ws-focus-wink-pronoun .ws-wrapper,
 body.ws-focus-wink-auxiliary .ws-wrapper,
 body.ws-focus-wink-numeric .ws-wrapper,
@@ -1536,15 +1551,23 @@ body.ws-focus-regex .ws-regex-match {
 
   .ws-repeated,
   .ws-passive,
+  .ws-wink-passive,
   .ws-long-sentence,
+  .ws-nominalization,
+  .ws-no-verb,
+  .ws-connector,
   .ws-hedge,
+  .ws-wordy,
   .ws-evidence,
   .ws-evidence-hardcoded,
   .ws-evidence-parameterized,
   .ws-modal,
   .ws-wink-modal,
   .ws-wink-complex,
-  .ws-wink-weak-opener,
+  .ws-wink-pronoun,
+  .ws-wink-auxiliary,
+  .ws-wink-numeric,
+  .ws-wink-propn,
   .ws-firstperson,
   .ws-citation-start,
   .ws-colloquial,
@@ -1565,6 +1588,166 @@ body.ws-focus-regex .ws-regex-match {
   }
 }
 
+/* ── Document Summary Card ──────────────────────────────────────────── */
+.ws-doc-summary {
+  border: 1px solid #e5e7eb;
+  border-left: 3px solid #7c3aed;
+  border-radius: 8px;
+  background: #faf9ff;
+  padding: 0.65rem 0.85rem 0.6rem;
+  font-family: ui-sans-serif, system-ui, sans-serif;
+  animation: ws-fade-in-up 320ms ease;
+  margin-top: 0.75rem;
+}
+
+.ws-sum-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.45rem;
+  padding-bottom: 0.3rem;
+  border-bottom: 1px solid #ede9fe;
+}
+
+.ws-sum-title {
+  font-size: 0.63rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: #5b21b6;
+}
+
+.ws-sum-badge {
+  font-size: 0.55rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #9ca3af;
+  background: #f3f4f6;
+  border-radius: 20px;
+  padding: 0.1rem 0.4rem;
+}
+
+.ws-sum-section-label {
+  font-size: 0.57rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  margin-top: 0.45rem;
+  margin-bottom: 0.15rem;
+  padding-bottom: 0.12rem;
+  border-bottom: 1px dashed currentColor;
+}
+.ws-sum-section-alert { color: #b91c1c; }
+.ws-sum-section-warn  { color: #b45309; }
+.ws-sum-section-profile { color: #5b21b6; }
+
+.ws-sum-profile {
+  margin-bottom: 0.45rem;
+}
+
+.ws-profile-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.18rem;
+  margin: 0.3rem 0 0.4rem;
+  font-size: 0.67rem;
+}
+
+.ws-profile-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.45rem;
+  line-height: 1.45;
+}
+
+.ws-profile-label {
+  min-width: 5.5rem;
+  font-size: 0.58rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #9ca3af;
+  flex-shrink: 0;
+}
+
+.ws-profile-vals {
+  color: #374151;
+  flex: 1;
+}
+
+.ws-profile-val {
+  color: #374151;
+}
+
+.ws-profile-val.ws-profile-alert {
+  color: #b91c1c;
+  font-weight: 600;
+}
+
+.ws-profile-val.ws-profile-warn {
+  color: #92400e;
+  font-weight: 600;
+}
+
+.ws-sum-section-words {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  margin: 0.25rem 0 0.15rem;
+}
+
+.ws-sum-section-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  max-width: 100%;
+  border: 1px solid #e9d5ff;
+  border-radius: 999px;
+  background: #fff;
+  color: #6b21a8;
+  font-size: 0.62rem;
+  line-height: 1.35;
+  padding: 0.12rem 0.42rem;
+  white-space: normal;
+}
+
+.ws-sum-section-pill strong {
+  color: #4c1d95;
+  font-weight: 700;
+}
+
+.ws-sum-issue {
+  font-size: 0.73rem;
+  line-height: 1.6;
+  padding: 0.04rem 0;
+}
+
+.ws-sum-issue-alert { color: #b91c1c; }
+.ws-sum-issue-warn  { color: #92400e; }
+
+.ws-sum-detail {
+  display: block;
+  font-size: 0.66rem;
+  color: #6b7280;
+  padding-left: 1.1rem;
+  line-height: 1.55;
+  margin-bottom: 0.1rem;
+}
+.ws-sum-detail em {
+  font-style: normal;
+  color: #374151;
+}
+
+.ws-sum-ok {
+  font-size: 0.73rem;
+  color: #15803d;
+}
+
+body.ws-annotations-hidden .ws-doc-summary {
+  display: none !important;
+}
+
 @keyframes ws-pulse {
   0%, 100% { opacity: 0.85; }
   50% { opacity: 1; }
@@ -1579,4 +1762,112 @@ body.ws-focus-regex .ws-regex-match {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+/* ── DOI validation tooltip ─────────────────────────────────────────────────── */
+.ws-doi-tip {
+  position: absolute;
+  z-index: 9999;
+  display: none;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-left: 3px solid #7c3aed;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.13);
+  padding: 0.5rem 0.75rem 0.6rem;
+  font-family: ui-sans-serif, system-ui, sans-serif;
+  font-size: 0.72rem;
+  line-height: 1.5;
+  pointer-events: auto;
+  animation: ws-fade-in-up 160ms ease;
+}
+.ws-doi-tip.ws-doi-tip-visible { display: block; }
+
+.ws-doi-tip-hdr {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-bottom: 0.2rem;
+}
+.ws-doi-tip-title {
+  font-size: 0.59rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: #5b21b6;
+}
+.ws-doi-tip-badge {
+  font-size: 0.56rem;
+  font-weight: 700;
+  border-radius: 999px;
+  padding: 0.05rem 0.4rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.ws-doi-tip-badge-ok  { background: #dcfce7; color: #15803d; }
+.ws-doi-tip-badge-err { background: #fee2e2; color: #b91c1c; }
+.ws-doi-tip-badge-warn { background: #fef9c3; color: #854d0e; }
+
+.ws-doi-tip-doi {
+  font-size: 0.62rem;
+  color: #9ca3af;
+  margin-bottom: 0.45rem;
+  word-break: break-all;
+}
+.ws-doi-tip-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.3rem;
+  margin: 0.12rem 0;
+  flex-wrap: wrap;
+}
+.ws-doi-tip-icon { flex-shrink: 0; font-size: 0.75rem; line-height: 1.5; }
+.ws-doi-tip-field {
+  font-weight: 600;
+  color: #374151;
+  min-width: 4rem;
+  flex-shrink: 0;
+}
+.ws-doi-tip-val { color: #9ca3af; font-weight: 400; }
+.ws-doi-tip-ok  .ws-doi-tip-icon  { color: #16a34a; }
+.ws-doi-tip-err .ws-doi-tip-field { color: #dc2626; }
+.ws-doi-tip-err .ws-doi-tip-icon  { color: #dc2626; }
+.ws-doi-tip-warn .ws-doi-tip-field { color: #92400e; }
+.ws-doi-tip-warn .ws-doi-tip-icon  { color: #b45309; }
+
+.ws-doi-tip-diff {
+  font-size: 0.64rem;
+  color: #6b7280;
+  padding-left: 0.2rem;
+  flex-basis: 100%;
+  margin-top: 0.1rem;
+  line-height: 1.55;
+}
+.ws-doi-tip-lbl {
+  font-weight: 600;
+  color: #374151;
+  display: inline-block;
+  min-width: 2rem;
+}
+
+/* Word-level diff spans inside DOI tooltip */
+.ws-diff-ok  { background: #dcfce7; padding: 0 1px; border-radius: 2px; }
+.ws-diff-err { background: #fee2e2; padding: 0 1px; border-radius: 2px; }
+.ws-diff-add { background: #ccfbf1; padding: 0 1px; border-radius: 2px; }
+
+/* DOI link indicators in bibliography */
+a.ws-doi-checkable {
+  cursor: help;
+}
+a.ws-doi-verified {
+  text-decoration-color: #16a34a !important;
+  text-decoration-style: solid !important;
+}
+a.ws-doi-has-error {
+  text-decoration-color: #dc2626 !important;
+  text-decoration-style: wavy !important;
+}
+a.ws-doi-has-warn {
+  text-decoration-color: #b45309 !important;
+  text-decoration-style: dashed !important;
 }

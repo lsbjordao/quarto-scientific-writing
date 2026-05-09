@@ -1,6 +1,9 @@
 (function () {
   'use strict';
 
+// src/config.js — Runtime configuration and shared thresholds.
+// Built into ../scientific-writing.js by build/build-scientific-writing.mjs.
+
   var CFG = window.WritingStatsConfig || {};
   var PARA_LONG = Number(CFG.paragraphLong) || 150;
   var SENT_LONG = Number(CFG.sentenceLong) || 30;
@@ -201,528 +204,544 @@
 
   var PASSIVE_PATTERNS = LANG === 'en' ? PASSIVE_EN : PASSIVE_PT;
 
-  // ── UI labels ──────────────────────────────────────────────────────────────
+// src/lang/pt.js — Portuguese UI strings
+// Built into ../scientific-writing.js by build/build-scientific-writing.mjs.
+var L_PT = {
+  wSuffix: 'p', sent: 'frase', sentP: 'frases',
+  diversity: 'diversidade', longSent: '🟡 frase longa',
+  passive: 'voz passiva', repeated: 'repetidas:', cross: 'recorrente na seção:',
+  readTime: 'min de leitura', words: 'palavras', parag: 'parágrafo', paragP: 'parágrafos',
+  alert: 'alerta', alertP: 'alertas', observation: 'observação', observationP: 'observações',
+  hideBtn: 'ocultar anotações', showBtn: 'mostrar anotações',
+  alertsOnlyBtn: 'só alertas', allNotesBtn: 'todas as notas',
+  compactBtn: 'compacto', fullBtn: 'completo', exportBtn: 'exportar relatório',
+  reviewBtn: 'revisão final', reviewOffBtn: 'revisão final: off',
+  rhythmTitle: 'ritmo das frases (comprimento relativo de cada frase)',
+  toggleTitle: 'Alternar anotações de escrita',
+  alertsOnlyTitle: 'Mostrar somente parágrafos com alertas',
+  compactTitle: 'Alternar painel geral compacto',
+  exportTitle: 'Exportar relatório Markdown das métricas',
+  reviewTitle: 'Mostrar somente pontos críticos para revisão final',
+  avgSentence: 'frase média', sentenceVar: 'var. frases',
+  avgParagraph: 'parágrafo médio', longestSentence: 'maior frase',
+  docDiversity: 'diversidade', passiveTotal: 'passivas',
+  passiveDensity: 'dens. passiva', longSentenceRate: 'frases longas',
+  topRepeated: 'repetições globais', repeatedTerms: 'repetições',
+  connectors: 'conectores', nominalization: 'nominalizações',
+  connectorAdd: 'conectores aditivos', connectorContrast: 'conectores de contraste',
+  connectorCause: 'conectores de causa', connectorConclusion: 'conectores de conclusão',
+  connectorTime: 'conectores temporais',
+  ambiguityStrict: 'ambiguidade: estrito',
+  ambiguityBalanced: 'ambiguidade: balanceado',
+  ambiguityLenient: 'ambiguidade: tolerante',
+  sectionScore: 'score seção', goalIssues: 'metas',
+  noVerb: 'sem verbo claro', sectionMap: 'mapa de seções',
+  rhythm: 'ritmo por seção', denseSections: 'seções densas',
+  passiveExpected: 'passiva concentrada onde é esperada',
+  passiveSpread: 'passiva espalhada fora de métodos',
+  noDenseSections: 'sem seção muito densa',
+  reportTitle: 'Relatório de escrita', alertReasons: 'motivos do alerta',
+  reasonParaLong: 'parágrafo longo', reasonSentLong: 'frase longa',
+  reasonLexLow: 'diversidade lexical baixa', reasonRepeat: 'repetição forte',
+  reasonPassive: 'muita voz passiva',
+  reasonHedge: 'atenuadores excessivos',
+  reasonWordy: 'prolixidade',
+  reasonFewCitations: 'poucas citações na seção',
+  reasonResultsCitation: 'citação em Resultados',
+  wordyPhrases: 'expressões prolixas',
+  wordyPhrasesDesc: 'Expressões que podem ser simplificadas para maior clareza.',
+  tenseWarning: 'tempo verbal inadequado',
+  tenseWarningDesc: 'O tempo verbal predominante nesta seção parece divergir do padrão esperado para este tipo de seção científica.',
+  acronymFirstUse: 'sigla sem definição inicial',
+  analysisPreparing: 'analisando texto...', analysisEngine: 'motor JS-only',
+  analysisLoadingNlp: 'carregando NLP via CDN...',
+  analysisWorker: 'worker', analysisSync: 'direto', analysisCache: 'cache', analysisTime: 'tempo',
+  nlpEngine: 'motor NLP',
+  nlpLoaded: 'cdnjs ativo',
+  nlpDisabled: 'desligado',
+  nlpFallback: 'fallback heurístico',
+  nlpUnavailable: 'CDN indisponível',
+  nlpNominalLoad: 'frases nominalmente densas',
+  nlpNominalLoadDesc: 'Frases com alta carga de substantivos/nominalizações, comum em prosa científica densa. Clique para destacar.',
+  nlpWeakVerbs: 'verbos genéricos',
+  nlpWeakVerbsDesc: 'Predicados pouco informativos ou muito genéricos; em manuscritos, prefira verbos que expressem a relação científica com precisão. Clique para destacar.',
+  nlpNounStacks: 'cadeias nominais',
+  nlpNounStacksDesc: 'Sequências longas de termos técnicos sem preposição ou pausa. Podem dificultar leitura, especialmente em títulos e Resultados. Clique para destacar.',
+  nlpVerbDiversity: 'diversidade verbal',
+  nlpVerbDiversityDesc: 'Proporção de verbos distintos entre os verbos detectados. Valores baixos indicam dependência de poucos predicados.',
+  nlpNounVerbRatio: 'razão subst./verbo',
+  nlpNounVerbRatioDesc: 'Razão entre substantivos e verbos detectados pelo motor NLP. Valores altos sugerem estilo nominal e menos orientado a ação.',
+  nlpNounDensity: 'densidade de substantivos',
+  nlpNounDensityDesc: 'Substantivos por 100 palavras. Densidade muito alta pode indicar excesso de nominalização e menor clareza de ação.',
+  nlpKeyTerms: 'termos-chave NLP',
+  nlpKeyTermsDesc: 'Candidatos a termos centrais do manuscrito extraídos por frequência e, quando disponível, pelo analisador NLP.',
+  nlpTermDrift: 'deriva terminológica',
+  nlpTermDriftDesc: 'Número de famílias de termos com variações concorrentes no mesmo texto/seção. Valores altos sugerem inconsistência de nomenclatura.',
+  nlpTopics: 'tópicos NLP',
+  nlpEntityDensity: 'densidade de entidades',
+  nlpEntityDensityDesc: 'Entidades nomeadas por 100 palavras. Excesso sem contextualização pode reduzir fluidez argumentativa.',
+  nlpEntityOverload: 'sobrecarga de entidades',
+  nlpEntityOverloadDesc: 'Sentenças com concentração alta de entidades nomeadas. Útil para revisar excesso de nomes próprios/termos sem explicação.',
+  nlpActionVerbScore: 'score de ação verbal',
+  nlpActionVerbScoreDesc: 'Percentual de verbos não genéricos em relação ao total de verbos. Quanto maior, mais concreta e orientada a ação tende a ser a redação.',
+  nlpSentencePatternRepeats: 'padrões de abertura (frases)',
+  nlpSentencePatternRepeatsDesc: 'Repetição de padrões sintáticos no início das frases (duas primeiras palavras úteis).',
+  nlpSemanticRedundancy: 'redundância semântica',
+  nlpSemanticRedundancyDesc: 'Percentual de pares adjacentes de frases com alta sobreposição lexical de conteúdo.',
+  nlpFlowScore: 'score de fluxo',
+  nlpFlowScoreDesc: 'Indicador de continuidade entre frases adjacentes usando sobreposição lexical e conectores discursivos.',
+  nlpTenseProfile: 'perfil temporal',
+  nlpTenseProfileDesc: 'Distribuição aproximada de tempos/modos verbais (passado, presente, futuro/modal) via wink-nlp.',
+  nlpWinkPosNounStacks: 'cadeias nominais POS (wink)',
+  nlpWinkPosNounStacksDesc: 'Cadeias nominais longas detectadas por POS tagging (NOUN/PROPN/ADJ) no wink-nlp. Mais robusto que regex para inglês técnico.',
+  nlpWinkReadingEase: 'facilidade de leitura (Flesch)',
+  nlpWinkReadingEaseDesc: 'Flesch Reading Ease (0–100). Valores menores indicam texto mais difícil. Artigos científicos: tipicamente 30–50.',
+  nlpWinkGradeLevel: 'nível escolar (F-K)',
+  nlpWinkGradeLevelDesc: 'Flesch-Kincaid Grade Level — nível de escolaridade necessário para compreender o texto. Artigos científicos: tipicamente 12–16.',
+  nlpWinkAvgWords: 'média pal./frase (wink)',
+  nlpWinkAvgWordsDesc: 'Média de palavras por frase calculada pelo wink-nlp.',
+  nlpWinkReadTime: 'tempo de leitura (wink)',
+  nlpWinkReadTimeDesc: 'Tempo estimado de leitura calculado pelo wink-nlp para o texto em inglês.',
+  nlpWinkComplexWords: 'palavras complexas (wink)',
+  nlpWinkComplexWordsDesc: 'Palavras complexas detectadas pelo wink-nlp. Em inglês científico, densidade muito alta pode indicar prosa excessivamente pesada. Clique para destacar.',
+  nlpWinkModalVerbs: 'verbos modais (wink)',
+  nlpWinkModalVerbsDesc: 'Modais detectados pelo wink-nlp (can, could, may, might, should, would etc.). Útil para revisar grau de cautela, especulação ou obrigação. Clique para destacar.',
+  nlpWinkPassive: 'voz passiva (wink)',
+  nlpWinkPassiveDesc: 'Frases em voz passiva detectadas via POS tagging do wink-nlp (verbo principal precedido por forma de "to be"). Clique para destacar.',
+  nlpWinkComplexDensity: 'densidade pal. complexas (wink)',
+  nlpWinkComplexDensityDesc: 'Percentual de palavras polissilábicas (≥3 sílabas) no texto, calculado pelo wink-nlp. Valores acima de 20% podem indicar prosa muito densa.',
+  nlpWinkVerbDiversity: 'diversidade verbal (wink)',
+  nlpWinkVerbDiversityDesc: 'Proporção entre lemas verbais únicos e total de verbos detectados pelo wink-nlp (POS: VERB). Valores maiores indicam vocabulário verbal mais variado.',
+  nlpWinkPronouns: 'pronomes (wink)',
+  nlpWinkPronounsDesc: 'Pronomes detectados por POS tagging (PRON). Uso elevado pode reduzir precisão referencial em trechos densos.',
+  nlpWinkPronounDensity: 'densidade de pronomes (wink)',
+  nlpWinkPronounDensityDesc: 'Pronomes por 100 tokens alfanuméricos. Valores altos podem sinalizar referência anafórica excessiva.',
+  nlpWinkAuxiliaries: 'auxiliares (wink)',
+  nlpWinkAuxiliariesDesc: 'Verbos auxiliares detectados (AUX). Concentração alta pode indicar cadeia verbal longa e estilo menos direto.',
+  nlpWinkAuxVerbRatio: 'razão AUX/VERB (wink)',
+  nlpWinkAuxVerbRatioDesc: 'Razão entre auxiliares e verbos lexicais detectados. Útil para revisar sobrecarga de perífrases.',
+  nlpWinkNumericDensity: 'densidade numérica (wink)',
+  nlpWinkNumericDensityDesc: 'Tokens numéricos por 100 tokens alfanuméricos (POS: NUM). Ajuda a avaliar concentração de dados quantitativos.',
+  nlpWinkLexicalDensity: 'densidade lexical (wink)',
+  nlpWinkLexicalDensityDesc: 'Proporção de classes abertas (NOUN/VERB/ADJ/ADV/PROPN) por 100 tokens alfanuméricos.',
+  nlpWinkProperNouns: 'nomes próprios (wink)',
+  nlpWinkProperNounsDesc: 'Termos marcados como nomes próprios (PROPN) pelo wink-nlp. Útil para revisar excesso de entidades no texto.',
+  nlpWinkProperNounDensity: 'densidade de nomes próprios (wink)',
+  nlpWinkProperNounDensityDesc: 'Nomes próprios por 100 tokens alfanuméricos (PROPN). Valores altos podem reduzir fluidez se sem contextualização.',
+  nlpTopicsDesc: 'Tópicos e entidades recorrentes extraídos pelo pacote NLP. Úteis para conferir foco terminológico do manuscrito. Clique para destacar.',
+  nlpEntities: 'entidades nomeadas',
+  nlpEntitiesDesc: 'Pessoas, organizações e lugares detectados no corpo do manuscrito. Útil para conferir nomes próprios, instituições, softwares e locais. Clique para destacar.',
+  nlpValuesDates: 'valores/datas NLP',
+  nlpValuesDatesDesc: 'Valores e datas reconhecidos pelo NLP, incluindo alguns números escritos por extenso. Use para checar evidências textuais. Clique para destacar.',
+  nlpAdverbs: 'advérbios',
+  nlpAdverbsDesc: 'Advérbios detectados pelo NLP. Excesso pode enfraquecer precisão ou criar tom menos objetivo em manuscritos. Clique para destacar.',
+  nlpContractions: 'contrações',
+  nlpContractionsDesc: "Contrações detectadas (ex.: isn't, don't). Em inglês formal, contrações devem ser evitadas em textos científicos.",
+  nlpQuestions: 'frases interrogativas',
+  nlpQuestionsDesc: 'Frases interrogativas detectadas no corpo do texto. Perguntas retóricas devem ser usadas com cautela em manuscritos científicos.',
+  readability: 'legibilidade', flesch: 'flesch', grade: 'nível', fog: 'fog',
+  complexSent: 'frases complexas', hedges: 'atenuadores', repeatedStarts: 'inícios repetidos',
+  hedgeDensity: 'dens. atenuadores',
+  undefinedAcronyms: 'siglas sem definição', emphaticPunct: 'pontuação enfática',
+  evidence: 'evidências', evidenceDensity: 'dens. evidências',
+  termVariants: 'variações de termo', cohesionGaps: 'lacunas de coesão',
+  longParagraphs: 'parágrafos longos',
+  citationGaps: 'lacunas de citação',
+  resultsCitations: 'citações em Resultados',
+  abstractCoverage: 'cobertura resumo', colloquial: 'informalidade',
+  avgSentenceDesc: 'Comprimento médio das frases (palavras). Recomendado: ≤25 para textos científicos.',
+  sentenceVarDesc: 'Variação no comprimento das frases. Maior variação indica ritmo mais dinâmico.',
+  avgParagraphDesc: 'Comprimento médio dos parágrafos em palavras.',
+  longestSentenceDesc: 'Maior frase do documento. Clique para destacar frases longas no texto.',
+  docDiversityDesc: 'Diversidade lexical: % de palavras únicas. Acima de 55% indica boa variação vocabular.',
+  passiveTotalDesc: 'Total de construções em voz passiva detectadas. Clique para destacar no texto.',
+  passiveDensityDesc: 'Voz passiva por 1000 palavras. Aceitável em Métodos; evitar nas demais seções.',
+  longSentRateDesc: 'Proporção de frases longas (acima do limite configurado). Clique para destacar no texto.',
+  topRepeatedDesc: 'Palavras com maior número de repetições no documento. Clique para destacar.',
+  repeatedTermsDesc: 'Número de termos repetidos no documento, excluindo palavras funcionais e termos ignorados. Clique para destacar as repetições nos parágrafos.',
+  connectorsDesc: 'Total de conectores detectados. Clique para destacar no texto.',
+  nominalizationDesc: 'Nominalizações: substantivos derivados de verbos/adjetivos que densificam o texto. Clique para destacar.',
+  fleschDesc: 'Flesch Reading Ease: quanto maior, mais fácil. 0–30 = muito difícil (acadêmico); 60–70 = padrão jornalístico.',
+  gradeDesc: 'Flesch-Kincaid Grade Level: equivalência ao ano escolar americano. Artigos científicos típicos ficam entre 12–16.',
+  fogDesc: 'Gunning Fog Index: estima os anos de escolaridade necessários para compreender o texto na primeira leitura. Fórmula: 0,4 × (palavras/frase + % palavras complexas). Textos acadêmicos: 12–18.',
+  complexSentDesc: 'Frases com múltiplas orações subordinadas ou alta complexidade sintática. Clique para destacar.',
+  hedgeDesc: 'Atenuadores: expressões que reduzem a força assertiva (ex.: pode, sugere, parece). Clique para destacar.',
+  undefinedAcronymsDesc: 'Siglas usadas no texto sem definição prévia entre parênteses.',
+  emphaticPunctDesc: 'Ocorrências de pontuação enfática (! ou ??) — inadequadas em textos científicos.',
+  evidenceDesc: 'Marcadores de evidência: números, percentuais, unidades de medida e citações. Clique para destacar no texto.',
+  termVariantsDesc: 'Formas divergentes de um mesmo termo — possível inconsistência terminológica.',
+  cohesionGapsDesc: 'Parágrafos sem conector de transição no início, após parágrafo de múltiplas frases. Clique para destacar.',
+  longParagraphsDesc: 'Parágrafos acima do limite configurado de palavras. Clique para destacar.',
+  citationGapsDesc: 'Parágrafos em Introdução/Discussão sem marcador de citação detectado. Clique para destacar.',
+  resultsCitationsDesc: 'Parágrafos de Resultados com citação bibliográfica detectada. Clique para destacar.',
+  abstractCoverageDesc: 'Presença dos elementos esperados no Resumo: objetivo, método, resultado, conclusão.',
+  colloquialDesc: 'Termos informais ou coloquiais detectados — evitar em textos científicos. Clique para destacar.',
+  repeatedStartsDesc: 'Frases consecutivas que iniciam com a mesma palavra ou expressão. Clique para destacar.',
+  sectionScoreDesc: 'Score médio de complexidade das seções (0–100). Valores altos indicam seções mais densas.',
+  noVerbDesc: 'Frases sem verbo principal identificável. Clique para destacar no texto.',
+  connectorAddDesc: 'Conectores aditivos (e, além disso, também…). Clique para destacar.',
+  connectorContrastDesc: 'Conectores de contraste (mas, porém, contudo…). Clique para destacar.',
+  connectorCauseDesc: 'Conectores de causa/efeito (porque, pois, portanto…). Clique para destacar.',
+  connectorConclusionDesc: 'Conectores de conclusão (logo, assim, portanto…). Clique para destacar.',
+  connectorTimeDesc: 'Conectores temporais (quando, depois, antes…). Clique para destacar.',
+  pronounAmbig: 'pronomes ambíguos',
+  pronounAmbigDesc: 'Frases iniciadas com pronomes demonstrativos/pessoais sem antecedente claro (isso, este, eles…). Clique para destacar.',
+  modalVerbs: 'verbos modais',
+  modalVerbsDesc: 'Verbos modais (pode, deve, seria…). Excesso em Resultados indica falta de assertividade. Clique para destacar.',
+  firstPerson: 'primeira pessoa',
+  firstPersonDesc: 'Uso de primeira pessoa (eu, nós, nossa…). Verifique as normas do periódico. Clique para destacar.',
+  sectionBalance: 'balanço de seções',
+  sectionBalanceDesc: 'Variação (CV) no comprimento das seções. Seções muito curtas ou longas em relação ao total são sinalizadas.',
+  conceptCoverage: 'cobertura conceitual',
+  conceptCoverageDesc: 'Cobertura de elementos fundamentais esperados por seção (heurística conservadora).',
+  conceptMissing: 'lacunas conceituais',
+  conceptMissingDesc: 'Total de itens essenciais ausentes nas seções avaliadas.',
+  conceptWeakSections: 'seções com lacunas',
+  conceptWeakSectionsDesc: 'Seções com baixa cobertura conceitual (heurística textual).',
+  conceptGap: 'lacuna de conhecimento',
+  conceptObjective: 'objetivo/hipótese',
+  conceptSignificance: 'relevância/impacto',
+  conceptDesign: 'desenho e amostra',
+  conceptReproducibility: 'reprodutibilidade/análise',
+  conceptQuantResult: 'resultado quantitativo',
+  conceptInterpretation: 'interpretação dos achados',
+  conceptLimitations: 'limitações',
+  conceptImplications: 'implicações/próximos passos',
+  paraOpeningRepeat: 'aberturas de ¶ repetidas',
+  paraOpeningRepeatDesc: 'Parágrafos que iniciam com a mesma palavra — indicativo de monotonia estrutural.',
+  citationSentStart: 'citações no início',
+  citationSentStartDesc: 'Frases que iniciam diretamente com uma citação — má prática editorial. Clique para destacar.',
+  citationSentEnd: 'citações no fim',
+  citationSentEndDesc: 'Frases que terminam com citação antes de concluir a ideia própria.',
+  abstractWordCount: 'palavras no resumo',
+  abstractWordCountDesc: 'Contagem de palavras no Resumo/Abstract. Faixa típica: 150–300 palavras.',
+  unitConsistency: 'unidades inconsistentes',
+  unitConsistencyDesc: 'Diferentes formas de escrever a mesma unidade de medida no documento.',
+  evidenceCited: 'evidências citadas',
+  evidenceCitedDesc: 'Valores numéricos e citações em frases com referência bibliográfica próxima.',
+  evidenceHardcoded: 'evidências sem citação',
+  evidenceHardcodedDesc: 'Valores numéricos em frases sem referência bibliográfica próxima. Considere citar a fonte. Clique para destacar.',
+  evidenceParameterized: 'evidências parametrizadas',
+  evidenceParameterizedDesc: 'Valores numéricos que correspondem a variáveis definidas em _variables.yml.',
+  evidenceUnparameterized: 'evidências não parametrizadas',
+  evidenceUnparameterizedDesc: 'Valores numéricos não vinculados a nenhuma variável em _variables.yml — considere parametrizá-los para facilitar atualizações.',
+  variableCount: 'variáveis definidas',
+  variableCountDesc: 'Número de variáveis escalares definidas em _variables.yml.',
+  groupSentences: 'Frases',
+  groupParagraphs: 'Parágrafos & Seções',
+  groupReadability: 'Legibilidade',
+  groupVocabulary: 'Vocabulário',
+  groupVoice: 'Voz & Tom',
+  groupConnectors: 'Conectores',
+  groupCitations: 'Citações & Referências',
+  groupEvidence: 'Evidências',
+  groupNlp: 'NLP científico',
+  groupAbstract: 'Resumo',
+  groupSearchSelection: 'Busca & Seleção',
+  italicText: 'itálico',
+  italicTextDesc: 'Elementos em itálico no manuscrito. Clique para destacar.',
+  regexSearch: 'busca regex',
+  regexSearchDesc: 'Informe uma regex para destacar ocorrências no texto.',
+  regexPlaceholder: 'regex (ex.: gene[s]?|p-valor)',
+  regexApply: 'marcar',
+  regexClear: 'limpar',
+  regexMatches: 'ocorrências',
+  regexInvalid: 'regex inválida',
+  referencesUsed: 'referências usadas',
+  referencesUsedDesc: 'Entradas do ref.bib citadas no manuscrito.',
+  citationsTotal: 'citações',
+  citationsTotalDesc: 'Marcadores de citação detectados no texto.',
+  doiValidation: 'validação DOI',
+  doiValidationDesc: 'Entradas DOI validadas via CrossRef (ok / total). Passe o mouse sobre os links DOI nas Referências para ver os detalhes por campo.',
+  figuresTotal: 'figuras',
+  figuresTotalDesc: 'Quantidade total de figuras com identificador fig- no documento.',
+  figureCrossRefs: 'cross-ref de figuras',
+  figureCrossRefsDesc: 'Cobertura de referências cruzadas para figuras (referenciadas/total).',
+  figureRefOrder: 'ordem refs figuras break',
+  figureRefOrderDesc: 'Quantidade de quebras de ordem nas referências de figuras (ex.: Figura 2 citada antes da Figura 1).',
+  tablesTotal: 'tabelas',
+  tablesTotalDesc: 'Quantidade total de tabelas com identificador tbl- no documento.',
+  tableCrossRefs: 'cross-ref de tabelas',
+  tableCrossRefsDesc: 'Cobertura de referências cruzadas para tabelas (referenciadas/total).',
+  tableRefOrder: 'ordem refs tabelas break',
+  tableRefOrderDesc: 'Quantidade de quebras de ordem nas referências de tabelas (ex.: Tabela 2 citada antes da Tabela 1).',
+  citations: 'citações',
+  noCitationsIntroDiscussion: 'Introdução/Discussão sem citação neste parágrafo.',
+  resultsCitationDesc: 'Resultados com citação: verifique se é realmente necessário.',
+};
 
-  var L = {
-    pt: {
-      wSuffix: 'p', sent: 'frase', sentP: 'frases',
-      diversity: 'diversidade', longSent: '🟡 frase longa',
-      passive: 'voz passiva', repeated: 'repetidas:', cross: 'recorrente na seção:',
-      readTime: 'min de leitura', words: 'palavras', parag: 'parágrafo', paragP: 'parágrafos',
-      alert: 'alerta', alertP: 'alertas', observation: 'observação', observationP: 'observações',
-      hideBtn: 'ocultar anotações', showBtn: 'mostrar anotações',
-      alertsOnlyBtn: 'só alertas', allNotesBtn: 'todas as notas',
-      compactBtn: 'compacto', fullBtn: 'completo', exportBtn: 'exportar relatório',
-      reviewBtn: 'revisão final', reviewOffBtn: 'revisão final: off',
-      rhythmTitle: 'ritmo das frases (comprimento relativo de cada frase)',
-      toggleTitle: 'Alternar anotações de escrita',
-      alertsOnlyTitle: 'Mostrar somente parágrafos com alertas',
-      compactTitle: 'Alternar painel geral compacto',
-      exportTitle: 'Exportar relatório Markdown das métricas',
-      reviewTitle: 'Mostrar somente pontos críticos para revisão final',
-      avgSentence: 'frase média', sentenceVar: 'var. frases',
-      avgParagraph: 'parágrafo médio', longestSentence: 'maior frase',
-      docDiversity: 'diversidade', passiveTotal: 'passivas',
-      passiveDensity: 'dens. passiva', longSentenceRate: 'frases longas',
-      topRepeated: 'repetições globais', repeatedTerms: 'repetições',
-      connectors: 'conectores', nominalization: 'nominalizações',
-      connectorAdd: 'conectores aditivos', connectorContrast: 'conectores de contraste',
-      connectorCause: 'conectores de causa', connectorConclusion: 'conectores de conclusão',
-      connectorTime: 'conectores temporais',
-      ambiguityStrict: 'ambiguidade: estrito',
-      ambiguityBalanced: 'ambiguidade: balanceado',
-      ambiguityLenient: 'ambiguidade: tolerante',
-      sectionScore: 'score seção', goalIssues: 'metas',
-      noVerb: 'sem verbo claro', sectionMap: 'mapa de seções',
-      rhythm: 'ritmo por seção', denseSections: 'seções densas',
-      passiveExpected: 'passiva concentrada onde é esperada',
-      passiveSpread: 'passiva espalhada fora de métodos',
-      noDenseSections: 'sem seção muito densa',
-      reportTitle: 'Relatório de escrita', alertReasons: 'motivos do alerta',
-      reasonParaLong: 'parágrafo longo', reasonSentLong: 'frase longa',
-      reasonLexLow: 'diversidade lexical baixa', reasonRepeat: 'repetição forte',
-      reasonPassive: 'muita voz passiva',
-      reasonHedge: 'atenuadores excessivos',
-      reasonWordy: 'prolixidade',
-      reasonFewCitations: 'poucas citações na seção',
-      reasonResultsCitation: 'citação em Resultados',
-      wordyPhrases: 'expressões prolixas',
-      wordyPhrasesDesc: 'Expressões que podem ser simplificadas para maior clareza.',
-      tenseWarning: 'tempo verbal inadequado',
-      tenseWarningDesc: 'O tempo verbal predominante nesta seção parece divergir do padrão esperado para este tipo de seção científica.',
-      acronymFirstUse: 'sigla sem definição inicial',
-      analysisPreparing: 'analisando texto...', analysisEngine: 'motor JS-only',
-      analysisLoadingNlp: 'carregando NLP via CDN...',
-      analysisWorker: 'worker', analysisSync: 'direto', analysisCache: 'cache', analysisTime: 'tempo',
-      nlpEngine: 'motor NLP',
-      nlpLoaded: 'cdnjs ativo',
-      nlpDisabled: 'desligado',
-      nlpFallback: 'fallback heurístico',
-      nlpUnavailable: 'CDN indisponível',
-      nlpNominalLoad: 'frases nominalmente densas',
-      nlpNominalLoadDesc: 'Frases com alta carga de substantivos/nominalizações, comum em prosa científica densa. Clique para destacar.',
-      nlpWeakVerbs: 'verbos genéricos',
-      nlpWeakVerbsDesc: 'Predicados pouco informativos ou muito genéricos; em manuscritos, prefira verbos que expressem a relação científica com precisão. Clique para destacar.',
-      nlpNounStacks: 'cadeias nominais',
-      nlpNounStacksDesc: 'Sequências longas de termos técnicos sem preposição ou pausa. Podem dificultar leitura, especialmente em títulos e Resultados. Clique para destacar.',
-      nlpVerbDiversity: 'diversidade verbal',
-      nlpVerbDiversityDesc: 'Proporção de verbos distintos entre os verbos detectados. Valores baixos indicam dependência de poucos predicados.',
-      nlpNounVerbRatio: 'razão subst./verbo',
-      nlpNounVerbRatioDesc: 'Razão entre substantivos e verbos detectados pelo motor NLP. Valores altos sugerem estilo nominal e menos orientado a ação.',
-      nlpNounDensity: 'densidade de substantivos',
-      nlpNounDensityDesc: 'Substantivos por 100 palavras. Densidade muito alta pode indicar excesso de nominalização e menor clareza de ação.',
-      nlpKeyTerms: 'termos-chave NLP',
-      nlpKeyTermsDesc: 'Candidatos a termos centrais do manuscrito extraídos por frequência e, quando disponível, pelo analisador NLP.',
-      nlpTermDrift: 'deriva terminológica',
-      nlpTermDriftDesc: 'Número de famílias de termos com variações concorrentes no mesmo texto/seção. Valores altos sugerem inconsistência de nomenclatura.',
-      nlpTopics: 'tópicos NLP',
-      nlpEntityDensity: 'densidade de entidades',
-      nlpEntityDensityDesc: 'Entidades nomeadas por 100 palavras. Excesso sem contextualização pode reduzir fluidez argumentativa.',
-      nlpEntityOverload: 'sobrecarga de entidades',
-      nlpEntityOverloadDesc: 'Sentenças com concentração alta de entidades nomeadas. Útil para revisar excesso de nomes próprios/termos sem explicação.',
-      nlpActionVerbScore: 'score de ação verbal',
-      nlpActionVerbScoreDesc: 'Percentual de verbos não genéricos em relação ao total de verbos. Quanto maior, mais concreta e orientada a ação tende a ser a redação.',
-      nlpSentencePatternRepeats: 'padrões de abertura (frases)',
-      nlpSentencePatternRepeatsDesc: 'Repetição de padrões sintáticos no início das frases (duas primeiras palavras úteis).',
-      nlpSemanticRedundancy: 'redundância semântica',
-      nlpSemanticRedundancyDesc: 'Percentual de pares adjacentes de frases com alta sobreposição lexical de conteúdo.',
-      nlpFlowScore: 'score de fluxo',
-      nlpFlowScoreDesc: 'Indicador de continuidade entre frases adjacentes usando sobreposição lexical e conectores discursivos.',
-      nlpTenseProfile: 'perfil temporal',
-      nlpTenseProfileDesc: 'Distribuição aproximada de tempos/modos verbais (passado, presente, futuro/modal) via wink-nlp.',
-      nlpWinkPosNounStacks: 'cadeias nominais POS (wink)',
-      nlpWinkPosNounStacksDesc: 'Cadeias nominais longas detectadas por POS tagging (NOUN/PROPN/ADJ) no wink-nlp. Mais robusto que regex para inglês técnico.',
-      nlpWinkReadingEase: 'facilidade de leitura (Flesch)',
-      nlpWinkReadingEaseDesc: 'Flesch Reading Ease (0–100). Valores menores indicam texto mais difícil. Artigos científicos: tipicamente 30–50.',
-      nlpWinkGradeLevel: 'nível escolar (F-K)',
-      nlpWinkGradeLevelDesc: 'Flesch-Kincaid Grade Level — nível de escolaridade necessário para compreender o texto. Artigos científicos: tipicamente 12–16.',
-      nlpWinkAvgWords: 'média pal./frase (wink)',
-      nlpWinkAvgWordsDesc: 'Média de palavras por frase calculada pelo wink-nlp.',
-      nlpWinkReadTime: 'tempo de leitura (wink)',
-      nlpWinkReadTimeDesc: 'Tempo estimado de leitura calculado pelo wink-nlp para o texto em inglês.',
-      nlpWinkComplexWords: 'palavras complexas (wink)',
-      nlpWinkComplexWordsDesc: 'Palavras complexas detectadas pelo wink-nlp. Em inglês científico, densidade muito alta pode indicar prosa excessivamente pesada. Clique para destacar.',
-      nlpWinkModalVerbs: 'verbos modais (wink)',
-      nlpWinkModalVerbsDesc: 'Modais detectados pelo wink-nlp (can, could, may, might, should, would etc.). Útil para revisar grau de cautela, especulação ou obrigação. Clique para destacar.',
-      nlpWinkPassive: 'voz passiva (wink)',
-      nlpWinkPassiveDesc: 'Frases em voz passiva detectadas via POS tagging do wink-nlp (verbo principal precedido por forma de "to be"). Clique para destacar.',
+// src/lang/en.js — English UI strings
+// Built into ../scientific-writing.js by build/build-scientific-writing.mjs.
+var L_EN = {
+  wSuffix: 'w', sent: 'sentence', sentP: 'sentences',
+  diversity: 'diversity', longSent: '🟡 long sentence',
+  passive: 'passive voice', repeated: 'repeated:', cross: 'recurrent in section:',
+  readTime: 'min read', words: 'words', parag: 'paragraph', paragP: 'paragraphs',
+  alert: 'alert', alertP: 'alerts', observation: 'observation', observationP: 'observations',
+  hideBtn: 'hide notes', showBtn: 'show notes',
+  alertsOnlyBtn: 'alerts only', allNotesBtn: 'all notes',
+  compactBtn: 'compact', fullBtn: 'full', exportBtn: 'export report',
+  reviewBtn: 'final review', reviewOffBtn: 'final review: off',
+  rhythmTitle: 'sentence rhythm (relative length per sentence)',
+  toggleTitle: 'Toggle writing annotations',
+  alertsOnlyTitle: 'Show only paragraphs with alerts',
+  compactTitle: 'Toggle compact document panel',
+  exportTitle: 'Export a Markdown report with writing metrics',
+  reviewTitle: 'Show only critical points for final revision',
+  avgSentence: 'avg sentence', sentenceVar: 'sentence var.',
+  avgParagraph: 'avg paragraph', longestSentence: 'longest sentence',
+  docDiversity: 'diversity', passiveTotal: 'passives',
+  passiveDensity: 'passive dens.', longSentenceRate: 'long sentences',
+  topRepeated: 'global repeats', repeatedTerms: 'repetitions',
+  connectors: 'connectors', nominalization: 'nominalizations',
+  connectorAdd: 'additive connectors', connectorContrast: 'contrast connectors',
+  connectorCause: 'causal connectors', connectorConclusion: 'conclusion connectors',
+  connectorTime: 'temporal connectors',
+  ambiguityStrict: 'ambiguity: strict',
+  ambiguityBalanced: 'ambiguity: balanced',
+  ambiguityLenient: 'ambiguity: lenient',
+  sectionScore: 'section score', goalIssues: 'goals',
+  noVerb: 'no clear verb', sectionMap: 'section map',
+  rhythm: 'rhythm by section', denseSections: 'dense sections',
+  passiveExpected: 'passive voice concentrated where expected',
+  passiveSpread: 'passive voice spread beyond methods',
+  noDenseSections: 'no very dense section',
+  reportTitle: 'Writing report', alertReasons: 'alert reasons',
+  reasonParaLong: 'long paragraph', reasonSentLong: 'long sentence',
+  reasonLexLow: 'low lexical diversity', reasonRepeat: 'strong repetition',
+  reasonPassive: 'high passive voice',
+  reasonHedge: 'excessive hedging',
+  reasonFewCitations: 'few citations in section',
+  reasonResultsCitation: 'citation in Results',
+  analysisPreparing: 'analyzing text...', analysisEngine: 'JS-only engine',
+  analysisLoadingNlp: 'loading NLP from CDN...',
+  analysisWorker: 'worker', analysisSync: 'direct', analysisCache: 'cache', analysisTime: 'time',
+  nlpEngine: 'NLP engine',
+  nlpLoaded: 'cdnjs active',
+  nlpDisabled: 'disabled',
+  nlpFallback: 'heuristic fallback',
+  nlpUnavailable: 'CDN unavailable',
+  nlpNominalLoad: 'noun-dense sentences',
+  nlpNominalLoadDesc: 'Sentences with high noun/nominalization load, a common source of dense scientific prose. Click to highlight.',
+  nlpWeakVerbs: 'generic verbs',
+  nlpWeakVerbsDesc: 'Low-information or overly generic predicates; in manuscripts, prefer verbs that express the scientific relationship precisely. Click to highlight.',
+  nlpNounStacks: 'noun stacks',
+  nlpNounStacksDesc: 'Long technical term chains without a preposition or pause. They can reduce readability, especially in titles and Results. Click to highlight.',
+  nlpVerbDiversity: 'verb diversity',
+  nlpVerbDiversityDesc: 'Share of distinct verbs among detected verbs. Low values indicate reliance on a small predicate set.',
+  nlpNounVerbRatio: 'noun/verb ratio',
+  nlpNounVerbRatioDesc: 'Ratio between nouns and verbs detected by the NLP engine. High values suggest a nominal, less action-oriented style.',
+  nlpNounDensity: 'noun density',
+  nlpNounDensityDesc: 'Nouns per 100 words. Very high density can indicate over-nominalized prose and less explicit action.',
+  nlpKeyTerms: 'NLP key terms',
+  nlpKeyTermsDesc: 'Candidate central manuscript terms extracted by frequency and, when available, by the NLP analyzer.',
+  nlpTermDrift: 'term drift',
+  nlpTermDriftDesc: 'Number of term families with competing surface forms in the same text/section. High values suggest naming inconsistency.',
+  nlpTopics: 'NLP topics',
+  nlpEntityDensity: 'entity density',
+  nlpEntityDensityDesc: 'Named entities per 100 words. High density without context may hurt readability.',
+  nlpEntityOverload: 'entity overload',
+  nlpEntityOverloadDesc: 'Sentences with high concentration of named entities. Useful to review overloaded proper names/terms.',
+  nlpActionVerbScore: 'action verb score',
+  nlpActionVerbScoreDesc: 'Share of non-generic verbs over total verbs. Higher values indicate more concrete, action-oriented writing.',
+  nlpSentencePatternRepeats: 'sentence opening patterns',
+  nlpSentencePatternRepeatsDesc: 'Repeated syntactic opening patterns across sentences (first two content words).',
+  nlpSemanticRedundancy: 'semantic redundancy',
+  nlpSemanticRedundancyDesc: 'Percentage of adjacent sentence pairs with high content-word overlap.',
+  nlpFlowScore: 'flow score',
+  nlpFlowScoreDesc: 'Continuity indicator between adjacent sentences using lexical overlap and discourse connectors.',
+  nlpTenseProfile: 'tense profile',
+  nlpTenseProfileDesc: 'Approximate distribution of verbal tense/mood (past, present, future/modal) via wink-nlp.',
+  nlpWinkPosNounStacks: 'POS noun stacks (wink)',
+  nlpWinkPosNounStacksDesc: 'Long noun stacks detected via POS tagging (NOUN/PROPN/ADJ) in wink-nlp. More robust than regex for technical English.',
+  nlpWinkReadingEase: 'reading ease (Flesch)',
+  nlpWinkReadingEaseDesc: 'Flesch Reading Ease Score (0–100). Lower values indicate harder text. Typical scientific range: 30–50.',
+  nlpWinkGradeLevel: 'grade level (F-K)',
+  nlpWinkGradeLevelDesc: 'Flesch-Kincaid Grade Level — education level needed to understand the text. Scientific articles typically score 12–16.',
+  nlpWinkAvgWords: 'avg words/sentence (wink)',
+  nlpWinkAvgWordsDesc: 'Average number of words per sentence computed by wink-nlp.',
+  nlpWinkReadTime: 'reading time (wink)',
+  nlpWinkReadTimeDesc: 'Estimated reading time computed by wink-nlp for the English text.',
+  nlpWinkComplexWords: 'complex words (wink)',
+  nlpWinkComplexWordsDesc: 'Complex words detected by wink-nlp. In scientific English, very high density can signal overly heavy prose. Click to highlight.',
+  nlpWinkModalVerbs: 'modal verbs (wink)',
+  nlpWinkModalVerbsDesc: 'Modals detected by wink-nlp (can, could, may, might, should, would, etc.). Useful for reviewing caution, speculation, or obligation. Click to highlight.',
+  nlpWinkPassive: 'passive voice (wink)',
+  nlpWinkPassiveDesc: 'Passive-voice sentences detected via wink-nlp POS tagging (main verb preceded by a form of "to be"). Click to highlight.',
+  nlpWinkComplexDensity: 'complex word density (wink)',
+  nlpWinkComplexDensityDesc: 'Percentage of polysyllabic words (≥3 syllables) in the text, computed by wink-nlp. Values above 20% may indicate very dense prose.',
+  nlpWinkVerbDiversity: 'verb diversity (wink)',
+  nlpWinkVerbDiversityDesc: 'Ratio of unique verb lemmas to total verbs detected by wink-nlp (POS: VERB). Higher values indicate more varied verb vocabulary.',
+  nlpWinkPronouns: 'pronouns (wink)',
+  nlpWinkPronounsDesc: 'Pronouns detected via POS tagging (PRON). Excessive usage can reduce referential precision in dense passages.',
+  nlpWinkPronounDensity: 'pronoun density (wink)',
+  nlpWinkPronounDensityDesc: 'Pronouns per 100 alphanumeric tokens. High values may indicate over-reliance on anaphoric references.',
+  nlpWinkAuxiliaries: 'auxiliaries (wink)',
+  nlpWinkAuxiliariesDesc: 'Auxiliary verbs detected (AUX). High concentration can indicate long verbal chains and less direct style.',
+  nlpWinkAuxVerbRatio: 'AUX/VERB ratio (wink)',
+  nlpWinkAuxVerbRatioDesc: 'Ratio between auxiliaries and lexical verbs. Useful for reviewing periphrastic overload.',
+  nlpWinkNumericDensity: 'numeric density (wink)',
+  nlpWinkNumericDensityDesc: 'Numeric tokens per 100 alphanumeric tokens (POS: NUM). Helps assess concentration of quantitative evidence.',
+  nlpWinkLexicalDensity: 'lexical density (wink)',
+  nlpWinkLexicalDensityDesc: 'Share of open-class tokens (NOUN/VERB/ADJ/ADV/PROPN) per 100 alphanumeric tokens.',
+  nlpWinkProperNouns: 'proper nouns (wink)',
+  nlpWinkProperNounsDesc: 'Terms tagged as proper nouns (PROPN) by wink-nlp. Useful for reviewing entity concentration.',
+  nlpWinkProperNounDensity: 'proper noun density (wink)',
+  nlpWinkProperNounDensityDesc: 'Proper nouns per 100 alphanumeric tokens (PROPN). High values may hurt readability without context.',
+  nlpTopicsDesc: "Recurring topics and entities extracted by the NLP package. Useful for checking the manuscript’s terminological focus. Click to highlight.",
+  nlpEntities: 'named entities',
+  nlpEntitiesDesc: 'People, organizations, and places detected in the manuscript body. Useful for checking proper names, institutions, software, and locations. Click to highlight.',
+  nlpValuesDates: 'NLP values/dates',
+  nlpValuesDatesDesc: 'Values and dates recognized by NLP, including some numbers written as words. Use to check textual evidence. Click to highlight.',
+  nlpAdverbs: 'adverbs',
+  nlpAdverbsDesc: 'Adverbs detected by NLP. Excess can weaken precision or create a less objective manuscript tone. Click to highlight.',
+  nlpContractions: 'contractions',
+  nlpContractionsDesc: "Contractions detected (e.g., isn't, don't). In formal scientific writing, contractions should be avoided.",
+  nlpQuestions: 'interrogative sentences',
+  nlpQuestionsDesc: 'Interrogative sentences detected in the body text. Rhetorical questions should be used sparingly in scientific manuscripts.',
+  readability: 'readability', flesch: 'flesch', grade: 'grade', fog: 'fog',
+  complexSent: 'complex sentences', hedges: 'hedges', repeatedStarts: 'repeated starts',
+  hedgeDensity: 'hedge density',
+  undefinedAcronyms: 'undefined acronyms', emphaticPunct: 'emphatic punctuation',
+  evidence: 'evidence', evidenceDensity: 'evidence density',
+  termVariants: 'term variants', cohesionGaps: 'cohesion gaps',
+  longParagraphs: 'long paragraphs',
+  citationGaps: 'citation gaps',
+  resultsCitations: 'Results citations',
+  abstractCoverage: 'abstract coverage', colloquial: 'colloquial tone',
+  avgSentenceDesc: 'Average sentence length (words). Recommended: ≤25 for scientific texts.',
+  sentenceVarDesc: 'Variation in sentence length. Greater variation suggests a more dynamic rhythm.',
+  avgParagraphDesc: 'Average paragraph length in words.',
+  longestSentenceDesc: 'Longest sentence in the document. Click to highlight long sentences in text.',
+  docDiversityDesc: 'Lexical diversity: % of unique words. Above 55% indicates good vocabulary variation.',
+  passiveTotalDesc: 'Total passive voice constructions detected. Click to highlight in text.',
+  passiveDensityDesc: 'Passive voice per 1000 words. Acceptable in Methods; avoid elsewhere.',
+  longSentRateDesc: 'Proportion of long sentences (above threshold). Click to highlight in text.',
+  topRepeatedDesc: 'Most repeated words in the document. Click to highlight.',
+  repeatedTermsDesc: 'Number of repeated terms in the document, excluding function words and ignored terms. Click to highlight repetitions in paragraphs.',
+  connectorsDesc: 'Total connectors detected. Click to highlight in text.',
+  nominalizationDesc: 'Nominalizations: nouns derived from verbs/adjectives that can densify prose. Click to highlight.',
+  fleschDesc: 'Flesch Reading Ease: higher = easier. 0–30 = very difficult (academic); 60–70 = standard.',
+  gradeDesc: 'Flesch-Kincaid Grade Level: U.S. school year equivalent. Academic papers typically score 12–16.',
+  fogDesc: 'Gunning Fog Index: estimates years of schooling needed to understand the text on first reading. Formula: 0.4 × (words/sentence + % complex words). Academic texts: 12–18.',
+  complexSentDesc: 'Sentences with multiple subordinate clauses or high syntactic complexity. Click to highlight.',
+  hedgeDesc: 'Hedges: expressions that weaken assertive force (e.g., may, suggests, appears). Click to highlight.',
+  undefinedAcronymsDesc: 'Acronyms used in the text without a prior parenthetical definition.',
+  emphaticPunctDesc: 'Emphatic punctuation occurrences (! or ??) — inappropriate in scientific texts.',
+  evidenceDesc: 'Evidence markers: numbers, percentages, measurement units, and citations. Click to highlight in text.',
+  termVariantsDesc: 'Divergent forms of the same term — possible terminological inconsistency.',
+  cohesionGapsDesc: 'Paragraphs without a transition connector at the start, after a multi-sentence paragraph. Click to highlight.',
+  longParagraphsDesc: 'Paragraphs above the configured word limit. Click to highlight.',
+  citationGapsDesc: 'Introduction/Discussion paragraphs without a detected citation marker. Click to highlight.',
+  resultsCitationsDesc: 'Results paragraphs with a detected bibliographic citation. Click to highlight.',
+  abstractCoverageDesc: 'Presence of expected elements in the Abstract: objective, method, result, conclusion.',
+  colloquialDesc: 'Informal or colloquial terms detected — avoid in scientific writing. Click to highlight.',
+  repeatedStartsDesc: 'Consecutive sentences beginning with the same word or phrase. Click to highlight.',
+  sectionScoreDesc: 'Average section complexity score (0–100). Higher values indicate denser sections.',
+  noVerbDesc: 'Sentences with no identifiable main verb. Click to highlight in text.',
+  connectorAddDesc: 'Additive connectors (and, furthermore, also…). Click to highlight.',
+  connectorContrastDesc: 'Contrast connectors (but, however, yet…). Click to highlight.',
+  connectorCauseDesc: 'Causal connectors (because, therefore, since…). Click to highlight.',
+  connectorConclusionDesc: 'Conclusion connectors (thus, hence, therefore…). Click to highlight.',
+  connectorTimeDesc: 'Temporal connectors (when, after, before…). Click to highlight.',
+  pronounAmbig: 'ambiguous pronouns',
+  pronounAmbigDesc: 'Sentences starting with demonstrative/personal pronouns without a clear antecedent (it, this, they…). Click to highlight.',
+  modalVerbs: 'modal verbs',
+  modalVerbsDesc: 'Modal verbs (may, might, would, should…). Overuse in Results signals lack of assertiveness. Click to highlight.',
+  firstPerson: 'first person',
+  firstPersonDesc: 'First-person usage (I, we, our…). Check your journal’s style guide. Click to highlight.',
+  sectionBalance: 'section balance',
+  sectionBalanceDesc: 'Coefficient of variation (CV) of section lengths. Flags sections disproportionately short or long.',
+  conceptCoverage: 'concept coverage',
+  conceptCoverageDesc: 'Coverage of core high-impact elements expected per section (conservative heuristic).',
+  conceptMissing: 'concept gaps',
+  conceptMissingDesc: 'Total missing core items across evaluated sections.',
+  conceptWeakSections: 'sections with gaps',
+  conceptWeakSectionsDesc: 'Sections with low concept coverage (textual heuristic).',
+  conceptGap: 'knowledge gap',
+  conceptObjective: 'objective/hypothesis',
+  conceptSignificance: 'significance/impact',
+  conceptDesign: 'design and sample',
+  conceptReproducibility: 'reproducibility/analysis',
+  conceptQuantResult: 'quantitative result',
+  conceptInterpretation: 'interpretation of findings',
+  conceptLimitations: 'limitations',
+  conceptImplications: 'implications/next steps',
+  paraOpeningRepeat: 'repeated ¶ openings',
+  paraOpeningRepeatDesc: 'Paragraphs starting with the same word — signals structural monotony.',
+  citationSentStart: 'citations at start',
+  citationSentStartDesc: 'Sentences opening directly with a citation — poor editorial practice. Click to highlight.',
+  citationSentEnd: 'citations at end',
+  citationSentEndDesc: 'Sentences ending with a citation before completing the author’s own idea.',
+  abstractWordCount: 'abstract words',
+  abstractWordCountDesc: 'Word count of the Abstract. Typical range: 150–300 words.',
+  unitConsistency: 'unit inconsistency',
+  unitConsistencyDesc: 'Different notations for the same measurement unit detected in the document.',
+  evidenceCited: 'cited evidence',
+  evidenceCitedDesc: 'Numeric values and citations in sentences with a nearby bibliographic reference.',
+  evidenceHardcoded: 'uncited evidence',
+  evidenceHardcodedDesc: 'Numeric values in sentences without a nearby bibliographic reference. Consider citing the source. Click to highlight.',
+  evidenceParameterized: 'parameterized evidence',
+  evidenceParameterizedDesc: 'Numeric values that match a variable defined in _variables.yml.',
+  evidenceUnparameterized: 'unparameterized evidence',
+  evidenceUnparameterizedDesc: 'Numeric values not linked to any variable in _variables.yml — consider parameterizing them for easier updates.',
+  variableCount: 'defined variables',
+  variableCountDesc: 'Number of scalar variables defined in _variables.yml.',
+  groupSentences: 'Sentences',
+  groupParagraphs: 'Paragraphs & Sections',
+  groupReadability: 'Readability',
+  groupVocabulary: 'Vocabulary',
+  groupVoice: 'Voice & Tone',
+  groupConnectors: 'Connectors',
+  groupCitations: 'Citations & References',
+  groupEvidence: 'Evidence',
+  groupNlp: 'Scientific NLP',
+  groupAbstract: 'Abstract',
+  groupSearchSelection: 'Search & Select',
+  italicText: 'italic',
+  italicTextDesc: 'Italicized elements in the manuscript. Click to highlight.',
+  regexSearch: 'regex search',
+  regexSearchDesc: 'Enter a regex to highlight matches in text.',
+  regexPlaceholder: 'regex (e.g.: gene[s]?|p-value)',
+  regexApply: 'highlight',
+  regexClear: 'clear',
+  regexMatches: 'matches',
+  regexInvalid: 'invalid regex',
+  referencesUsed: 'references used',
+  referencesUsedDesc: 'ref.bib entries cited in the manuscript.',
+  citationsTotal: 'citations',
+  citationsTotalDesc: 'Citation markers detected in the text.',
+  doiValidation: 'DOI validation',
+  doiValidationDesc: 'DOI entries validated against CrossRef (ok / total). Hover over DOI links in References to see field-by-field details.',
+  figuresTotal: 'figures',
+  figuresTotalDesc: 'Total number of figures with fig- identifiers in the document.',
+  figureCrossRefs: 'figure cross-refs',
+  figureCrossRefsDesc: 'Cross-reference coverage for figures (referenced/total).',
+  figureRefOrder: 'figure ref order break',
+  figureRefOrderDesc: 'Number of figure reference order breaks (e.g., Figure 2 cited before Figure 1).',
+  tablesTotal: 'tables',
+  tablesTotalDesc: 'Total number of tables with tbl- identifiers in the document.',
+  tableCrossRefs: 'table cross-refs',
+  tableCrossRefsDesc: 'Cross-reference coverage for tables (referenced/total).',
+  tableRefOrder: 'table ref order break',
+  tableRefOrderDesc: 'Number of table reference order breaks (e.g., Table 2 cited before Table 1).',
+  citations: 'citations',
+  noCitationsIntroDiscussion: 'Introduction/Discussion paragraph without citation.',
+  resultsCitationDesc: 'Results paragraph with citation: verify whether it is necessary.',
+  wordyPhrases: 'wordy phrases',
+  wordyPhrasesDesc: 'Expressions that can be simplified for greater clarity.',
+  tenseWarning: 'verb tense warning',
+  tenseWarningDesc: 'The dominant verb tense in this section appears to diverge from the expected pattern for this type of scientific section.',
+  acronymFirstUse: 'acronym without initial definition',
+};
 
-      nlpWinkComplexDensity: 'densidade pal. complexas (wink)',
-      nlpWinkComplexDensityDesc: 'Percentual de palavras polissilábicas (≥3 sílabas) no texto, calculado pelo wink-nlp. Valores acima de 20% podem indicar prosa muito densa.',
-      nlpWinkVerbDiversity: 'diversidade verbal (wink)',
-      nlpWinkVerbDiversityDesc: 'Proporção entre lemas verbais únicos e total de verbos detectados pelo wink-nlp (POS: VERB). Valores maiores indicam vocabulário verbal mais variado.',
-      nlpWinkPronouns: 'pronomes (wink)',
-      nlpWinkPronounsDesc: 'Pronomes detectados por POS tagging (PRON). Uso elevado pode reduzir precisão referencial em trechos densos.',
-      nlpWinkPronounDensity: 'densidade de pronomes (wink)',
-      nlpWinkPronounDensityDesc: 'Pronomes por 100 tokens alfanuméricos. Valores altos podem sinalizar referência anafórica excessiva.',
-      nlpWinkAuxiliaries: 'auxiliares (wink)',
-      nlpWinkAuxiliariesDesc: 'Verbos auxiliares detectados (AUX). Concentração alta pode indicar cadeia verbal longa e estilo menos direto.',
-      nlpWinkAuxVerbRatio: 'razão AUX/VERB (wink)',
-      nlpWinkAuxVerbRatioDesc: 'Razão entre auxiliares e verbos lexicais detectados. Útil para revisar sobrecarga de perífrases.',
-      nlpWinkNumericDensity: 'densidade numérica (wink)',
-      nlpWinkNumericDensityDesc: 'Tokens numéricos por 100 tokens alfanuméricos (POS: NUM). Ajuda a avaliar concentração de dados quantitativos.',
-      nlpWinkLexicalDensity: 'densidade lexical (wink)',
-      nlpWinkLexicalDensityDesc: 'Proporção de classes abertas (NOUN/VERB/ADJ/ADV/PROPN) por 100 tokens alfanuméricos.',
-      nlpWinkProperNouns: 'nomes próprios (wink)',
-      nlpWinkProperNounsDesc: 'Termos marcados como nomes próprios (PROPN) pelo wink-nlp. Útil para revisar excesso de entidades no texto.',
-      nlpWinkProperNounDensity: 'densidade de nomes próprios (wink)',
-      nlpWinkProperNounDensityDesc: 'Nomes próprios por 100 tokens alfanuméricos (PROPN). Valores altos podem reduzir fluidez se sem contextualização.',
-      nlpTopicsDesc: 'Tópicos e entidades recorrentes extraídos pelo pacote NLP. Úteis para conferir foco terminológico do manuscrito. Clique para destacar.',
-      nlpEntities: 'entidades nomeadas',
-      nlpEntitiesDesc: 'Pessoas, organizações e lugares detectados no corpo do manuscrito. Útil para conferir nomes próprios, instituições, softwares e locais. Clique para destacar.',
-      nlpValuesDates: 'valores/datas NLP',
-      nlpValuesDatesDesc: 'Valores e datas reconhecidos pelo NLP, incluindo alguns números escritos por extenso. Use para checar evidências textuais. Clique para destacar.',
-      nlpAdverbs: 'advérbios',
-      nlpAdverbsDesc: 'Advérbios detectados pelo NLP. Excesso pode enfraquecer precisão ou criar tom menos objetivo em manuscritos. Clique para destacar.',
-      nlpContractions: 'contrações',
-      nlpContractionsDesc: 'Contrações detectadas (ex.: isn\'t, don\'t). Em inglês formal, contrações devem ser evitadas em textos científicos.',
-      nlpQuestions: 'frases interrogativas',
-      nlpQuestionsDesc: 'Frases interrogativas detectadas no corpo do texto. Perguntas retóricas devem ser usadas com cautela em manuscritos científicos.',
-      readability: 'legibilidade', flesch: 'flesch', grade: 'nível', fog: 'fog',
-      complexSent: 'frases complexas', hedges: 'atenuadores', repeatedStarts: 'inícios repetidos',
-      hedgeDensity: 'dens. atenuadores',
-      undefinedAcronyms: 'siglas sem definição', emphaticPunct: 'pontuação enfática',
-      evidence: 'evidências', evidenceDensity: 'dens. evidências',
-      termVariants: 'variações de termo', cohesionGaps: 'lacunas de coesão',
-      longParagraphs: 'parágrafos longos',
-      citationGaps: 'lacunas de citação',
-      resultsCitations: 'citações em Resultados',
-      abstractCoverage: 'cobertura resumo', colloquial: 'informalidade',
-      avgSentenceDesc: 'Comprimento médio das frases (palavras). Recomendado: ≤25 para textos científicos.',
-      sentenceVarDesc: 'Variação no comprimento das frases. Maior variação indica ritmo mais dinâmico.',
-      avgParagraphDesc: 'Comprimento médio dos parágrafos em palavras.',
-      longestSentenceDesc: 'Maior frase do documento. Clique para destacar frases longas no texto.',
-      docDiversityDesc: 'Diversidade lexical: % de palavras únicas. Acima de 55% indica boa variação vocabular.',
-      passiveTotalDesc: 'Total de construções em voz passiva detectadas. Clique para destacar no texto.',
-      passiveDensityDesc: 'Voz passiva por 1000 palavras. Aceitável em Métodos; evitar nas demais seções.',
-      longSentRateDesc: 'Proporção de frases longas (acima do limite configurado). Clique para destacar no texto.',
-      topRepeatedDesc: 'Palavras com maior número de repetições no documento. Clique para destacar.',
-      repeatedTermsDesc: 'Número de termos repetidos no documento, excluindo palavras funcionais e termos ignorados. Clique para destacar as repetições nos parágrafos.',
-      connectorsDesc: 'Total de conectores detectados. Clique para destacar no texto.',
-      nominalizationDesc: 'Nominalizações: substantivos derivados de verbos/adjetivos que densificam o texto. Clique para destacar.',
-      fleschDesc: 'Flesch Reading Ease: quanto maior, mais fácil. 0–30 = muito difícil (acadêmico); 60–70 = padrão jornalístico.',
-      gradeDesc: 'Flesch-Kincaid Grade Level: equivalência ao ano escolar americano. Artigos científicos típicos ficam entre 12–16.',
-      fogDesc: 'Gunning Fog Index: estima os anos de escolaridade necessários para compreender o texto na primeira leitura. Fórmula: 0,4 × (palavras/frase + % palavras complexas). Textos acadêmicos: 12–18.',
-      complexSentDesc: 'Frases com múltiplas orações subordinadas ou alta complexidade sintática. Clique para destacar.',
-      hedgeDesc: 'Atenuadores: expressões que reduzem a força assertiva (ex.: pode, sugere, parece). Clique para destacar.',
-      undefinedAcronymsDesc: 'Siglas usadas no texto sem definição prévia entre parênteses.',
-      emphaticPunctDesc: 'Ocorrências de pontuação enfática (! ou ??) — inadequadas em textos científicos.',
-      evidenceDesc: 'Marcadores de evidência: números, percentuais, unidades de medida e citações. Clique para destacar no texto.',
-      termVariantsDesc: 'Formas divergentes de um mesmo termo — possível inconsistência terminológica.',
-      cohesionGapsDesc: 'Parágrafos sem conector de transição no início, após parágrafo de múltiplas frases. Clique para destacar.',
-      longParagraphsDesc: 'Parágrafos acima do limite configurado de palavras. Clique para destacar.',
-      citationGapsDesc: 'Parágrafos em Introdução/Discussão sem marcador de citação detectado. Clique para destacar.',
-      resultsCitationsDesc: 'Parágrafos de Resultados com citação bibliográfica detectada. Clique para destacar.',
-      abstractCoverageDesc: 'Presença dos elementos esperados no Resumo: objetivo, método, resultado, conclusão.',
-      colloquialDesc: 'Termos informais ou coloquiais detectados — evitar em textos científicos. Clique para destacar.',
-      repeatedStartsDesc: 'Frases consecutivas que iniciam com a mesma palavra ou expressão. Clique para destacar.',
-      sectionScoreDesc: 'Score médio de complexidade das seções (0–100). Valores altos indicam seções mais densas.',
-      noVerbDesc: 'Frases sem verbo principal identificável. Clique para destacar no texto.',
-      connectorAddDesc: 'Conectores aditivos (e, além disso, também…). Clique para destacar.',
-      connectorContrastDesc: 'Conectores de contraste (mas, porém, contudo…). Clique para destacar.',
-      connectorCauseDesc: 'Conectores de causa/efeito (porque, pois, portanto…). Clique para destacar.',
-      connectorConclusionDesc: 'Conectores de conclusão (logo, assim, portanto…). Clique para destacar.',
-      connectorTimeDesc: 'Conectores temporais (quando, depois, antes…). Clique para destacar.',
-      pronounAmbig: 'pronomes ambíguos',
-      pronounAmbigDesc: 'Frases iniciadas com pronomes demonstrativos/pessoais sem antecedente claro (isso, este, eles…). Clique para destacar.',
-      modalVerbs: 'verbos modais',
-      modalVerbsDesc: 'Verbos modais (pode, deve, seria…). Excesso em Resultados indica falta de assertividade. Clique para destacar.',
-      firstPerson: 'primeira pessoa',
-      firstPersonDesc: 'Uso de primeira pessoa (eu, nós, nossa…). Verifique as normas do periódico. Clique para destacar.',
-      sectionBalance: 'balanço de seções',
-      sectionBalanceDesc: 'Variação (CV) no comprimento das seções. Seções muito curtas ou longas em relação ao total são sinalizadas.',
-      conceptCoverage: 'cobertura conceitual',
-      conceptCoverageDesc: 'Cobertura de elementos fundamentais esperados por seção (heurística conservadora).',
-      conceptMissing: 'lacunas conceituais',
-      conceptMissingDesc: 'Total de itens essenciais ausentes nas seções avaliadas.',
-      conceptWeakSections: 'seções com lacunas',
-      conceptWeakSectionsDesc: 'Seções com baixa cobertura conceitual (heurística textual).',
-      conceptGap: 'lacuna de conhecimento',
-      conceptObjective: 'objetivo/hipótese',
-      conceptSignificance: 'relevância/impacto',
-      conceptDesign: 'desenho e amostra',
-      conceptReproducibility: 'reprodutibilidade/análise',
-      conceptQuantResult: 'resultado quantitativo',
-      conceptInterpretation: 'interpretação dos achados',
-      conceptLimitations: 'limitações',
-      conceptImplications: 'implicações/próximos passos',
-      paraOpeningRepeat: 'aberturas de ¶ repetidas',
-      paraOpeningRepeatDesc: 'Parágrafos que iniciam com a mesma palavra — indicativo de monotonia estrutural.',
-      citationSentStart: 'citações no início',
-      citationSentStartDesc: 'Frases que iniciam diretamente com uma citação — má prática editorial. Clique para destacar.',
-      citationSentEnd: 'citações no fim',
-      citationSentEndDesc: 'Frases que terminam com citação antes de concluir a ideia própria.',
-      abstractWordCount: 'palavras no resumo',
-      abstractWordCountDesc: 'Contagem de palavras no Resumo/Abstract. Faixa típica: 150–300 palavras.',
-      unitConsistency: 'unidades inconsistentes',
-      unitConsistencyDesc: 'Diferentes formas de escrever a mesma unidade de medida no documento.',
-      evidenceCited: 'evidências citadas',
-      evidenceCitedDesc: 'Valores numéricos e citações em frases com referência bibliográfica próxima.',
-      evidenceHardcoded: 'evidências sem citação',
-      evidenceHardcodedDesc: 'Valores numéricos em frases sem referência bibliográfica próxima. Considere citar a fonte. Clique para destacar.',
-      evidenceParameterized: 'evidências parametrizadas',
-      evidenceParameterizedDesc: 'Valores numéricos que correspondem a variáveis definidas em _variables.yml.',
-      evidenceUnparameterized: 'evidências não parametrizadas',
-      evidenceUnparameterizedDesc: 'Valores numéricos não vinculados a nenhuma variável em _variables.yml — considere parametrizá-los para facilitar atualizações.',
-      variableCount: 'variáveis definidas',
-      variableCountDesc: 'Número de variáveis escalares definidas em _variables.yml.',
-      groupSentences: 'Frases',
-      groupParagraphs: 'Parágrafos & Seções',
-      groupReadability: 'Legibilidade',
-      groupVocabulary: 'Vocabulário',
-      groupVoice: 'Voz & Tom',
-      groupConnectors: 'Conectores',
-      groupCitations: 'Citações & Referências',
-      groupEvidence: 'Evidências',
-      groupNlp: 'NLP científico',
-      groupAbstract: 'Resumo',
-      groupSearchSelection: 'Busca & Seleção',
-      italicText: 'itálico',
-      italicTextDesc: 'Elementos em itálico no manuscrito. Clique para destacar.',
-      regexSearch: 'busca regex',
-      regexSearchDesc: 'Informe uma regex para destacar ocorrências no texto.',
-      regexPlaceholder: 'regex (ex.: gene[s]?|p-valor)',
-      regexApply: 'marcar',
-      regexClear: 'limpar',
-      regexMatches: 'ocorrências',
-      regexInvalid: 'regex inválida',
-      referencesUsed: 'referências usadas',
-      referencesUsedDesc: 'Entradas do ref.bib citadas no manuscrito.',
-      citationsTotal: 'citações',
-      citationsTotalDesc: 'Marcadores de citação detectados no texto.',
-      figuresTotal: 'figuras',
-      figuresTotalDesc: 'Quantidade total de figuras com identificador fig- no documento.',
-      figureCrossRefs: 'cross-ref de figuras',
-      figureCrossRefsDesc: 'Cobertura de referências cruzadas para figuras (referenciadas/total).',
-      figureRefOrder: 'ordem refs figuras break',
-      figureRefOrderDesc: 'Quantidade de quebras de ordem nas referências de figuras (ex.: Figura 2 citada antes da Figura 1).',
-      tablesTotal: 'tabelas',
-      tablesTotalDesc: 'Quantidade total de tabelas com identificador tbl- no documento.',
-      tableCrossRefs: 'cross-ref de tabelas',
-      tableCrossRefsDesc: 'Cobertura de referências cruzadas para tabelas (referenciadas/total).',
-      tableRefOrder: 'ordem refs tabelas break',
-      tableRefOrderDesc: 'Quantidade de quebras de ordem nas referências de tabelas (ex.: Tabela 2 citada antes da Tabela 1).',
-      citations: 'citações',
-      noCitationsIntroDiscussion: 'Introdução/Discussão sem citação neste parágrafo.',
-      resultsCitationDesc: 'Resultados com citação: verifique se é realmente necessário.',
-    },
-    en: {
-      wSuffix: 'w', sent: 'sentence', sentP: 'sentences',
-      diversity: 'diversity', longSent: '🟡 long sentence',
-      passive: 'passive voice', repeated: 'repeated:', cross: 'recurrent in section:',
-      readTime: 'min read', words: 'words', parag: 'paragraph', paragP: 'paragraphs',
-      alert: 'alert', alertP: 'alerts', observation: 'observation', observationP: 'observations',
-      hideBtn: 'hide notes', showBtn: 'show notes',
-      alertsOnlyBtn: 'alerts only', allNotesBtn: 'all notes',
-      compactBtn: 'compact', fullBtn: 'full', exportBtn: 'export report',
-      reviewBtn: 'final review', reviewOffBtn: 'final review: off',
-      rhythmTitle: 'sentence rhythm (relative length per sentence)',
-      toggleTitle: 'Toggle writing annotations',
-      alertsOnlyTitle: 'Show only paragraphs with alerts',
-      compactTitle: 'Toggle compact document panel',
-      exportTitle: 'Export a Markdown report with writing metrics',
-      reviewTitle: 'Show only critical points for final revision',
-      avgSentence: 'avg sentence', sentenceVar: 'sentence var.',
-      avgParagraph: 'avg paragraph', longestSentence: 'longest sentence',
-      docDiversity: 'diversity', passiveTotal: 'passives',
-      passiveDensity: 'passive dens.', longSentenceRate: 'long sentences',
-      topRepeated: 'global repeats', repeatedTerms: 'repetitions',
-      connectors: 'connectors', nominalization: 'nominalizations',
-      connectorAdd: 'additive connectors', connectorContrast: 'contrast connectors',
-      connectorCause: 'causal connectors', connectorConclusion: 'conclusion connectors',
-      connectorTime: 'temporal connectors',
-      ambiguityStrict: 'ambiguity: strict',
-      ambiguityBalanced: 'ambiguity: balanced',
-      ambiguityLenient: 'ambiguity: lenient',
-      sectionScore: 'section score', goalIssues: 'goals',
-      noVerb: 'no clear verb', sectionMap: 'section map',
-      rhythm: 'rhythm by section', denseSections: 'dense sections',
-      passiveExpected: 'passive voice concentrated where expected',
-      passiveSpread: 'passive voice spread beyond methods',
-      noDenseSections: 'no very dense section',
-      reportTitle: 'Writing report', alertReasons: 'alert reasons',
-      reasonParaLong: 'long paragraph', reasonSentLong: 'long sentence',
-      reasonLexLow: 'low lexical diversity', reasonRepeat: 'strong repetition',
-      reasonPassive: 'high passive voice',
-      reasonHedge: 'excessive hedging',
-      reasonFewCitations: 'few citations in section',
-      reasonResultsCitation: 'citation in Results',
-      analysisPreparing: 'analyzing text...', analysisEngine: 'JS-only engine',
-      analysisLoadingNlp: 'loading NLP from CDN...',
-      analysisWorker: 'worker', analysisSync: 'direct', analysisCache: 'cache', analysisTime: 'time',
-      nlpEngine: 'NLP engine',
-      nlpLoaded: 'cdnjs active',
-      nlpDisabled: 'disabled',
-      nlpFallback: 'heuristic fallback',
-      nlpUnavailable: 'CDN unavailable',
-      nlpNominalLoad: 'noun-dense sentences',
-      nlpNominalLoadDesc: 'Sentences with high noun/nominalization load, a common source of dense scientific prose. Click to highlight.',
-      nlpWeakVerbs: 'generic verbs',
-      nlpWeakVerbsDesc: 'Low-information or overly generic predicates; in manuscripts, prefer verbs that express the scientific relationship precisely. Click to highlight.',
-      nlpNounStacks: 'noun stacks',
-      nlpNounStacksDesc: 'Long technical term chains without a preposition or pause. They can reduce readability, especially in titles and Results. Click to highlight.',
-      nlpVerbDiversity: 'verb diversity',
-      nlpVerbDiversityDesc: 'Share of distinct verbs among detected verbs. Low values indicate reliance on a small predicate set.',
-      nlpNounVerbRatio: 'noun/verb ratio',
-      nlpNounVerbRatioDesc: 'Ratio between nouns and verbs detected by the NLP engine. High values suggest a nominal, less action-oriented style.',
-      nlpNounDensity: 'noun density',
-      nlpNounDensityDesc: 'Nouns per 100 words. Very high density can indicate over-nominalized prose and less explicit action.',
-      nlpKeyTerms: 'NLP key terms',
-      nlpKeyTermsDesc: 'Candidate central manuscript terms extracted by frequency and, when available, by the NLP analyzer.',
-      nlpTermDrift: 'term drift',
-      nlpTermDriftDesc: 'Number of term families with competing surface forms in the same text/section. High values suggest naming inconsistency.',
-      nlpTopics: 'NLP topics',
-      nlpEntityDensity: 'entity density',
-      nlpEntityDensityDesc: 'Named entities per 100 words. High density without context may hurt readability.',
-      nlpEntityOverload: 'entity overload',
-      nlpEntityOverloadDesc: 'Sentences with high concentration of named entities. Useful to review overloaded proper names/terms.',
-      nlpActionVerbScore: 'action verb score',
-      nlpActionVerbScoreDesc: 'Share of non-generic verbs over total verbs. Higher values indicate more concrete, action-oriented writing.',
-      nlpSentencePatternRepeats: 'sentence opening patterns',
-      nlpSentencePatternRepeatsDesc: 'Repeated syntactic opening patterns across sentences (first two content words).',
-      nlpSemanticRedundancy: 'semantic redundancy',
-      nlpSemanticRedundancyDesc: 'Percentage of adjacent sentence pairs with high content-word overlap.',
-      nlpFlowScore: 'flow score',
-      nlpFlowScoreDesc: 'Continuity indicator between adjacent sentences using lexical overlap and discourse connectors.',
-      nlpTenseProfile: 'tense profile',
-      nlpTenseProfileDesc: 'Approximate distribution of verbal tense/mood (past, present, future/modal) via wink-nlp.',
-      nlpWinkPosNounStacks: 'POS noun stacks (wink)',
-      nlpWinkPosNounStacksDesc: 'Long noun stacks detected via POS tagging (NOUN/PROPN/ADJ) in wink-nlp. More robust than regex for technical English.',
-      nlpWinkReadingEase: 'reading ease (Flesch)',
-      nlpWinkReadingEaseDesc: 'Flesch Reading Ease Score (0–100). Lower values indicate harder text. Typical scientific range: 30–50.',
-      nlpWinkGradeLevel: 'grade level (F-K)',
-      nlpWinkGradeLevelDesc: 'Flesch-Kincaid Grade Level — education level needed to understand the text. Scientific articles typically score 12–16.',
-      nlpWinkAvgWords: 'avg words/sentence (wink)',
-      nlpWinkAvgWordsDesc: 'Average number of words per sentence computed by wink-nlp.',
-      nlpWinkReadTime: 'reading time (wink)',
-      nlpWinkReadTimeDesc: 'Estimated reading time computed by wink-nlp for the English text.',
-      nlpWinkComplexWords: 'complex words (wink)',
-      nlpWinkComplexWordsDesc: 'Complex words detected by wink-nlp. In scientific English, very high density can signal overly heavy prose. Click to highlight.',
-      nlpWinkModalVerbs: 'modal verbs (wink)',
-      nlpWinkModalVerbsDesc: 'Modals detected by wink-nlp (can, could, may, might, should, would, etc.). Useful for reviewing caution, speculation, or obligation. Click to highlight.',
-      nlpWinkPassive: 'passive voice (wink)',
-      nlpWinkPassiveDesc: 'Passive-voice sentences detected via wink-nlp POS tagging (main verb preceded by a form of "to be"). Click to highlight.',
+// src/lang/index.js — selects UI strings for the active document language.
+// Built into ../scientific-writing.js by build/build-scientific-writing.mjs.
 
-      nlpWinkComplexDensity: 'complex word density (wink)',
-      nlpWinkComplexDensityDesc: 'Percentage of polysyllabic words (≥3 syllables) in the text, computed by wink-nlp. Values above 20% may indicate very dense prose.',
-      nlpWinkVerbDiversity: 'verb diversity (wink)',
-      nlpWinkVerbDiversityDesc: 'Ratio of unique verb lemmas to total verbs detected by wink-nlp (POS: VERB). Higher values indicate more varied verb vocabulary.',
-      nlpWinkPronouns: 'pronouns (wink)',
-      nlpWinkPronounsDesc: 'Pronouns detected via POS tagging (PRON). Excessive usage can reduce referential precision in dense passages.',
-      nlpWinkPronounDensity: 'pronoun density (wink)',
-      nlpWinkPronounDensityDesc: 'Pronouns per 100 alphanumeric tokens. High values may indicate over-reliance on anaphoric references.',
-      nlpWinkAuxiliaries: 'auxiliaries (wink)',
-      nlpWinkAuxiliariesDesc: 'Auxiliary verbs detected (AUX). High concentration can indicate long verbal chains and less direct style.',
-      nlpWinkAuxVerbRatio: 'AUX/VERB ratio (wink)',
-      nlpWinkAuxVerbRatioDesc: 'Ratio between auxiliaries and lexical verbs. Useful for reviewing periphrastic overload.',
-      nlpWinkNumericDensity: 'numeric density (wink)',
-      nlpWinkNumericDensityDesc: 'Numeric tokens per 100 alphanumeric tokens (POS: NUM). Helps assess concentration of quantitative evidence.',
-      nlpWinkLexicalDensity: 'lexical density (wink)',
-      nlpWinkLexicalDensityDesc: 'Share of open-class tokens (NOUN/VERB/ADJ/ADV/PROPN) per 100 alphanumeric tokens.',
-      nlpWinkProperNouns: 'proper nouns (wink)',
-      nlpWinkProperNounsDesc: 'Terms tagged as proper nouns (PROPN) by wink-nlp. Useful for reviewing entity concentration.',
-      nlpWinkProperNounDensity: 'proper noun density (wink)',
-      nlpWinkProperNounDensityDesc: 'Proper nouns per 100 alphanumeric tokens (PROPN). High values may hurt readability without context.',
-      nlpTopicsDesc: 'Recurring topics and entities extracted by the NLP package. Useful for checking the manuscript’s terminological focus. Click to highlight.',
-      nlpEntities: 'named entities',
-      nlpEntitiesDesc: 'People, organizations, and places detected in the manuscript body. Useful for checking proper names, institutions, software, and locations. Click to highlight.',
-      nlpValuesDates: 'NLP values/dates',
-      nlpValuesDatesDesc: 'Values and dates recognized by NLP, including some numbers written as words. Use to check textual evidence. Click to highlight.',
-      nlpAdverbs: 'adverbs',
-      nlpAdverbsDesc: 'Adverbs detected by NLP. Excess can weaken precision or create a less objective manuscript tone. Click to highlight.',
-      nlpContractions: 'contractions',
-      nlpContractionsDesc: 'Contractions detected (e.g., isn\'t, don\'t). In formal scientific writing, contractions should be avoided.',
-      nlpQuestions: 'interrogative sentences',
-      nlpQuestionsDesc: 'Interrogative sentences detected in the body text. Rhetorical questions should be used sparingly in scientific manuscripts.',
-      readability: 'readability', flesch: 'flesch', grade: 'grade', fog: 'fog',
-      complexSent: 'complex sentences', hedges: 'hedges', repeatedStarts: 'repeated starts',
-      hedgeDensity: 'hedge density',
-      undefinedAcronyms: 'undefined acronyms', emphaticPunct: 'emphatic punctuation',
-      evidence: 'evidence', evidenceDensity: 'evidence density',
-      termVariants: 'term variants', cohesionGaps: 'cohesion gaps',
-      longParagraphs: 'long paragraphs',
-      citationGaps: 'citation gaps',
-      resultsCitations: 'Results citations',
-      abstractCoverage: 'abstract coverage', colloquial: 'colloquial tone',
-      avgSentenceDesc: 'Average sentence length (words). Recommended: \u226425 for scientific texts.',
-      sentenceVarDesc: 'Variation in sentence length. Greater variation suggests a more dynamic rhythm.',
-      avgParagraphDesc: 'Average paragraph length in words.',
-      longestSentenceDesc: 'Longest sentence in the document. Click to highlight long sentences in text.',
-      docDiversityDesc: 'Lexical diversity: % of unique words. Above 55% indicates good vocabulary variation.',
-      passiveTotalDesc: 'Total passive voice constructions detected. Click to highlight in text.',
-      passiveDensityDesc: 'Passive voice per 1000 words. Acceptable in Methods; avoid elsewhere.',
-      longSentRateDesc: 'Proportion of long sentences (above threshold). Click to highlight in text.',
-      topRepeatedDesc: 'Most repeated words in the document. Click to highlight.',
-      repeatedTermsDesc: 'Number of repeated terms in the document, excluding function words and ignored terms. Click to highlight repetitions in paragraphs.',
-      connectorsDesc: 'Total connectors detected. Click to highlight in text.',
-      nominalizationDesc: 'Nominalizations: nouns derived from verbs/adjectives that can densify prose. Click to highlight.',
-      fleschDesc: 'Flesch Reading Ease: higher = easier. 0\u201330 = very difficult (academic); 60\u201370 = standard.',
-      gradeDesc: 'Flesch-Kincaid Grade Level: U.S. school year equivalent. Academic papers typically score 12\u201316.',
-      fogDesc: 'Gunning Fog Index: estimates years of schooling needed to understand the text on first reading. Formula: 0.4 \u00d7 (words/sentence + % complex words). Academic texts: 12\u201318.',
-      complexSentDesc: 'Sentences with multiple subordinate clauses or high syntactic complexity. Click to highlight.',
-      hedgeDesc: 'Hedges: expressions that weaken assertive force (e.g., may, suggests, appears). Click to highlight.',
-      undefinedAcronymsDesc: 'Acronyms used in the text without a prior parenthetical definition.',
-      emphaticPunctDesc: 'Emphatic punctuation occurrences (! or ??) \u2014 inappropriate in scientific texts.',
-      evidenceDesc: 'Evidence markers: numbers, percentages, measurement units, and citations. Click to highlight in text.',
-      termVariantsDesc: 'Divergent forms of the same term \u2014 possible terminological inconsistency.',
-      cohesionGapsDesc: 'Paragraphs without a transition connector at the start, after a multi-sentence paragraph. Click to highlight.',
-      longParagraphsDesc: 'Paragraphs above the configured word limit. Click to highlight.',
-      citationGapsDesc: 'Introduction/Discussion paragraphs without a detected citation marker. Click to highlight.',
-      resultsCitationsDesc: 'Results paragraphs with a detected bibliographic citation. Click to highlight.',
-      abstractCoverageDesc: 'Presence of expected elements in the Abstract: objective, method, result, conclusion.',
-      colloquialDesc: 'Informal or colloquial terms detected \u2014 avoid in scientific writing. Click to highlight.',
-      repeatedStartsDesc: 'Consecutive sentences beginning with the same word or phrase. Click to highlight.',
-      sectionScoreDesc: 'Average section complexity score (0\u2013100). Higher values indicate denser sections.',
-      noVerbDesc: 'Sentences with no identifiable main verb. Click to highlight in text.',
-      connectorAddDesc: 'Additive connectors (and, furthermore, also\u2026). Click to highlight.',
-      connectorContrastDesc: 'Contrast connectors (but, however, yet\u2026). Click to highlight.',
-      connectorCauseDesc: 'Causal connectors (because, therefore, since\u2026). Click to highlight.',
-      connectorConclusionDesc: 'Conclusion connectors (thus, hence, therefore\u2026). Click to highlight.',
-      connectorTimeDesc: 'Temporal connectors (when, after, before\u2026). Click to highlight.',
-      pronounAmbig: 'ambiguous pronouns',
-      pronounAmbigDesc: 'Sentences starting with demonstrative/personal pronouns without a clear antecedent (it, this, they\u2026). Click to highlight.',
-      modalVerbs: 'modal verbs',
-      modalVerbsDesc: 'Modal verbs (may, might, would, should\u2026). Overuse in Results signals lack of assertiveness. Click to highlight.',
-      firstPerson: 'first person',
-      firstPersonDesc: 'First-person usage (I, we, our\u2026). Check your journal\u2019s style guide. Click to highlight.',
-      sectionBalance: 'section balance',
-      sectionBalanceDesc: 'Coefficient of variation (CV) of section lengths. Flags sections disproportionately short or long.',
-      conceptCoverage: 'concept coverage',
-      conceptCoverageDesc: 'Coverage of core high-impact elements expected per section (conservative heuristic).',
-      conceptMissing: 'concept gaps',
-      conceptMissingDesc: 'Total missing core items across evaluated sections.',
-      conceptWeakSections: 'sections with gaps',
-      conceptWeakSectionsDesc: 'Sections with low concept coverage (textual heuristic).',
-      conceptGap: 'knowledge gap',
-      conceptObjective: 'objective/hypothesis',
-      conceptSignificance: 'significance/impact',
-      conceptDesign: 'design and sample',
-      conceptReproducibility: 'reproducibility/analysis',
-      conceptQuantResult: 'quantitative result',
-      conceptInterpretation: 'interpretation of findings',
-      conceptLimitations: 'limitations',
-      conceptImplications: 'implications/next steps',
-      paraOpeningRepeat: 'repeated \u00b6 openings',
-      paraOpeningRepeatDesc: 'Paragraphs starting with the same word \u2014 signals structural monotony.',
-      citationSentStart: 'citations at start',
-      citationSentStartDesc: 'Sentences opening directly with a citation \u2014 poor editorial practice. Click to highlight.',
-      citationSentEnd: 'citations at end',
-      citationSentEndDesc: 'Sentences ending with a citation before completing the author\u2019s own idea.',
-      abstractWordCount: 'abstract words',
-      abstractWordCountDesc: 'Word count of the Abstract. Typical range: 150\u2013300 words.',
-      unitConsistency: 'unit inconsistency',
-      unitConsistencyDesc: 'Different notations for the same measurement unit detected in the document.',
-      evidenceCited: 'cited evidence',
-      evidenceCitedDesc: 'Numeric values and citations in sentences with a nearby bibliographic reference.',
-      evidenceHardcoded: 'uncited evidence',
-      evidenceHardcodedDesc: 'Numeric values in sentences without a nearby bibliographic reference. Consider citing the source. Click to highlight.',
-      evidenceParameterized: 'parameterized evidence',
-      evidenceParameterizedDesc: 'Numeric values that match a variable defined in _variables.yml.',
-      evidenceUnparameterized: 'unparameterized evidence',
-      evidenceUnparameterizedDesc: 'Numeric values not linked to any variable in _variables.yml — consider parameterizing them for easier updates.',
-      variableCount: 'defined variables',
-      variableCountDesc: 'Number of scalar variables defined in _variables.yml.',
-      groupSentences: 'Sentences',
-      groupParagraphs: 'Paragraphs & Sections',
-      groupReadability: 'Readability',
-      groupVocabulary: 'Vocabulary',
-      groupVoice: 'Voice & Tone',
-      groupConnectors: 'Connectors',
-      groupCitations: 'Citations & References',
-      groupEvidence: 'Evidence',
-      groupNlp: 'Scientific NLP',
-      groupAbstract: 'Abstract',
-      groupSearchSelection: 'Search & Select',
-      italicText: 'italic',
-      italicTextDesc: 'Italicized elements in the manuscript. Click to highlight.',
-      regexSearch: 'regex search',
-      regexSearchDesc: 'Enter a regex to highlight matches in text.',
-      regexPlaceholder: 'regex (e.g.: gene[s]?|p-value)',
-      regexApply: 'highlight',
-      regexClear: 'clear',
-      regexMatches: 'matches',
-      regexInvalid: 'invalid regex',
-      referencesUsed: 'references used',
-      referencesUsedDesc: 'ref.bib entries cited in the manuscript.',
-      citationsTotal: 'citations',
-      citationsTotalDesc: 'Citation markers detected in the text.',
-      figuresTotal: 'figures',
-      figuresTotalDesc: 'Total number of figures with fig- identifiers in the document.',
-      figureCrossRefs: 'figure cross-refs',
-      figureCrossRefsDesc: 'Cross-reference coverage for figures (referenced/total).',
-      figureRefOrder: 'figure ref order break',
-      figureRefOrderDesc: 'Number of figure reference order breaks (e.g., Figure 2 cited before Figure 1).',
-      tablesTotal: 'tables',
-      tablesTotalDesc: 'Total number of tables with tbl- identifiers in the document.',
-      tableCrossRefs: 'table cross-refs',
-      tableCrossRefsDesc: 'Cross-reference coverage for tables (referenced/total).',
-      tableRefOrder: 'table ref order break',
-      tableRefOrderDesc: 'Number of table reference order breaks (e.g., Table 2 cited before Table 1).',
-      citations: 'citations',
-      noCitationsIntroDiscussion: 'Introduction/Discussion paragraph without citation.',
-      resultsCitationDesc: 'Results paragraph with citation: verify whether it is necessary.',
-    },
-  }[LANG];
+  var L = LANG === 'en' ? L_EN : L_PT;
+
+// src/utils/text.js — Basic text normalization, sentence splitting, word and syllable counts.
+// Built into ../scientific-writing.js by build/build-scientific-writing.mjs.
 
   // ── Text analysis ──────────────────────────────────────────────────────────
 
@@ -782,6 +801,9 @@
       return !STOP_WORDS.has(lower) && !shouldIgnoreWord(lower) && countSyllablesWord(lower) >= 3;
     }).length;
   }
+
+// src/detect/style.js — Hedges, wordy phrases, sentence complexity, acronyms, colloquial terms and vague quantifiers.
+// Built into ../scientific-writing.js by build/build-scientific-writing.mjs.
 
   function getHedgeTerms() {
     if (LANG === 'en') {
@@ -966,14 +988,42 @@
     }, 0);
   }
 
+  function countVagueQuantifiers(text) {
+    var src = String(text || '');
+    var terms = LANG === 'pt'
+      ? ['muitos', 'muitas', 'vários', 'várias', 'alguns', 'algumas', 'poucos', 'poucas',
+         'diversos', 'diversas', 'numerosos', 'numerosas', 'inúmeros', 'inúmeras',
+         'bastante', 'bastantes', 'certos', 'certas', 'determinados', 'determinadas']
+      : ['many', 'several', 'few', 'various', 'numerous', 'some', 'certain',
+         'a number of', 'a variety of', 'a range of', 'multiple', 'considerable',
+         'substantial', 'significant number'];
+    var count = 0;
+    terms.forEach(function (term) {
+      var safe = term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      var re = term.indexOf(' ') >= 0 ? new RegExp(safe, 'gi') : new RegExp('\\b' + safe + '\\b', 'gi');
+      var m;
+      var re2 = new RegExp(re.source, 'gi');
+      while ((m = re2.exec(src)) !== null) {
+        // skip if immediately preceded or followed by a digit (e.g. "3 various" is fine)
+        var before = src.slice(Math.max(0, m.index - 10), m.index);
+        var after = src.slice(m.index + m[0].length, m.index + m[0].length + 10);
+        if (!/\d/.test(before.slice(-3)) && !/^\s*\d/.test(after)) count++;
+      }
+    });
+    return count;
+  }
+
   function countEvidenceMarkers(text) {
     var src = String(text || '');
     var numberLike = src.match(/\b\d+(?:[\.,]\d+)?\b/g) || [];
     var percent = src.match(/\b\d+(?:[\.,]\d+)?\s*%\b/g) || [];
-    var units = src.match(/\b\d+(?:[\.,]\d+)?\s*(?:mg|g|kg|ml|l|cm|mm|nm|ha|m\/?s|°c|kpa|pa|ppm|ppb)\b/gi) || [];
+    var units = src.match(/\b\d+(?:[\.,]\d+)?\s*(?:mg|g|kg|ml|l|cm|mm|nm|ha|m\/?s|\u00b0c|kpa|pa|ppm|ppb)\b/gi) || [];
     var citations = src.match(/\((?:[^)]*\d{4}[^)]*)\)|\[[0-9,\-\s]+\]|@\w+/g) || [];
     return numberLike.length + percent.length + units.length + citations.length;
   }
+
+// src/detect/connectors.js — Paragraph-level cohesion gap detection. Connector taxonomy lives below with connector highlighting helpers.
+// Built into ../scientific-writing.js by build/build-scientific-writing.mjs.
 
   function countCohesionGaps(paragraphTexts) {
     var texts = paragraphTexts || [];
@@ -997,6 +1047,9 @@
     }
     return gaps;
   }
+
+// src/detect/vocabulary.js — Terminology variants, abstract coverage and sentence-level similarity helpers.
+// Built into ../scientific-writing.js by build/build-scientific-writing.mjs.
 
   function getTerminologyVariants(text) {
     var RE = LANG === 'en' ? /\b[a-z]{6,}\b/gi : /\b[a-záéíóúàâêôãõüçñ]{6,}\b/gi;
@@ -1095,6 +1148,9 @@
       missing: missing,
     };
   }
+
+// src/detect/nlp/wink.js — wink-nlp loading, document analysis and wink-backed highlights.
+// Built into ../scientific-writing.js by build/build-scientific-writing.mjs.
 
   // ── New analyses ───────────────────────────────────────────────────────────
 
@@ -1546,95 +1602,8 @@
     return false;
   }
 
-  function highlightWinkPassiveSentences(p) {
-    if (!WINK_NLP || LANG !== 'en') return;
-    var title = L.nlpWinkPassive;
-    var marked = p.innerHTML.replace(
-      /([.!?]+\s+)(?=[A-ZÁÉÍÓÚÀÂÊÔÃÕÜÇÑ"])/g,
-      '$1\x00'
-    );
-    p.innerHTML = marked.split('\x00').map(function (part) {
-      var plain = part.replace(/<[^>]+>/g, ' ').trim();
-      return plain && isWinkPassiveSentence(plain)
-        ? '<span class="ws-wink-passive" data-ws-focus="wink-passive" data-ws-reason="' + escapeHTML(title) + '" title="' + escapeHTML(title) + '">' + part + '</span>'
-        : part;
-    }).join('');
-  }
-
-  function highlightWinkComplexWords(p, nlpStats) {
-    if (!nlpStats || !nlpStats.winkComplexWords || !nlpStats.winkComplexWords.length) return;
-    highlightTermListInNode(p, nlpStats.winkComplexWords, 'ws-wink-complex', L.nlpWinkComplexWords);
-  }
-
-  function highlightWinkModalVerbs(p, nlpStats) {
-    var terms = (nlpStats && nlpStats.winkModalTerms) || [];
-    var list = terms
-      .map(function (item) { return normalizeWord(item.text || item); })
-      .filter(Boolean)
-      .sort(function (a, b) { return b.length - a.length; });
-    if (!list.length) return;
-    var escaped = list.map(function (term) {
-      return term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    });
-    highlightRegexInNode(p, new RegExp('\\b(?:' + escaped.join('|') + ')\\b', 'gi'), 'ws-wink-modal', L.nlpWinkModalVerbs);
-  }
-
-  function highlightWinkPronouns(p, nlpStats) {
-    var terms = (nlpStats && nlpStats.winkPronounTerms) || [];
-    var list = terms
-      .map(function (item) { return normalizeWord(item.text || item); })
-      .filter(Boolean)
-      .sort(function (a, b) { return b.length - a.length; });
-    if (!list.length) return;
-    var escaped = list.map(function (term) {
-      return term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    });
-    highlightRegexInNode(p, new RegExp('\\b(?:' + escaped.join('|') + ')\\b', 'gi'), 'ws-wink-pronoun', L.nlpWinkPronouns);
-  }
-
-  function highlightWinkAuxiliaries(p, nlpStats) {
-    var terms = (nlpStats && nlpStats.winkAuxiliaryTerms) || [];
-    var list = terms
-      .map(function (item) { return normalizeWord(item.text || item); })
-      .filter(Boolean)
-      .sort(function (a, b) { return b.length - a.length; });
-    if (!list.length) return;
-    var escaped = list.map(function (term) {
-      return term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    });
-    highlightRegexInNode(p, new RegExp('\\b(?:' + escaped.join('|') + ')\\b', 'gi'), 'ws-wink-auxiliary', L.nlpWinkAuxiliaries);
-  }
-
-  function highlightWinkNumericTokens(p, nlpStats) {
-    var terms = (nlpStats && nlpStats.winkNumericTerms) || [];
-    var list = terms
-      .map(function (item) { return normalizeWord(item.text || item); })
-      .filter(Boolean)
-      .sort(function (a, b) { return b.length - a.length; });
-    if (list.length) {
-      var escaped = list.map(function (term) {
-        return term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      });
-      highlightRegexInNode(p, new RegExp('\\b(?:' + escaped.join('|') + ')\\b', 'gi'), 'ws-wink-numeric', L.nlpWinkNumericDensity);
-      return;
-    }
-    highlightRegexInNode(p, /\b\d+(?:[.,]\d+)?\b/g, 'ws-wink-numeric', L.nlpWinkNumericDensity);
-  }
-
-  function highlightWinkProperNouns(p, nlpStats) {
-    var terms = (nlpStats && nlpStats.winkProperNounTerms) || [];
-    var list = terms
-      .map(function (item) { return normalizeWord(item.text || item); })
-      .filter(Boolean)
-      .sort(function (a, b) { return b.length - a.length; });
-    if (!list.length) return;
-    var escaped = list.map(function (term) {
-      return term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    });
-    highlightRegexInNode(p, new RegExp('\\b(?:' + escaped.join('|') + ')\\b', 'gi'), 'ws-wink-propn', L.nlpWinkProperNouns);
-  }
-
-
+// src/detect/nlp/compromise.js — compromise-backed scientific NLP helpers and term extraction.
+// Built into ../scientific-writing.js by build/build-scientific-writing.mjs.
 
   function makeNlpDoc(text) {
     var lib = NLP_LIB || detectGlobalNlp();
@@ -1980,6 +1949,9 @@
     };
   }
 
+// src/detect/sections.js — Paragraph opening repetition helpers. Section summary helpers are in analysis/section.js.
+// Built into ../scientific-writing.js by build/build-scientific-writing.mjs.
+
   function getParaOpeningKey(text) {
     var src = String(text || '').trim().replace(/^["'«\(\[\{\s]+/, '');
     var words = (src.match(LANG === 'en' ? /\b[a-z]+\b/gi : /\b[a-záéíóúàâêôãõüçñ]+\b/gi) || [])
@@ -2002,6 +1974,9 @@
       .sort(function (a, b) { return freq[b] - freq[a] || a.localeCompare(b); })
       .map(function (k) { return { word: k, count: freq[k] }; });
   }
+
+// src/detect/citations.js — Citation marker and citation position detection.
+// Built into ../scientific-writing.js by build/build-scientific-writing.mjs.
 
   function countCitationSentStart(sentences) {
     return (sentences || []).filter(function (s) {
@@ -2029,6 +2004,9 @@
     return { markers: markers, keys: Array.from(keys) };
   }
 
+// src/detect/references.js — Bibliography key usage detection.
+// Built into ../scientific-writing.js by build/build-scientific-writing.mjs.
+
   function getReferenceUsage(root) {
     var keys = new Set();
     var markerCount = 0;
@@ -2050,6 +2028,9 @@
       markerCount: markerCount,
     };
   }
+
+// src/detect/crossrefs.js — Figure and table cross-reference coverage/order checks.
+// Built into ../scientific-writing.js by build/build-scientific-writing.mjs.
 
   function getCrossRefUsage(root) {
     var scope = root || document;
@@ -2130,6 +2111,9 @@
     };
   }
 
+// src/detect/evidence.js — Abstract length, unit consistency and numeric evidence checks.
+// Built into ../scientific-writing.js by build/build-scientific-writing.mjs.
+
   function getAbstractWordCount(sectionSummaries) {
     var abs = (sectionSummaries || []).find(function (s) { return isAbstractLikeTitle(s.title || ''); });
     return abs ? (abs.words || 0) : 0;
@@ -2200,6 +2184,9 @@
       node.parentElement.closest('.citation, .csl-entry, #refs, [role="doc-biblioref"]'));
   }
 
+// src/analysis/readability.js — Readability, lexical diversity and repetition metrics.
+// Built into ../scientific-writing.js by build/build-scientific-writing.mjs.
+
   function computeReadability(totalWords, sentenceCount, totalSyllables, complexWords) {
     if (!totalWords || !sentenceCount) {
       return { flesch: 0, grade: 0, fog: 0 };
@@ -2264,6 +2251,9 @@
       .map(function (k) { return { text: k, count: freq[k] }; });
     return limit ? repeated.slice(0, limit) : repeated;
   }
+
+// src/detect/connectors-taxonomy.js — Connector categories, ambiguity handling and connector highlighting helpers.
+// Built into ../scientific-writing.js by build/build-scientific-writing.mjs.
 
   function getConnectorCategories() {
     if (LANG === 'en') {
@@ -2456,6 +2446,9 @@
     return CONNECTOR_AMBIGUITY_MODE;
   }
 
+// src/detect/passive.js — Connector totals, nominalization, verb presence and passive voice counters.
+// Built into ../scientific-writing.js by build/build-scientific-writing.mjs.
+
   function countConnectors(text) {
     var byCat = countConnectorCategories(text);
     return Object.keys(byCat).reduce(function (sum, k) { return sum + byCat[k]; }, 0);
@@ -2497,6 +2490,9 @@
       return total + (matches ? matches.length : 0);
     }, 0);
   }
+
+// src/analysis/paragraph.js — Paragraph analysis and worker-backed batch analysis.
+// Built into ../scientific-writing.js by build/build-scientific-writing.mjs.
 
   function analyzeParagraphSync(text) {
     var sentences = getSentences(text);
@@ -2764,6 +2760,9 @@
     });
   }
 
+// src/utils/math.js — Small math and escaping helpers.
+// Built into ../scientific-writing.js by build/build-scientific-writing.mjs.
+
   function sparkline(sentences) {
     var BLOCKS = '▁▂▃▄▅▆▇█';
     if (sentences.length === 0) return '';
@@ -2795,6 +2794,9 @@
       return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[ch];
     });
   }
+
+// src/analysis/section.js — Section classification, goals, scoring and section rhythm data.
+// Built into ../scientific-writing.js by build/build-scientific-writing.mjs.
 
   function isMethodsTitle(title) {
     var t = title.toLowerCase();
@@ -2944,7 +2946,214 @@
     }).join('');
   }
 
-  // ── DOM manipulation ───────────────────────────────────────────────────────
+  function sectionTypeFromTitle(title) {
+    var t = normalizeSectionName(title);
+    if (LANG === 'en') {
+      if (/\babstract\b/.test(t)) return 'abstract';
+      if (/\bintroduction\b/.test(t)) return 'introduction';
+      if (/\b(method|methods|materials|methodology)\b/.test(t)) return 'methods';
+      if (/\bresults\b/.test(t)) return 'results';
+      if (/\bdiscussion\b/.test(t)) return 'discussion';
+      if (/\b(conclusion|conclusions)\b/.test(t)) return 'conclusion';
+      return 'other';
+    }
+    if (/\b(resumo|abstract)\b/.test(t)) return 'abstract';
+    if (/\bintroducao\b/.test(t)) return 'introduction';
+    if (/\b(metodo|metodos|material|materiais|metodologia)\b/.test(t)) return 'methods';
+    if (/\bresultados\b/.test(t)) return 'results';
+    if (/\bdiscussao\b/.test(t)) return 'discussion';
+    if (/\b(conclusao|conclusoes)\b/.test(t)) return 'conclusion';
+    return 'other';
+  }
+
+  function hasAnyPattern(text, patterns) {
+    return (patterns || []).some(function (re) { return re.test(text); });
+  }
+
+  function analyzeSectionConceptCoverage(title, sectionText) {
+    var raw = String(sectionText || '');
+    var text = normalizeSectionName(raw);
+    var sectionType = sectionTypeFromTitle(title);
+    var checks = [];
+
+    if (sectionType === 'introduction' || sectionType === 'abstract') {
+      checks.push({
+        label: L.conceptGap,
+        ok: hasAnyPattern(text, LANG === 'en'
+          ? [/\b(gap|unknown|unclear|remains unknown|little is known|not well understood)\b/]
+          : [/\b(lacuna|desconhecid|nao se sabe|pouco se sabe|nao esta claro)\b/]),
+      });
+      checks.push({
+        label: L.conceptObjective,
+        ok: hasAnyPattern(text, LANG === 'en'
+          ? [/\b(objective|aim|we hypothesize|hypothesis|this study investigates|this study evaluates|we tested)\b/]
+          : [/\b(objetivo|hipotese|este estudo investig|este estudo avali|testamos|avaliamos)\b/]),
+      });
+      checks.push({
+        label: L.conceptSignificance,
+        ok: hasAnyPattern(text, LANG === 'en'
+          ? [/\b(important|relevant|impact|implication|significance|clinical relevance|practical relevance)\b/]
+          : [/\b(importante|relevante|impacto|implicac|significancia|relevancia clinica|relevancia pratica)\b/]),
+      });
+    }
+
+    if (sectionType === 'methods') {
+      checks.push({
+        label: L.conceptDesign,
+        ok: hasAnyPattern(text, LANG === 'en'
+          ? [/\b(randomized|controlled|experimental design|study design|n\s*=|sample|replicate|participants)\b/]
+          : [/\b(delineamento|desenho experimental|n\s*=|amostra|replic|participantes|controle|randomiz)\b/]),
+      });
+      checks.push({
+        label: L.conceptReproducibility,
+        ok: hasAnyPattern(text, LANG === 'en'
+          ? [/\b(protocol|according to|as described|anova|regression|confidence interval|p\s*[<=>]|statistical analysis)\b/]
+          : [/\b(protocolo|conforme|como descrito|anova|regress|intervalo de confianca|p\s*[<=>]|analise estatistica)\b/]),
+      });
+    }
+
+    if (sectionType === 'results' || sectionType === 'abstract') {
+      checks.push({
+        label: L.conceptQuantResult,
+        ok: hasAnyPattern(raw, LANG === 'en'
+          ? [/\b\d+(?:[.,]\d+)?\b/, /\bp\s*[<=>]\s*0?\.?\d+/i, /\b\d+(?:[.,]\d+)?\s*(%|mg|g|kg|ml|l|mm|cm|m|s|min|h|days?)\b/i]
+          : [/\b\d+(?:[.,]\d+)?\b/, /\bp\s*[<=>]\s*0?\.?\d+/i, /\b\d+(?:[.,]\d+)?\s*(%|mg|g|kg|ml|l|mm|cm|m|s|min|h|dias?)\b/i]),
+      });
+    }
+
+    if (sectionType === 'discussion' || sectionType === 'conclusion') {
+      checks.push({
+        label: L.conceptInterpretation,
+        ok: hasAnyPattern(text, LANG === 'en'
+          ? [/\b(suggest|indicate|indicates|interpreted|interpretation|explain|explains)\b/]
+          : [/\b(sugere|indica|indicam|interpret|explica|explicam)\b/]),
+      });
+      checks.push({
+        label: L.conceptLimitations,
+        ok: hasAnyPattern(text, LANG === 'en'
+          ? [/\b(limitation|limitations|constraint|constraints|caution)\b/]
+          : [/\b(limitac|restric|cautela)\b/]),
+      });
+      checks.push({
+        label: L.conceptImplications,
+        ok: hasAnyPattern(text, LANG === 'en'
+          ? [/\b(implication|implications|future work|future studies|further research|therefore)\b/]
+          : [/\b(implicac|estudos futuros|trabalhos futuros|pesquisas futuras|portanto)\b/]),
+      });
+    }
+
+    if (!checks.length) {
+      return {
+        sectionType: sectionType,
+        score: 100,
+        missingCount: 0,
+        missing: [],
+      };
+    }
+
+    var okCount = checks.filter(function (c) { return c.ok; }).length;
+    var missing = checks.filter(function (c) { return !c.ok; }).map(function (c) { return c.label; });
+    var score = Math.round((okCount / checks.length) * 100);
+
+    return {
+      sectionType: sectionType,
+      score: score,
+      missingCount: missing.length,
+      missing: missing,
+    };
+  }
+
+  function sectionSummary(id, title, statsList, totalWords, sectionText) {
+    var sentLens = [];
+    var passive = 0;
+    var longSentences = 0;
+    var lexSum = 0;
+    statsList.forEach(function (stats) {
+      passive += stats.passiveCount;
+      lexSum += stats.lexDiv;
+      stats.sentences.forEach(function (sent) {
+        var n = countWords(sent);
+        if (n > 0) {
+          sentLens.push(n);
+          if (n > SENT_LONG) longSentences++;
+        }
+      });
+    });
+    var citationMarkers = statsList.reduce(function (sum, stats) { return sum + (stats.citationMarkers || 0); }, 0);
+    var citationKeys = statsList.reduce(function (sum, stats) { return sum + (stats.citationKeyCount || 0); }, 0);
+    var summary = {
+      id: id,
+      title: title,
+      text: sectionText || '',
+      words: totalWords,
+      paras: statsList.length,
+      sentences: sentLens.length,
+      passive: passive,
+      citationMarkers: citationMarkers,
+      citationKeys: citationKeys,
+      longSentences: longSentences,
+      avgSentence: mean(sentLens),
+      avgParagraph: mean(statsList.map(function (stats) { return stats.wordCount; })),
+      lexicalDiversity: statsList.length ? (lexSum / statsList.length) : 1,
+      isMethods: isMethodsTitle(title),
+    };
+
+    var secSentences = getSentences(sectionText || '');
+    var secNlp = analyzeScientificNlp(sectionText || '', secSentences);
+    summary.nlpNounDensity = secNlp.nounDensity || 0;
+    summary.nlpEntityDensity = secNlp.entityDensity || 0;
+    summary.nlpEntityOverload = secNlp.entityOverloadCount || 0;
+    summary.nlpActionVerbScore = secNlp.actionVerbScore || 0;
+    summary.nlpPatternRepeats = secNlp.sentencePatternRepeatCount || 0;
+    summary.nlpSemanticRedundancy = secNlp.semanticRedundancyPct || 0;
+    summary.nlpFlowScore = secNlp.flowScore || 0;
+    summary.nlpTermDrift = secNlp.termDriftCount || 0;
+    summary.nlpTenseProfile = secNlp.tenseProfile || { past: 0, present: 0, future_modal: 0, other: 0 };
+    summary.nlpPosNounStacks = secNlp.nounStackCount || 0;
+    var concept = analyzeSectionConceptCoverage(title, sectionText || '');
+    summary.sectionType = concept.sectionType;
+    summary.conceptCoverage = concept.score;
+    summary.conceptMissingCount = concept.missingCount;
+    summary.conceptMissing = concept.missing;
+
+    summary.passiveDensity = summary.words ? (summary.passive / summary.words) * 1000 : 0;
+    summary.longSentenceRate = summary.sentences ? (summary.longSentences / summary.sentences) * 100 : 0;
+    var goals = evaluateSectionGoals(summary);
+    summary.goalIssueCount = goals.count;
+    summary.goalIssues = goals.details;
+    summary.score = calcSectionScore(summary);
+    return summary;
+  }
+
+  function buildDiagnostics(sections, passiveTotal, longSentenceRate) {
+    if (sections.length === 0) return '';
+
+    var rhythm = scaledBlocks(sections);
+    var methodPassive = sections
+      .filter(function (s) { return s.isMethods; })
+      .reduce(function (sum, s) { return sum + s.passive; }, 0);
+    var passiveRatio = passiveTotal > 0 ? methodPassive / passiveTotal : 0;
+
+    var dense = sections
+      .slice()
+      .sort(function (a, b) { return b.score - a.score; })
+      .slice(0, 2);
+
+    var passiveNote = passiveRatio >= 0.45 ? L.passiveExpected : L.passiveSpread;
+    var denseText = dense.length
+      ? dense.map(function (s) { return escapeHTML(s.title) + ' (' + s.score + '/100)'; }).join(', ')
+      : L.noDenseSections;
+
+    return '<div class="ws-doc-diagnostics">' +
+      '<div><span>' + L.rhythm + '</span><strong class="ws-doc-rhythm">' + rhythm + '</strong></div>' +
+      '<div><span>' + L.denseSections + '</span><strong>' + denseText + '</strong></div>' +
+      '<div><span>' + L.longSentenceRate + '</span><strong>' + round1(longSentenceRate) + '%</strong></div>' +
+      '<div><span>' + L.passive + '</span><strong>' + passiveNote + '</strong></div>' +
+      '</div>';
+  }
+
+// src/ui/highlight-core.js — Highlight focus registry, reasons and tooltip state.
+// Built into ../scientific-writing.js by build/build-scientific-writing.mjs.
 
   var HIGHLIGHT_FOCUS_CLASSES = {
     'ws-passive': 'passive',
@@ -2980,7 +3189,6 @@
     'ws-wink-auxiliary': 'wink-auxiliary',
     'ws-wink-numeric': 'wink-numeric',
     'ws-wink-propn': 'wink-propn',
-    'ws-wink-weak-opener': 'wink-weak-opener',
     'ws-connector': 'connectors',
     'ws-connector-add': 'connectors-add',
     'ws-connector-contrast': 'connectors-contrast',
@@ -3089,6 +3297,16 @@
     setAnnotationTitlesEnabled(visible);
   }
 
+// src/ui/highlights.js — Generic text and inline annotation highlighters.
+// Built into ../scientific-writing.js by build/build-scientific-writing.mjs.
+
+  function highlightItalicText(p) {
+    p.querySelectorAll('em, i').forEach(function (el) {
+      el.classList.add('ws-italic-text');
+      markReason(el, 'italic', L.italicText);
+    });
+  }
+
   function wrapLongSentences(p, threshold) {
     var title = L.longSent;
     var marked = p.innerHTML.replace(
@@ -3188,135 +3406,6 @@
     ) {
       Array.from(node.childNodes).forEach(function (c) { highlightPatternInNode(c, patterns, cls, title); });
     }
-  }
-
-  function getVariableUsage(root) {
-    var used = [];
-    var unused = [];
-    var usedSet = new Set();
-    if (root && root.querySelectorAll) {
-      root.querySelectorAll('.ws-var-origin[data-ws-var-name]').forEach(function (el) {
-        usedSet.add(el.dataset.wsVarName);
-      });
-      root.querySelectorAll('.ws-evidence-parameterized[data-ws-reason]').forEach(function (el) {
-        var name = (el.dataset.wsReason || '').split('|')[0].trim();
-        if (name) usedSet.add(name);
-      });
-    }
-    VARIABLE_NAMES.forEach(function (name) {
-      if (usedSet.has(name)) used.push(name);
-      else unused.push(name);
-    });
-    return { used: used, unused: unused };
-  }
-
-  function normalizeEvidenceNumber(raw) {
-    var m = String(raw || '').replace(',', '.').match(/-?\d+(?:\.\d+)?/);
-    return m ? m[0] : '';
-  }
-
-  function getSourceTokenOrigin(raw) {
-    var value = normalizeEvidenceNumber(raw);
-    if (!value || !SOURCE_EVIDENCE_TOKENS.length) return null;
-
-    for (var i = SOURCE_EVIDENCE_INDEX; i < Math.min(SOURCE_EVIDENCE_TOKENS.length, SOURCE_EVIDENCE_INDEX + 40); i++) {
-      var token = SOURCE_EVIDENCE_TOKENS[i] || {};
-      if (normalizeEvidenceNumber(token.value) === value) {
-        SOURCE_EVIDENCE_INDEX = i + 1;
-        return token.name ? [token.name] : null;
-      }
-    }
-    return null;
-  }
-
-  function highlightEvidenceInNode(node, isCited, offset) {
-    var numRe = /\b\d+(?:[\.,]\d+)?\s*(?:%|mg|g|kg|ml|l|cm|mm|nm|ha|m\/s|\u00b0c|kpa|pa|ppm|ppb)?\b|\((?:[^)]*\d{4}[^)]*)\)|\[[0-9,\-\s]+\]|@\w+/gi;
-    function getParamName(raw) {
-      var origin = node.parentElement && node.parentElement.closest
-        ? node.parentElement.closest('.ws-var-origin')
-        : null;
-      if (origin && origin.dataset && origin.dataset.wsVarName) {
-        return [origin.dataset.wsVarName];
-      }
-      return getSourceTokenOrigin(raw);
-    }
-    if (node.nodeType === Node.TEXT_NODE) {
-      var text = node.textContent;
-      if (isInsideBibliographicCitation(node)) {
-        offset.v += text.length;
-        return;
-      }
-      var ranges = [];
-      var r = new RegExp(numRe.source, 'gi');
-      var m;
-      while ((m = r.exec(text)) !== null) {
-        if (m[0].trim().length > 0) {
-          var globalPos = offset.v + m.index;
-          var cited = isCited ? isCited(globalPos) : true;
-          var paramNames = getParamName(m[0]); // null or array of var names
-          ranges.push([m.index, m.index + m[0].length, cited, paramNames]);
-        }
-      }
-      offset.v += text.length;
-      if (ranges.length === 0) return;
-      ranges.sort(function (a, b) { return a[0] - b[0]; });
-      var merged = [ranges[0].slice()];
-      for (var i = 1; i < ranges.length; i++) {
-        var last = merged[merged.length - 1];
-        if (ranges[i][0] < last[1]) {
-          last[1] = Math.max(last[1], ranges[i][1]);
-          last[2] = last[2] || ranges[i][2];
-          last[3] = last[3] || ranges[i][3];
-        } else merged.push(ranges[i].slice());
-      }
-      var frag = document.createDocumentFragment();
-      var pos = 0;
-      merged.forEach(function (rng) {
-        if (rng[0] > pos) frag.appendChild(document.createTextNode(text.slice(pos, rng[0])));
-        var span = document.createElement('span');
-        var paramNames = rng[3]; // null or array
-        var isCit = rng[2];
-        if (paramNames) {
-          span.className = 'ws-evidence-parameterized';
-          markReason(span, 'evidence-parameterized', paramNames[0]);
-        } else if (isCit) {
-          span.className = 'ws-evidence';
-          markReason(span, 'evidence', L.evidence);
-        } else {
-          span.className = 'ws-evidence-hardcoded';
-          markReason(span, 'evidence-hardcoded',
-            VARIABLE_COUNT > 0 ? L.evidenceHardcoded + ' | ' + L.evidenceUnparameterized : L.evidenceHardcoded);
-        }
-        span.textContent = text.slice(rng[0], rng[1]);
-        frag.appendChild(span);
-        pos = rng[1];
-      });
-      if (pos < text.length) frag.appendChild(document.createTextNode(text.slice(pos)));
-      node.parentNode.replaceChild(frag, node);
-    } else if (
-      node.nodeType === Node.ELEMENT_NODE &&
-      node.tagName !== 'SCRIPT' && node.tagName !== 'STYLE' &&
-      !node.classList.contains('ws-note') &&
-      !node.classList.contains('citation') &&
-      !node.classList.contains('csl-entry') &&
-      node.id !== 'refs' &&
-      node.getAttribute('role') !== 'doc-biblioref'
-    ) {
-      Array.from(node.childNodes).forEach(function (c) { highlightEvidenceInNode(c, isCited, offset); });
-    }
-  }
-
-  function highlightEvidenceInParagraph(p) {
-    var paraText = p.innerText || p.textContent || '';
-    var citationRe = /\((?:[^)]*\d{4}[^)]*)\)|\[[0-9,\-\s]+\]|@\w+/g;
-    var citationPositions = [];
-    var cm;
-    while ((cm = citationRe.exec(paraText)) !== null) citationPositions.push(cm.index);
-    var WINDOW = 200;
-    function isCited(globalPos) {
-      return citationPositions.some(function (cp) { return Math.abs(cp - globalPos) <= WINDOW; });
-    }
-    highlightEvidenceInNode(p, isCited, { v: 0 });
   }
 
   function highlightModalVerbs(p) {
@@ -3552,6 +3641,159 @@
     });
   }
 
+  function highlightConnectors(p) {
+    var categories = getConnectorCategories();
+    var contextual = getContextualConnectorTerms();
+    Object.keys(categories).forEach(function (cat) {
+      categories[cat].forEach(function (term) {
+        var mode = getConnectorAmbiguityMode(term);
+        highlightConnectorInNode(
+          p,
+          term,
+          'ws-connector ws-connector-' + cat,
+          connectorCategoryLabel(cat) + ' • ' + connectorAmbiguityLabel(mode),
+          contextual.has(term),
+          mode
+        );
+      });
+    });
+  }
+
+// src/ui/evidence.js — Variable usage and numeric evidence highlighting.
+// Built into ../scientific-writing.js by build/build-scientific-writing.mjs.
+
+  function getVariableUsage(root) {
+    var used = [];
+    var unused = [];
+    var usedSet = new Set();
+    if (root && root.querySelectorAll) {
+      root.querySelectorAll('.ws-var-origin[data-ws-var-name]').forEach(function (el) {
+        usedSet.add(el.dataset.wsVarName);
+      });
+      root.querySelectorAll('.ws-evidence-parameterized[data-ws-reason]').forEach(function (el) {
+        var name = (el.dataset.wsReason || '').split('|')[0].trim();
+        if (name) usedSet.add(name);
+      });
+    }
+    VARIABLE_NAMES.forEach(function (name) {
+      if (usedSet.has(name)) used.push(name);
+      else unused.push(name);
+    });
+    return { used: used, unused: unused };
+  }
+
+  function normalizeEvidenceNumber(raw) {
+    var m = String(raw || '').replace(',', '.').match(/-?\d+(?:\.\d+)?/);
+    return m ? m[0] : '';
+  }
+
+  function getSourceTokenOrigin(raw) {
+    var value = normalizeEvidenceNumber(raw);
+    if (!value || !SOURCE_EVIDENCE_TOKENS.length) return null;
+
+    for (var i = SOURCE_EVIDENCE_INDEX; i < Math.min(SOURCE_EVIDENCE_TOKENS.length, SOURCE_EVIDENCE_INDEX + 40); i++) {
+      var token = SOURCE_EVIDENCE_TOKENS[i] || {};
+      if (normalizeEvidenceNumber(token.value) === value) {
+        SOURCE_EVIDENCE_INDEX = i + 1;
+        return token.name ? [token.name] : null;
+      }
+    }
+    return null;
+  }
+
+  function highlightEvidenceInNode(node, isCited, offset) {
+    var numRe = /\b\d+(?:[\.,]\d+)?\s*(?:%|mg|g|kg|ml|l|cm|mm|nm|ha|m\/s|\u00b0c|kpa|pa|ppm|ppb)?\b|\((?:[^)]*\d{4}[^)]*)\)|\[[0-9,\-\s]+\]|@\w+/gi;
+    function getParamName(raw) {
+      var origin = node.parentElement && node.parentElement.closest
+        ? node.parentElement.closest('.ws-var-origin')
+        : null;
+      if (origin && origin.dataset && origin.dataset.wsVarName) {
+        return [origin.dataset.wsVarName];
+      }
+      return getSourceTokenOrigin(raw);
+    }
+    if (node.nodeType === Node.TEXT_NODE) {
+      var text = node.textContent;
+      if (isInsideBibliographicCitation(node)) {
+        offset.v += text.length;
+        return;
+      }
+      var ranges = [];
+      var r = new RegExp(numRe.source, 'gi');
+      var m;
+      while ((m = r.exec(text)) !== null) {
+        if (m[0].trim().length > 0) {
+          var globalPos = offset.v + m.index;
+          var cited = isCited ? isCited(globalPos) : true;
+          var paramNames = getParamName(m[0]);
+          ranges.push([m.index, m.index + m[0].length, cited, paramNames]);
+        }
+      }
+      offset.v += text.length;
+      if (ranges.length === 0) return;
+      ranges.sort(function (a, b) { return a[0] - b[0]; });
+      var merged = [ranges[0].slice()];
+      for (var i = 1; i < ranges.length; i++) {
+        var last = merged[merged.length - 1];
+        if (ranges[i][0] < last[1]) {
+          last[1] = Math.max(last[1], ranges[i][1]);
+          last[2] = last[2] || ranges[i][2];
+          last[3] = last[3] || ranges[i][3];
+        } else merged.push(ranges[i].slice());
+      }
+      var frag = document.createDocumentFragment();
+      var pos = 0;
+      merged.forEach(function (rng) {
+        if (rng[0] > pos) frag.appendChild(document.createTextNode(text.slice(pos, rng[0])));
+        var span = document.createElement('span');
+        var paramNames = rng[3];
+        var isCit = rng[2];
+        if (paramNames) {
+          span.className = 'ws-evidence-parameterized';
+          markReason(span, 'evidence-parameterized', paramNames[0]);
+        } else if (isCit) {
+          span.className = 'ws-evidence';
+          markReason(span, 'evidence', L.evidence);
+        } else {
+          span.className = 'ws-evidence-hardcoded';
+          markReason(span, 'evidence-hardcoded',
+            VARIABLE_COUNT > 0 ? L.evidenceHardcoded + ' | ' + L.evidenceUnparameterized : L.evidenceHardcoded);
+        }
+        span.textContent = text.slice(rng[0], rng[1]);
+        frag.appendChild(span);
+        pos = rng[1];
+      });
+      if (pos < text.length) frag.appendChild(document.createTextNode(text.slice(pos)));
+      node.parentNode.replaceChild(frag, node);
+    } else if (
+      node.nodeType === Node.ELEMENT_NODE &&
+      node.tagName !== 'SCRIPT' && node.tagName !== 'STYLE' &&
+      !node.classList.contains('ws-note') &&
+      !node.classList.contains('citation') &&
+      !node.classList.contains('csl-entry') &&
+      node.id !== 'refs' &&
+      node.getAttribute('role') !== 'doc-biblioref'
+    ) {
+      Array.from(node.childNodes).forEach(function (c) { highlightEvidenceInNode(c, isCited, offset); });
+    }
+  }
+
+  function highlightEvidenceInParagraph(p) {
+    var paraText = p.innerText || p.textContent || '';
+    var citationRe = /\((?:[^)]*\d{4}[^)]*)\)|\[[0-9,\-\s]+\]|@\w+/g;
+    var citationPositions = [];
+    var cm;
+    while ((cm = citationRe.exec(paraText)) !== null) citationPositions.push(cm.index);
+    var WINDOW = 200;
+    function isCited(globalPos) {
+      return citationPositions.some(function (cp) { return Math.abs(cp - globalPos) <= WINDOW; });
+    }
+    highlightEvidenceInNode(p, isCited, { v: 0 });
+  }
+
+// src/ui/nlp-highlights.js — NLP-specific paragraph highlighting helpers.
+// Built into ../scientific-writing.js by build/build-scientific-writing.mjs.
+
   function highlightNlpNominalLoad(p) {
     var title = L.nlpNominalLoad;
     var marked = p.innerHTML.replace(
@@ -3625,23 +3867,99 @@
     highlightTermListInNode(p, nlpStats.adverbs, 'ws-nlp-adverb', L.nlpAdverbs);
   }
 
-  function highlightConnectors(p) {
-    var categories = getConnectorCategories();
-    var contextual = getContextualConnectorTerms();
-    Object.keys(categories).forEach(function (cat) {
-      categories[cat].forEach(function (term) {
-        var mode = getConnectorAmbiguityMode(term);
-        highlightConnectorInNode(
-          p,
-          term,
-          'ws-connector ws-connector-' + cat,
-          connectorCategoryLabel(cat) + ' • ' + connectorAmbiguityLabel(mode),
-          contextual.has(term),
-          mode
-        );
-      });
-    });
+// src/ui/wink-highlights.js — wink-nlp-backed highlight helpers.
+// Built into ../scientific-writing.js by build/build-scientific-writing.mjs.
+
+  function highlightWinkPassiveSentences(p) {
+    if (!WINK_NLP || LANG !== 'en') return;
+    var title = L.nlpWinkPassive;
+    var marked = p.innerHTML.replace(
+      /([.!?]+\s+)(?=[A-ZÁÉÍÓÚÀÂÊÔÃÕÜÇÑ"])/g,
+      '$1\x00'
+    );
+    p.innerHTML = marked.split('\x00').map(function (part) {
+      var plain = part.replace(/<[^>]+>/g, ' ').trim();
+      return plain && isWinkPassiveSentence(plain)
+        ? '<span class="ws-wink-passive" data-ws-focus="wink-passive" data-ws-reason="' + escapeHTML(title) + '" title="' + escapeHTML(title) + '">' + part + '</span>'
+        : part;
+    }).join('');
   }
+
+  function highlightWinkComplexWords(p, nlpStats) {
+    if (!nlpStats || !nlpStats.winkComplexWords || !nlpStats.winkComplexWords.length) return;
+    highlightTermListInNode(p, nlpStats.winkComplexWords, 'ws-wink-complex', L.nlpWinkComplexWords);
+  }
+
+  function highlightWinkModalVerbs(p, nlpStats) {
+    var terms = (nlpStats && nlpStats.winkModalTerms) || [];
+    var list = terms
+      .map(function (item) { return normalizeWord(item.text || item); })
+      .filter(Boolean)
+      .sort(function (a, b) { return b.length - a.length; });
+    if (!list.length) return;
+    var escaped = list.map(function (term) {
+      return term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    });
+    highlightRegexInNode(p, new RegExp('\\b(?:' + escaped.join('|') + ')\\b', 'gi'), 'ws-wink-modal', L.nlpWinkModalVerbs);
+  }
+
+  function highlightWinkPronouns(p, nlpStats) {
+    var terms = (nlpStats && nlpStats.winkPronounTerms) || [];
+    var list = terms
+      .map(function (item) { return normalizeWord(item.text || item); })
+      .filter(Boolean)
+      .sort(function (a, b) { return b.length - a.length; });
+    if (!list.length) return;
+    var escaped = list.map(function (term) {
+      return term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    });
+    highlightRegexInNode(p, new RegExp('\\b(?:' + escaped.join('|') + ')\\b', 'gi'), 'ws-wink-pronoun', L.nlpWinkPronouns);
+  }
+
+  function highlightWinkAuxiliaries(p, nlpStats) {
+    var terms = (nlpStats && nlpStats.winkAuxiliaryTerms) || [];
+    var list = terms
+      .map(function (item) { return normalizeWord(item.text || item); })
+      .filter(Boolean)
+      .sort(function (a, b) { return b.length - a.length; });
+    if (!list.length) return;
+    var escaped = list.map(function (term) {
+      return term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    });
+    highlightRegexInNode(p, new RegExp('\\b(?:' + escaped.join('|') + ')\\b', 'gi'), 'ws-wink-auxiliary', L.nlpWinkAuxiliaries);
+  }
+
+  function highlightWinkNumericTokens(p, nlpStats) {
+    var terms = (nlpStats && nlpStats.winkNumericTerms) || [];
+    var list = terms
+      .map(function (item) { return normalizeWord(item.text || item); })
+      .filter(Boolean)
+      .sort(function (a, b) { return b.length - a.length; });
+    if (list.length) {
+      var escaped = list.map(function (term) {
+        return term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      });
+      highlightRegexInNode(p, new RegExp('\\b(?:' + escaped.join('|') + ')\\b', 'gi'), 'ws-wink-numeric', L.nlpWinkNumericDensity);
+      return;
+    }
+    highlightRegexInNode(p, /\b\d+(?:[.,]\d+)?\b/g, 'ws-wink-numeric', L.nlpWinkNumericDensity);
+  }
+
+  function highlightWinkProperNouns(p, nlpStats) {
+    var terms = (nlpStats && nlpStats.winkProperNounTerms) || [];
+    var list = terms
+      .map(function (item) { return normalizeWord(item.text || item); })
+      .filter(Boolean)
+      .sort(function (a, b) { return b.length - a.length; });
+    if (!list.length) return;
+    var escaped = list.map(function (term) {
+      return term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    });
+    highlightRegexInNode(p, new RegExp('\\b(?:' + escaped.join('|') + ')\\b', 'gi'), 'ws-wink-propn', L.nlpWinkProperNouns);
+  }
+
+// src/ui/cards.js — Margin note card construction.
+// Built into ../scientific-writing.js by build/build-scientific-writing.mjs.
 
   // ── UI helpers ─────────────────────────────────────────────────────────────
 
@@ -3780,6 +4098,11 @@
 
   // ── Section stats bar ──────────────────────────────────────────────────────
 
+// src/ui/rhythm.js — Per-section stats/rhythm UI.
+// Built into ../scientific-writing.js by build/build-scientific-writing.mjs.
+
+  // ── Section stats bar ──────────────────────────────────────────────────────
+
   function buildSectionStats(section, statsList, totalWords, summary) {
     if (statsList.length === 0) return;
     var h = section.querySelector('h2, h3');
@@ -3820,6 +4143,987 @@
 
   // ── Document reading-time badge ────────────────────────────────────────────
 
+// src/ui/summary.js — Document summary card and issue guidance.
+// Built into ../scientific-writing.js by build/build-scientific-writing.mjs.
+
+  function buildDocSummaryCard(opts) {
+    var pt = LANG === 'pt';
+    var sentMean = opts.sentLengths.length ? mean(opts.sentLengths) : 0;
+    var sentCv   = sentMean > 0 ? opts.sentStd / sentMean : 0;
+    var maxParaLen = opts.paraLengths && opts.paraLengths.length ? Math.max.apply(null, opts.paraLengths) : 0;
+
+    function D(lines) {
+      return '<span class="ws-sum-detail">' + lines.join('<br>') + '</span>';
+    }
+    function em(s) { return '<em>' + s + '</em>'; }
+    function topList(items, limit, formatter) {
+      if (!items || !items.length) return '';
+      return items.slice(0, limit || 4).map(formatter || function (x) {
+        return typeof x === 'string' ? x : (x.text ? x.text + (x.count ? ' ×' + x.count : '') : String(x));
+      }).join(', ');
+    }
+    function connectorTotal(byCat) {
+      byCat = byCat || {};
+      return (byCat.add || 0) + (byCat.contrast || 0) + (byCat.cause || 0) + (byCat.conclusion || 0) + (byCat.time || 0);
+    }
+    function rhythmLabel(cv) {
+      if (cv < 0.30) return pt ? 'cadência muito regular' : 'very regular cadence';
+      if (cv <= 0.55) return pt ? 'cadência variada e controlada' : 'varied, controlled cadence';
+      return pt ? 'cadência bastante irregular' : 'markedly uneven cadence';
+    }
+    function sectionCadenceLabel(cv) {
+      if (cv < 0.25) return pt ? 'distribuição bem uniforme' : 'very even distribution';
+      if (cv < 0.35) return pt ? 'distribuição relativamente equilibrada' : 'relatively balanced distribution';
+      if (cv < 0.55) return pt ? 'distribuição desigual entre seções' : 'uneven section distribution';
+      return pt ? 'distribuição fortemente concentrada' : 'strongly concentrated distribution';
+    }
+    function buildTextProfile() {
+      var sections = opts.sections || [];
+      var paraMean = opts.paraLengths && opts.paraLengths.length ? mean(opts.paraLengths) : 0;
+      var minutes = Math.max(1, Math.round((opts.totalWords || 0) / READ_WPM));
+
+      function ind(v, wThresh, aThresh) {
+        return v >= aThresh ? ' ws-profile-alert' : v >= wThresh ? ' ws-profile-warn' : '';
+      }
+      function indLow(v, wThresh, aThresh) {
+        return v <= aThresh ? ' ws-profile-alert' : v <= wThresh ? ' ws-profile-warn' : '';
+      }
+      function pval(text, cls) {
+        return '<span class="ws-profile-val' + (cls || '') + '">' + escapeHTML(String(text)) + '</span>';
+      }
+      function row(label, vals) {
+        return '<div class="ws-profile-row">' +
+          '<span class="ws-profile-label">' + escapeHTML(label) + '</span>' +
+          '<span class="ws-profile-vals">' + vals + '</span>' +
+          '</div>';
+      }
+      function fleschLabel(f) {
+        if (f == null) return '';
+        if (f >= 70) return pt ? ' — fácil' : ' — easy';
+        if (f >= 60) return pt ? ' — relativamente fácil' : ' — fairly easy';
+        if (f >= 50) return pt ? ' — padrão' : ' — standard';
+        if (f >= 30) return pt ? ' — difícil' : ' — difficult';
+        return pt ? ' — muito difícil' : ' — very difficult';
+      }
+
+      var DOT = ' \xb7 ';
+      var readability = opts.readability || {};
+      var fleschVal = typeof readability.flesch === 'number' ? readability.flesch : null;
+      var fleschCls = fleschVal != null ? indLow(fleschVal, 50, 30) : '';
+      var cvCls = sentCv >= 0.55 ? ' ws-profile-alert' : sentCv < 0.30 ? ' ws-profile-warn' : '';
+      var longRateCls = ind(opts.longSentenceRate || 0, 6, 20);
+      var lexCls = indLow(opts.lexDiv || 0, 55, 40);
+      var passiveCls = ind(opts.passiveTotal || 0, 20, 40);
+      var passiveDensity = opts.totalWords ? round1((opts.passiveTotal || 0) / opts.totalWords * 1000) : 0;
+      var sectionCv = (opts.sectionBalance && opts.sectionBalance.cv) || 0;
+      var sectionCvCls = ind(sectionCv, 0.35, 0.55);
+      var byCat = opts.connectorByCat || {};
+      var catCount = ['add', 'contrast', 'cause', 'conclusion', 'time'].filter(function (c) { return (byCat[c] || 0) > 0; }).length;
+      var catCls = catCount <= 1 ? ' ws-profile-warn' : '';
+      var unusedRefCount = (opts.referencesDefined > 0 && opts.referencesUsed < opts.referencesDefined)
+        ? opts.referencesDefined - opts.referencesUsed : 0;
+      var refCls = unusedRefCount > 0 ? ' ws-profile-warn' : '';
+      var figRefd = opts.figureCrossRefs != null ? opts.figureCrossRefs : null;
+      var figCls = (figRefd != null && figRefd < (opts.figuresTotal || 0)) ? ' ws-profile-warn' : '';
+
+      var rows =
+        row(pt ? 'Documento' : 'Document',
+          pval((opts.totalWords || 0).toLocaleString() + (pt ? 'p' : 'w')) +
+          DOT + pval(sections.length + (pt ? ' seções' : ' sections')) +
+          DOT + '~' + pval(minutes + ' min read')) +
+        row(pt ? 'Frases' : 'Sentences',
+          (pt ? 'méd ' : 'avg ') + pval(round1(sentMean) + (pt ? 'p' : 'w')) +
+          DOT + 'max ' + pval((opts.maxSentLen || 0) + (pt ? 'p' : 'w')) +
+          DOT + 'CV ' + pval(round1(sentCv) + ' — ' + rhythmLabel(sentCv), cvCls) +
+          DOT + pval(round1(opts.longSentenceRate || 0) + '% long', longRateCls)) +
+        row(pt ? 'Parágrafos' : 'Paragraphs',
+          (pt ? 'méd ' : 'avg ') + pval(round1(paraMean) + (pt ? 'p' : 'w')) +
+          DOT + 'max ' + pval(maxParaLen + (pt ? 'p' : 'w'), maxParaLen > PARA_LONG ? ' ws-profile-warn' : '') +
+          ((opts.longParagraphCount || 0) > 0 ? DOT + pval(opts.longParagraphCount + (pt ? ' longos' : ' long'), ' ws-profile-warn') : '') +
+          DOT + (pt ? 'seções CV ' : 'sections CV ') + pval(round1(sectionCv) + ' — ' + sectionCadenceLabel(sectionCv), sectionCvCls)) +
+        row(pt ? 'Legibilidade' : 'Readability',
+          'Flesch ' + pval((fleschVal != null ? fleschVal : '—') + fleschLabel(fleschVal), fleschCls) +
+          DOT + 'Grade ' + pval(readability.grade != null ? readability.grade : '—') +
+          DOT + 'Fog ' + pval(readability.fog != null ? readability.fog : '—')) +
+        row('Style',
+          (pt ? 'div ' : 'div ') + pval((opts.lexDiv || 0) + '%', lexCls) +
+          DOT + pval((opts.passiveTotal || 0) + ' passive (' + passiveDensity + '‰)', passiveCls) +
+          DOT + pval((opts.hedgeCount || 0) + (pt ? ' aten' : ' hedges')) +
+          DOT + pval((opts.connectorCount || 0) + ' connectors · ' + catCount + '/5 cat', catCls)) +
+        row(pt ? 'Evidências' : 'Evidence',
+          pval((opts.citationsTotal || 0) + (pt ? ' cit' : ' citations')) +
+          DOT + pval((opts.referencesUsed || 0) + '/' + (opts.referencesDefined || 0) + ' refs' +
+            (unusedRefCount > 0 ? ' (' + unusedRefCount + (pt ? ' não usadas' : ' unused') + ')' : ''), refCls) +
+          (figRefd != null
+            ? DOT + pval(figRefd + '/' + (opts.figuresTotal || 0) + (pt ? ' figs ref.' : ' figs cross-ref\'d'), figCls)
+            : DOT + pval((opts.figuresTotal || 0) + ' figs')) +
+          DOT + pval((opts.tablesTotal || 0) + (pt ? ' tab' : ' tables')));
+
+      var sectionWords = sections.map(function (s) {
+        var title = s.title || (pt ? 'Seção' : 'Section');
+        var share = opts.totalWords ? Math.round(((s.words || 0) / opts.totalWords) * 100) : 0;
+        return '<span class="ws-sum-section-pill">' +
+          '<strong>' + escapeHTML(title) + '</strong> ' +
+          escapeHTML(String(s.words || 0)) + (pt ? 'p' : 'w') +
+          ' \xb7 ' + escapeHTML(String(share)) + '%' +
+          (s.sentences ? ' \xb7 ' + escapeHTML(String(s.sentences)) + (pt ? 'fr' : 's') : '') +
+          (s.avgSentence ? ' \xb7 ' + escapeHTML(round1(s.avgSentence) + (pt ? 'p/fr' : 'w/s')) : '') +
+        '</span>';
+      }).join('');
+
+      return '<div class="ws-sum-profile">' +
+        '<div class="ws-sum-section-label ws-sum-section-profile">' + (pt ? 'Perfil do texto' : 'Text profile') + '</div>' +
+        '<div class="ws-profile-grid">' + rows + '</div>' +
+        (sectionWords ? '<div class="ws-sum-section-words">' + sectionWords + '</div>' : '') +
+      '</div>';
+    }
+
+    var issues = [];
+
+    // Frases longas
+    if (opts.longSentenceRate >= 6) {
+      issues.push({ level: opts.longSentenceRate >= 20 ? 'alert' : 'warn',
+        text: pt
+          ? round1(opts.longSentenceRate) + '% das frases superam ' + SENT_LONG + ' palavras (max detectado: ' + opts.maxSentLen + 'p)'
+          : round1(opts.longSentenceRate) + '% of sentences exceed ' + SENT_LONG + ' words (longest detected: ' + opts.maxSentLen + 'w)',
+        detail: pt
+          ? D(['· divida em conjunções coordenativas: ' + em('e, mas, pois, portanto, porém'),
+               '· elimine orações relativas encadeadas: ' + em('"…que foi então submetido…" → frase separada'),
+               '· nominalizações inflam frases — prefira verbos: ' + em('"a análise foi realizada" → "analisamos"'),
+               '· meta: 15–25 palavras por frase para máxima legibilidade'])
+          : D(['· split at coordinating conjunctions: ' + em('and, but, so, yet, therefore'),
+               '· break stacked relative clauses: ' + em('"…which was then submitted…" → separate sentence'),
+               '· nominalizations inflate length — prefer verbs: ' + em('"an analysis was performed" → "we analyzed"'),
+               '· target: 15–25 words per sentence for best readability']) });
+    }
+
+    // Complexidade sintática
+    if (opts.complexSentenceRate >= 12 || opts.complexSentenceCount > 8) {
+      issues.push({ level: opts.complexSentenceRate >= 28 ? 'alert' : 'warn',
+        text: pt
+          ? opts.complexSentenceCount + (opts.complexSentenceCount === 1 ? ' frase complexa detectada' : ' frases complexas detectadas') + ' (' + round1(opts.complexSentenceRate || 0) + '%)'
+          : opts.complexSentenceCount + (opts.complexSentenceCount === 1 ? ' complex sentence detected' : ' complex sentences detected') + ' (' + round1(opts.complexSentenceRate || 0) + '%)',
+        detail: pt
+          ? D(['· procure cadeias com "que", "quando", "embora", "enquanto" e múltiplas vírgulas',
+               '· separe condição, método e resultado em frases distintas',
+               '· mantenha uma oração principal clara antes de qualificadores longos',
+               '· use o card "frases complexas" para destacar os trechos'])
+          : D(['· look for chains with "which", "that", "although", "whereas" and multiple commas',
+               '· separate condition, method, and result into distinct sentences',
+               '· keep a clear main clause before long qualifiers',
+               '· use the complex-sentence card to highlight passages']) });
+    }
+
+    // Frases sem verbo principal claro
+    if (opts.noVerbCount > 0) {
+      issues.push({ level: opts.noVerbCount > 4 ? 'alert' : 'warn',
+        text: pt
+          ? opts.noVerbCount + (opts.noVerbCount === 1 ? ' frase sem' : ' frases sem') + ' verbo principal claro'
+          : opts.noVerbCount + (opts.noVerbCount === 1 ? ' sentence has' : ' sentences have') + ' no clear main verb',
+        detail: pt
+          ? D(['· verifique fragmentos em legendas, listas e frases iniciadas por abreviações',
+               '· transforme rótulos em afirmações completas quando estiverem no corpo do texto',
+               '· garanta sujeito + verbo + complemento em resultados e conclusões'])
+          : D(['· check fragments in captions, lists, and abbreviation-led sentences',
+               '· turn labels into full claims when they appear in body prose',
+               '· ensure subject + verb + complement in Results and Conclusions']) });
+    }
+
+    // Legibilidade global
+    if (opts.readability && (opts.readability.flesch < 45 || opts.readability.grade > 16 || opts.readability.fog > 18)) {
+      var readAlert = opts.readability.flesch < 30 || opts.readability.grade > 20 || opts.readability.fog > 22;
+      issues.push({ level: readAlert ? 'alert' : 'warn',
+        text: pt
+          ? 'Legibilidade difícil: Flesch ' + opts.readability.flesch + ', grade ' + opts.readability.grade + ', fog ' + opts.readability.fog
+          : 'Difficult readability: Flesch ' + opts.readability.flesch + ', grade ' + opts.readability.grade + ', fog ' + opts.readability.fog,
+        detail: pt
+          ? D(['· priorize frases longas, palavras complexas e nominalizações',
+               '· artigos científicos aceitam densidade, mas valores extremos atrasam revisão',
+               '· reduza uma ideia secundária por frase antes de trocar terminologia técnica'])
+          : D(['· prioritize long sentences, complex words, and nominalizations',
+               '· scientific articles tolerate density, but extreme scores slow review',
+               '· remove one secondary idea per sentence before changing technical terms']) });
+    }
+
+    // Ritmo irregular
+    if (sentCv > 0.55) {
+      issues.push({ level: 'warn',
+        text: pt
+          ? 'Variação alta no comprimento das frases (CV ' + round1(sentCv) + ') — ritmo pode ser irregular'
+          : 'High sentence length variation (CV ' + round1(sentCv) + ') — rhythm may feel uneven',
+        detail: pt
+          ? D(['· alterne: frase curta de impacto (8–12p) seguida de análise mais longa',
+               '· evite sequências de 4+ frases com comprimento parecido',
+               '· frases curtas no final de parágrafo reforçam a conclusão',
+               '· meta: CV entre 0.30 e 0.55'])
+          : D(['· alternate: short punchy sentence (8–12w) followed by a longer analytical one',
+               '· avoid runs of 4+ sentences of similar length',
+               '· short sentences at paragraph end reinforce the conclusion',
+               '· target: CV between 0.30 and 0.55']) });
+    }
+
+    // Parágrafos longos
+    if (opts.longParagraphCount > 0) {
+      issues.push({ level: opts.longParagraphCount > 2 ? 'alert' : 'warn',
+        text: pt
+          ? opts.longParagraphCount + (opts.longParagraphCount === 1 ? ' parágrafo excede' : ' parágrafos excedem') + ' ' + PARA_LONG + ' palavras (max: ' + maxParaLen + 'p)'
+          : opts.longParagraphCount + (opts.longParagraphCount === 1 ? ' paragraph exceeds' : ' paragraphs exceed') + ' ' + PARA_LONG + ' words (max: ' + maxParaLen + 'w)',
+        detail: pt
+          ? D(['· a primeira frase deve enunciar o tópico; a última deve concluí-lo',
+               '· divida onde houver mudança de subtópico ou evidência nova',
+               '· use um conector de abertura na frase inicial do segundo parágrafo',
+               '· parágrafo ideal: 3–6 frases desenvolvendo uma ideia central'])
+          : D(['· first sentence states the topic; last sentence closes it',
+               '· split where a new sub-topic or piece of evidence begins',
+               '· open the second paragraph with a transition connector',
+               '· ideal paragraph: 3–6 sentences developing one central idea']) });
+    }
+
+    // Gaps de coesão
+    if (opts.cohesionGaps > 0) {
+      issues.push({ level: opts.cohesionGaps > 3 ? 'alert' : 'warn',
+        text: pt
+          ? opts.cohesionGaps + (opts.cohesionGaps === 1 ? ' parágrafo sem' : ' parágrafos sem') + ' conector de abertura após parágrafo longo'
+          : opts.cohesionGaps + (opts.cohesionGaps === 1 ? ' paragraph missing' : ' paragraphs missing') + ' an opening connector after a multi-sentence paragraph',
+        detail: pt
+          ? D(['· aditivo ' + em('(continua o raciocínio)') + ': ' + em('além disso, também, ademais, igualmente'),
+               '· contraste ' + em('(nova perspectiva)') + ': ' + em('porém, entretanto, no entanto, todavia'),
+               '· causa/efeito ' + em('(relação lógica)') + ': ' + em('portanto, assim, por isso, consequentemente'),
+               '· temporal ' + em('(sequência)') + ': ' + em('em seguida, posteriormente, então, nesse momento'),
+               '· conclusão ' + em('(fechamento)') + ': ' + em('em suma, dessa forma, assim sendo, diante disso')])
+          : D(['· additive ' + em('(continues reasoning)') + ': ' + em('furthermore, in addition, also, moreover'),
+               '· contrast ' + em('(new perspective)') + ': ' + em('however, nevertheless, yet, on the other hand'),
+               '· causal ' + em('(logical link)') + ': ' + em('therefore, because, thus, consequently'),
+               '· temporal ' + em('(sequence)') + ': ' + em('subsequently, then, following this, at this stage'),
+               '· conclusion ' + em('(closing)') + ': ' + em('in summary, thus, overall, taken together')]) });
+    }
+
+    // Aberturas repetidas de parágrafo
+    if (opts.paraOpeningRepeats && opts.paraOpeningRepeats.length > 0) {
+      var paraOpenList = topList(opts.paraOpeningRepeats, 4, function (x) { return (x.word || x.start || x.text) + ' ×' + x.count; });
+      issues.push({ level: opts.paraOpeningRepeats.length > 4 ? 'alert' : 'warn',
+        text: pt
+          ? opts.paraOpeningRepeats.length + (opts.paraOpeningRepeats.length === 1 ? ' abertura de parágrafo repetida' : ' aberturas de parágrafo repetidas')
+          : opts.paraOpeningRepeats.length + (opts.paraOpeningRepeats.length === 1 ? ' repeated paragraph opening' : ' repeated paragraph openings'),
+        detail: pt
+          ? D((paraOpenList ? ['· exemplos: ' + em(paraOpenList)] : []).concat([
+               '· varie a função da primeira frase: contexto, contraste, resultado, consequência',
+               '· quando a repetição for intencional, mantenha só em blocos paralelos',
+               '· conectores diferentes ajudam a explicitar a progressão lógica']))
+          : D((paraOpenList ? ['· examples: ' + em(paraOpenList)] : []).concat([
+               '· vary the function of first sentences: context, contrast, result, consequence',
+               '· when repetition is intentional, keep it only in parallel blocks',
+               '· varied connectors make the logical progression explicit'])) });
+    }
+
+    // Cobertura conceitual das seções
+    if ((opts.conceptCoverageAvg > 0 && opts.conceptCoverageAvg < 70) || opts.conceptMissingTotal > 0 || (opts.conceptWeakSections || []).length > 0) {
+      var weakSections = topList(opts.conceptWeakSections || [], 5);
+      issues.push({ level: opts.conceptCoverageAvg < 50 || opts.conceptMissingTotal > 5 ? 'alert' : 'warn',
+        text: pt
+          ? 'Cobertura conceitual incompleta: ' + (opts.conceptCoverageAvg || 0) + '% média, ' + (opts.conceptMissingTotal || 0) + ' lacunas'
+          : 'Incomplete concept coverage: ' + (opts.conceptCoverageAvg || 0) + '% average, ' + (opts.conceptMissingTotal || 0) + ' gaps',
+        detail: pt
+          ? D((weakSections ? ['· seções frágeis: ' + em(weakSections)] : []).concat([
+               '· Introdução deve explicitar lacuna, objetivo e relevância',
+               '· Métodos deve cobrir desenho, amostra, análise e reprodutibilidade',
+               '· Resultados precisa de achados quantitativos; Discussão precisa interpretação, limitações e implicações']))
+          : D((weakSections ? ['· weak sections: ' + em(weakSections)] : []).concat([
+               '· Introduction should state gap, objective, and significance',
+               '· Methods should cover design, sample, analysis, and reproducibility',
+               '· Results need quantitative findings; Discussion needs interpretation, limitations, and implications'])) });
+    }
+
+    // Lacunas de citação (Introdução / Discussão)
+    if (opts.citationGapCount > 0) {
+      issues.push({ level: opts.citationGapCount > 2 ? 'alert' : 'warn',
+        text: pt
+          ? opts.citationGapCount + (opts.citationGapCount === 1 ? ' parágrafo da Introdução/Discussão' : ' parágrafos da Introdução/Discussão') + ' sem citação detectada'
+          : opts.citationGapCount + (opts.citationGapCount === 1 ? ' Introduction/Discussion paragraph' : ' Introduction/Discussion paragraphs') + ' without a detected citation',
+        detail: pt
+          ? D(['· toda afirmação de contexto ou interpretação deve ser ancorada',
+               '· insira com ' + em('@chave') + ' — Quarto converte automaticamente para o estilo da revista',
+               '· Introdução: cite ao estabelecer gaps; Discussão: cite ao comparar achados',
+               '· parágrafos sinalizados estão destacados no painel de coesão'])
+          : D(['· every context claim or interpretive statement needs a literature anchor',
+               '· insert with ' + em('@citationKey') + ' — Quarto renders it to the journal\'s citation style',
+               '· Introduction: cite when establishing gaps; Discussion: cite when comparing findings',
+               '· flagged paragraphs are highlighted in the cohesion panel']) });
+    }
+
+    // Citações em Resultados
+    if (opts.resultsCitationCount > 0) {
+      issues.push({ level: 'warn',
+        text: pt
+          ? opts.resultsCitationCount + (opts.resultsCitationCount === 1 ? ' parágrafo de Resultados' : ' parágrafos de Resultados') + ' com citação bibliográfica'
+          : opts.resultsCitationCount + (opts.resultsCitationCount === 1 ? ' Results paragraph' : ' Results paragraphs') + ' contains a bibliographic citation',
+        detail: pt
+          ? D(['· Resultados relata dados e achados — não compara com literatura',
+               '· mova a citação para a Discussão, onde ela serve de contraponto ou suporte',
+               '· exceção aceitável: validação de protocolo metodológico na própria seção',
+               '· se necessário, combine Results+Discussion em uma única seção'])
+          : D(['· Results reports data and findings — it does not compare to prior literature',
+               '· move the citation to Discussion where it serves as support or counterpoint',
+               '· acceptable exception: method protocol validation within the same section',
+               '· if needed, combine Results+Discussion into a single section']) });
+    }
+
+    // Variáveis não usadas
+    if (opts.unusedVars && opts.unusedVars.length > 0) {
+      var unusedList = opts.unusedVars.join(', ');
+      issues.push({ level: 'alert',
+        text: pt
+          ? opts.unusedVars.length + (opts.unusedVars.length === 1 ? ' variável definida' : ' variáveis definidas') + ' em _variables.yml mas não referenciada' + (opts.unusedVars.length === 1 ? '' : 's') + ' no texto'
+          : opts.unusedVars.length + (opts.unusedVars.length === 1 ? ' variable defined' : ' variables defined') + ' in _variables.yml but not referenced in text',
+        detail: pt
+          ? D(['· variáveis: ' + em(unusedList),
+               '· referencie com ' + em('{{&lt; var nome &gt;}}') + ' no local do valor numérico',
+               '· se a variável foi renomeada na análise, atualize a chave em ' + em('_variables.yml'),
+               '· se não for mais necessária, remova para evitar confusão'])
+          : D(['· variables: ' + em(unusedList),
+               '· reference with ' + em('{{&lt; var name &gt;}}') + ' at the location of the numeric value',
+               '· if the variable was renamed in the analysis, update the key in ' + em('_variables.yml'),
+               '· if no longer needed, remove it to avoid confusion']) });
+    }
+
+    // Evidências não parametrizadas
+    if (opts.evidenceUnparameterized > 0) {
+      issues.push({ level: 'warn',
+        text: pt
+          ? opts.evidenceUnparameterized + (opts.evidenceUnparameterized === 1 ? ' valor numérico' : ' valores numéricos') + ' hardcoded sem variável associada'
+          : opts.evidenceUnparameterized + (opts.evidenceUnparameterized === 1 ? ' hardcoded numeric value' : ' hardcoded numeric values') + ' without a variable binding',
+        detail: pt
+          ? D(['· defina em ' + em('_variables.yml') + ': ' + em('nome_da_variavel: 42.3'),
+               '· insira no texto: ' + em('{{&lt; var nome_da_variavel &gt;}}'),
+               '· se o dado mudar na análise, basta atualizar o arquivo YAML',
+               '· os valores estão destacados no painel de evidências'])
+          : D(['· define in ' + em('_variables.yml') + ': ' + em('variable_name: 42.3'),
+               '· insert in text: ' + em('{{&lt; var variable_name &gt;}}'),
+               '· if the value changes in the analysis, only the YAML file needs updating',
+               '· the values are highlighted in the evidence panel']) });
+    }
+
+    // Evidências numéricas sem citação próxima
+    if (opts.evidenceHardcoded > 0) {
+      issues.push({ level: opts.evidenceHardcoded > 12 ? 'alert' : 'warn',
+        text: pt
+          ? opts.evidenceHardcoded + (opts.evidenceHardcoded === 1 ? ' evidência numérica' : ' evidências numéricas') + ' sem citação bibliográfica próxima'
+          : opts.evidenceHardcoded + (opts.evidenceHardcoded === 1 ? ' numeric evidence item' : ' numeric evidence items') + ' without a nearby bibliographic citation',
+        detail: pt
+          ? D(['· cite a fonte de valores importados da literatura',
+               '· para achados próprios, garanta que a frase deixe claro que o dado vem deste estudo',
+               '· valores parametrizados resolvem atualização; citações resolvem rastreabilidade',
+               '· revise o painel de Evidências antes da submissão'])
+          : D(['· cite the source for values imported from literature',
+               '· for original findings, make clear that the value comes from this study',
+               '· parameterization solves updating; citations solve traceability',
+               '· review the Evidence panel before submission']) });
+    }
+
+    // Baixa densidade de evidência
+    if (opts.totalWords >= 800 && opts.evidenceDensity < 3) {
+      issues.push({ level: 'warn',
+        text: pt
+          ? 'Baixa densidade de evidências detectáveis: ' + round1(opts.evidenceDensity || 0) + '/1000p'
+          : 'Low detectable evidence density: ' + round1(opts.evidenceDensity || 0) + '/1000w',
+        detail: pt
+          ? D(['· verifique se afirmações centrais estão acompanhadas por números, tabelas, figuras ou citações',
+               '· se o manuscrito for conceitual/qualitativo, esse alerta pode ser menos relevante',
+               '· em Resultados, prefira achados quantificados a descrições genéricas'])
+          : D(['· check whether central claims are supported by numbers, tables, figures, or citations',
+               '· if the manuscript is conceptual/qualitative, this warning may be less relevant',
+               '· in Results, prefer quantified findings over generic descriptions']) });
+    }
+
+    // Referências citadas mas não definidas
+    if (opts.undefinedRefs && opts.undefinedRefs.length > 0) {
+      var undefRefList = topList(opts.undefinedRefs, 5);
+      issues.push({ level: 'alert',
+        text: pt
+          ? opts.undefinedRefs.length + (opts.undefinedRefs.length === 1 ? ' citação aponta' : ' citações apontam') + ' para chave ausente no ref.bib'
+          : opts.undefinedRefs.length + (opts.undefinedRefs.length === 1 ? ' citation points' : ' citations point') + ' to a key missing from ref.bib',
+        detail: pt
+          ? D(['· chaves: ' + em(undefRefList),
+               '· adicione as entradas ao .bib ou corrija a grafia da chave',
+               '· esse problema costuma quebrar renderizações e referências finais'])
+          : D(['· keys: ' + em(undefRefList),
+               '· add entries to the .bib file or correct the citation key spelling',
+               '· this often breaks rendering and final reference lists']) });
+    }
+
+    // Figuras/tabelas presentes mas não referenciadas
+    if ((opts.figureMissing && opts.figureMissing.length) || (opts.tableMissing && opts.tableMissing.length)) {
+      var missingBits = [];
+      if (opts.figureMissing && opts.figureMissing.length) missingBits.push((pt ? 'figuras: ' : 'figures: ') + topList(opts.figureMissing, 4));
+      if (opts.tableMissing && opts.tableMissing.length) missingBits.push((pt ? 'tabelas: ' : 'tables: ') + topList(opts.tableMissing, 4));
+      issues.push({ level: 'alert',
+        text: pt
+          ? 'Figuras ou tabelas aparecem sem chamada no texto'
+          : 'Figures or tables appear without an in-text callout',
+        detail: pt
+          ? D(['· ' + em(missingBits.join(' | ')),
+               '· todo elemento visual deve ser citado antes ou perto de sua apresentação',
+               '· use @fig-id e @tbl-id para manter a numeração automática'])
+          : D(['· ' + em(missingBits.join(' | ')),
+               '· every visual element should be cited before or near its appearance',
+               '· use @fig-id and @tbl-id to keep numbering automatic']) });
+    }
+
+    // Order breaks de figuras
+    if (opts.figureOrderIssues > 0) {
+      var figExamples = opts.figureOrderExamples && opts.figureOrderExamples.length
+        ? opts.figureOrderExamples.slice(0, 4).join(', ') : '';
+      issues.push({ level: 'alert',
+        text: pt
+          ? opts.figureOrderIssues + (opts.figureOrderIssues === 1 ? ' quebra de ordem' : ' quebras de ordem') + ' nas referências de figuras'
+          : opts.figureOrderIssues + (opts.figureOrderIssues === 1 ? ' figure reference' : ' figure references') + ' out of sequence',
+        detail: pt
+          ? D((figExamples ? ['· quebras detectadas: ' + em(figExamples)] : []).concat([
+               '· figuras devem ser citadas em ordem crescente conforme surgem no texto',
+               '· verifique se figuras foram renumeradas na análise sem atualizar o manuscrito',
+               '· use o painel de cross-references para navegar até cada referência']))
+          : D((figExamples ? ['· detected breaks: ' + em(figExamples)] : []).concat([
+               '· figures must be cited in ascending order as they appear in text',
+               '· check if figures were renumbered in analysis without updating the manuscript',
+               '· use the cross-references panel to navigate to each reference'])) });
+    }
+
+    // Order breaks de tabelas
+    if (opts.tableOrderIssues > 0) {
+      var tblExamples = opts.tableOrderExamples && opts.tableOrderExamples.length
+        ? opts.tableOrderExamples.slice(0, 4).join(', ') : '';
+      issues.push({ level: 'alert',
+        text: pt
+          ? opts.tableOrderIssues + (opts.tableOrderIssues === 1 ? ' quebra de ordem' : ' quebras de ordem') + ' nas referências de tabelas'
+          : opts.tableOrderIssues + (opts.tableOrderIssues === 1 ? ' table reference' : ' table references') + ' out of sequence',
+        detail: pt
+          ? D((tblExamples ? ['· quebras detectadas: ' + em(tblExamples)] : []).concat([
+               '· tabelas devem ser citadas em ordem crescente conforme surgem no texto',
+               '· verifique se tabelas foram renumeradas na análise sem atualizar o manuscrito',
+               '· use o painel de cross-references para navegar até cada referência']))
+          : D((tblExamples ? ['· detected breaks: ' + em(tblExamples)] : []).concat([
+               '· tables must be cited in ascending order as they appear in text',
+               '· check if tables were renumbered in analysis without updating the manuscript',
+               '· use the cross-references panel to navigate to each reference'])) });
+    }
+
+    // Tamanho do abstract
+    if (opts.abstractWordCount > 0 && (opts.abstractWordCount < 150 || opts.abstractWordCount > 300)) {
+      issues.push({ level: 'warn',
+        text: pt
+          ? 'Abstract com ' + opts.abstractWordCount + ' palavras — faixa típica: 150–300'
+          : 'Abstract has ' + opts.abstractWordCount + ' words — typical range: 150–300',
+        detail: pt
+          ? D(['· se estiver curto, acrescente resultado quantitativo e implicação',
+               '· se estiver longo, remova contexto secundário e detalhes de método',
+               '· sempre confirme o limite específico da revista'])
+          : D(['· if it is short, add a quantitative result and implication',
+               '· if it is long, remove secondary context and method details',
+               '· always confirm the target journal limit']) });
+    }
+
+    // Cobertura do abstract
+    if (opts.abstractWordCount > 0 && opts.abstractCoverage.score < 75) {
+      var missItems = opts.abstractCoverage.missing || [];
+      var abstractHints = pt
+        ? { objective:   'objetivo — ' + em('Este estudo visa…, O objetivo foi…, Buscou-se…'),
+            method:      'método — ' + em('foram avaliados…, utilizou-se…, o experimento consistiu em…'),
+            result:      'resultado — ' + em('os resultados indicam…, observou-se…, verificou-se que…'),
+            conclusion:  'conclusão — ' + em('conclui-se que…, os dados sugerem…, portanto…') }
+        : { objective:   'objective — ' + em('This study aims to…, The purpose was…, We sought to…'),
+            method:      'method — ' + em('We used…, Samples were collected…, The experiment consisted of…'),
+            result:      'result — ' + em('Results showed…, We found…, It was observed that…'),
+            conclusion:  'conclusion — ' + em('We conclude…, The data suggest…, Therefore…') };
+      issues.push({ level: opts.abstractCoverage.score < 50 ? 'alert' : 'warn',
+        text: pt
+          ? 'Abstract cobre ' + opts.abstractCoverage.score + '% dos elementos esperados (objetivo, método, resultado, conclusão)'
+          : 'Abstract covers ' + opts.abstractCoverage.score + '% of expected elements (objective, method, result, conclusion)',
+        detail: D(missItems.length
+          ? (pt ? ['· elementos ausentes:'] : ['· missing elements:']).concat(missItems.map(function(m) {
+              return '&nbsp;&nbsp;– ' + (abstractHints[m] || em(m));
+            }))
+          : (pt ? ['· revise os sinalizadores de presença de cada elemento'] : ['· review signal phrases for each element'])) });
+    }
+
+    // Equilíbrio entre seções
+    if (opts.sectionBalance.cv >= 0.35) {
+      var outliers = opts.sectionBalance.outliers || [];
+      issues.push({ level: opts.sectionBalance.cv >= 0.55 ? 'alert' : 'warn',
+        text: pt
+          ? 'Desequilíbrio entre seções — CV ' + opts.sectionBalance.cv
+          : 'Section length imbalance — CV ' + opts.sectionBalance.cv,
+        detail: pt
+          ? D((outliers.length ? ['· seções discrepantes: ' + em(outliers.slice(0, 3).join(', '))] : []).concat([
+               '· CV atual: ' + em(String(opts.sectionBalance.cv)) + ' — meta ≤ 0.35 (alerta ≥ 0.55)',
+               '· Métodos pode ser legitimamente mais longa — verifique Introdução e Discussão primeiro',
+               '· seções muito curtas podem indicar argumentação incompleta']))
+          : D((outliers.length ? ['· outlier sections: ' + em(outliers.slice(0, 3).join(', '))] : []).concat([
+               '· current CV: ' + em(String(opts.sectionBalance.cv)) + ' — target ≤ 0.35 (alert at ≥ 0.55)',
+               '· Methods is legitimately longer — check Introduction and Discussion first',
+               '· very short sections may indicate incomplete argumentation'])) });
+    }
+
+    // Perfil de conectores
+    if (opts.totalWords >= 500) {
+      var connTotal = connectorTotal(opts.connectorByCat);
+      var connDensity = opts.totalWords ? (connTotal / opts.totalWords) * 1000 : 0;
+      var contrastCause = ((opts.connectorByCat || {}).contrast || 0) + ((opts.connectorByCat || {}).cause || 0);
+      var addShare = connTotal ? (((opts.connectorByCat || {}).add || 0) / connTotal) : 0;
+      if (connDensity < 6 || (connTotal >= 12 && addShare > 0.7) || (connTotal >= 8 && contrastCause === 0)) {
+        issues.push({ level: connDensity < 3 ? 'alert' : 'warn',
+          text: pt
+            ? 'Perfil de conectores pode enfraquecer a progressão lógica (' + round1(connDensity) + '/1000p)'
+            : 'Connector profile may weaken logical progression (' + round1(connDensity) + '/1000w)',
+          detail: pt
+            ? D(['· baixa densidade sugere parágrafos justapostos, não encadeados',
+                 '· excesso de aditivos cria lista; inclua contraste, causa e consequência',
+                 '· bons pontos de revisão: início de parágrafos e transição Resultados→Discussão'])
+            : D(['· low density suggests juxtaposed rather than connected paragraphs',
+                 '· too many additive connectors creates a list; add contrast, cause, and consequence',
+                 '· good revision points: paragraph openings and the Results→Discussion transition']) });
+      }
+    }
+
+    // Voz passiva elevada
+    if (opts.passiveDensity > 60) {
+      issues.push({ level: 'warn',
+        text: pt
+          ? 'Densidade de voz passiva elevada: ' + round1(opts.passiveDensity) + '/1000p (meta ≤ 60)'
+          : 'High passive voice density: ' + round1(opts.passiveDensity) + '/1000w (target ≤ 60)',
+        detail: pt
+          ? D(['· converta: ' + em('"foram coletadas amostras" → "coletamos amostras"'),
+               '· converta: ' + em('"foi observado que" → "observamos que"'),
+               '· passiva é aceitável em Métodos e quando o agente é desconhecido',
+               '· prefira ativa em Resultados e Discussão para maior clareza'])
+          : D(['· convert: ' + em('"samples were collected" → "we collected samples"'),
+               '· convert: ' + em('"it was observed that" → "we observed that"'),
+               '· passive is acceptable in Methods and when the agent is unknown',
+               '· prefer active in Results and Discussion for greater clarity']) });
+    }
+
+    // Hedges excessivos
+    if (opts.hedgeDensity > 30) {
+      issues.push({ level: 'warn',
+        text: pt
+          ? 'Alta densidade de atenuadores: ' + round1(opts.hedgeDensity) + '/1000p (meta ≤ 30)'
+          : 'High hedge density: ' + round1(opts.hedgeDensity) + '/1000w (target ≤ 30)',
+        detail: pt
+          ? D(['· reduza: ' + em('pode, poderia, talvez, parece, aparentemente, possivelmente'),
+               '· hedges são necessários para afirmações incertas — mas não para resultados diretos',
+               '· troque: ' + em('"parece indicar" → "indica"') + ' quando os dados suportam',
+               '· assertividade calibrada aumenta a credibilidade científica do texto'])
+          : D(['· reduce: ' + em('may, might, could, possibly, appears to, seems to, perhaps'),
+               '· hedges are needed for uncertain claims — but not for direct results',
+               '· replace: ' + em('"appears to indicate" → "indicates"') + ' when data supports it',
+               '· calibrated assertiveness strengthens the scientific credibility of the text']) });
+    }
+
+    // Nominalizações
+    if (opts.nominalizationCount > 0 && opts.totalWords > 0) {
+      var nominalDensity = (opts.nominalizationCount / opts.totalWords) * 1000;
+      if (nominalDensity > 18 || opts.nominalizationCount > 30) {
+        issues.push({ level: nominalDensity > 35 ? 'alert' : 'warn',
+          text: pt
+            ? 'Nominalizações elevadas: ' + opts.nominalizationCount + ' (' + round1(nominalDensity) + '/1000p)'
+            : 'High nominalization load: ' + opts.nominalizationCount + ' (' + round1(nominalDensity) + '/1000w)',
+          detail: pt
+            ? D(['· transforme nomes abstratos em verbos quando a ação importa',
+                 '· exemplo: ' + em('"a realização da análise" → "analisamos"'),
+                 '· preserve termos técnicos estáveis, mas reduza cadeias como "avaliação da determinação da variação"',
+                 '· esse ajuste costuma reduzir frases longas e melhorar Flesch/Fog'])
+            : D(['· turn abstract nouns into verbs when the action matters',
+                 '· example: ' + em('"the performance of the analysis" → "we analyzed"'),
+                 '· preserve stable technical terms, but reduce chains like "evaluation of determination of variation"',
+                 '· this often shortens sentences and improves Flesch/Fog']) });
+      }
+    }
+
+    // Pronomes ambíguos
+    if (opts.pronounAmbigCount > 2) {
+      issues.push({ level: opts.pronounAmbigCount > 8 ? 'alert' : 'warn',
+        text: pt
+          ? opts.pronounAmbigCount + (opts.pronounAmbigCount === 1 ? ' pronome ambíguo' : ' pronomes ambíguos') + ' no início de frase'
+          : opts.pronounAmbigCount + (opts.pronounAmbigCount === 1 ? ' ambiguous pronoun' : ' ambiguous pronouns') + ' at sentence start',
+        detail: pt
+          ? D(['· troque "isso/isto/eles" por um referente explícito',
+               '· exemplo: ' + em('"Isso sugere…" → "Esse aumento sugere…"'),
+               '· em parágrafos densos, pronomes fazem o leitor procurar o antecedente'])
+          : D(['· replace "this/it/they" with an explicit referent',
+               '· example: ' + em('"This suggests…" → "This increase suggests…"'),
+               '· in dense paragraphs, pronouns force readers to search for the antecedent']) });
+    }
+
+    // Modais, primeira pessoa e pontuação enfática
+    if (opts.modalVerbCount > 12) {
+      issues.push({ level: opts.modalVerbCount > 28 ? 'alert' : 'warn',
+        text: pt
+          ? opts.modalVerbCount + ' verbos modais detectados — revise cautela excessiva'
+          : opts.modalVerbCount + ' modal verbs detected — review excessive caution',
+        detail: pt
+          ? D(['· mantenha modais em hipóteses, limitações e recomendações',
+               '· em Resultados, substitua "pode indicar" por "indica" quando o dado sustenta',
+               '· diferencie incerteza real de hábito de escrita defensiva'])
+          : D(['· keep modals for hypotheses, limitations, and recommendations',
+               '· in Results, replace "may indicate" with "indicates" when the data supports it',
+               '· distinguish real uncertainty from defensive writing habit']) });
+    }
+    if (opts.firstPersonCount > 8) {
+      issues.push({ level: 'warn',
+        text: pt
+          ? opts.firstPersonCount + ' usos de primeira pessoa — confirme a política da revista'
+          : opts.firstPersonCount + ' first-person uses — confirm the journal policy',
+        detail: pt
+          ? D(['· primeira pessoa pode ser aceitável em periódicos modernos',
+               '· se a revista preferir impessoalidade, reescreva sem voltar à passiva excessiva',
+               '· evite alternar "nós", "os autores" e voz passiva para a mesma ação'])
+          : D(['· first person can be acceptable in modern journals',
+               '· if the journal prefers impersonal style, revise without overusing passive voice',
+               '· avoid alternating "we", "the authors", and passive voice for the same action']) });
+    }
+    if (opts.emphaticPunct > 0) {
+      issues.push({ level: 'warn',
+        text: pt
+          ? opts.emphaticPunct + (opts.emphaticPunct === 1 ? ' pontuação enfática' : ' pontuações enfáticas') + ' detectada' + (opts.emphaticPunct === 1 ? '' : 's')
+          : opts.emphaticPunct + (opts.emphaticPunct === 1 ? ' emphatic punctuation mark' : ' emphatic punctuation marks') + ' detected',
+        detail: pt
+          ? D(['· substitua exclamações e perguntas retóricas por afirmações analíticas',
+               '· em manuscritos científicos, ênfase deve vir de dados, contraste e conclusão'])
+          : D(['· replace exclamation marks and rhetorical emphasis with analytical statements',
+               '· in scientific manuscripts, emphasis should come from data, contrast, and conclusion']) });
+    }
+
+    // Voz passiva fora de Métodos
+    if (opts.nonMethodsPassiveDensity > 45) {
+      issues.push({ level: opts.nonMethodsPassiveDensity > 80 ? 'alert' : 'warn',
+        text: pt
+          ? 'Voz passiva elevada fora de Métodos: ' + round1(opts.nonMethodsPassiveDensity) + '/1000p (meta ≤ 45)'
+          : 'High passive voice outside Methods: ' + round1(opts.nonMethodsPassiveDensity) + '/1000w (target ≤ 45)',
+        detail: pt
+          ? D(['· Introdução, Resultados e Discussão beneficiam de voz ativa',
+               '· converta: ' + em('"foi observado que" → "observamos que"'),
+               '· converta: ' + em('"foram coletados dados" → "coletamos dados"'),
+               '· voz passiva em Métodos é esperada — concentre revisão nas demais seções'])
+          : D(['· Introduction, Results, and Discussion benefit from active voice',
+               '· convert: ' + em('"it was observed that" → "we observed that"'),
+               '· convert: ' + em('"data were collected" → "we collected data"'),
+               '· passive in Methods is expected — focus revisions on other sections']) });
+    }
+
+    // Termos coloquiais
+    if (opts.colloquialCount > 0) {
+      issues.push({ level: opts.colloquialCount > 3 ? 'alert' : 'warn',
+        text: pt
+          ? opts.colloquialCount + (opts.colloquialCount === 1 ? ' expressão coloquial' : ' expressões coloquiais') + ' detectada' + (opts.colloquialCount === 1 ? '' : 's') + ' — inadequada' + (opts.colloquialCount === 1 ? '' : 's') + ' em escrita científica'
+          : opts.colloquialCount + (opts.colloquialCount === 1 ? ' colloquial expression' : ' colloquial expressions') + ' detected — inappropriate in scientific writing',
+        detail: pt
+          ? D(['· substitua: ' + em('"muito bom" → "notável, substancial"'),
+               '· substitua: ' + em('"tipo" → "como, tal como"') + ', ' + em('"coisa" → "elemento, fator"'),
+               '· use o painel de Tom/Estilo para localizar cada ocorrência',
+               '· registros coloquiais reduzem a credibilidade do manuscrito'])
+          : D(['· replace: ' + em('"a lot" → "substantial, considerable"'),
+               '· replace: ' + em('"kind of" → "somewhat, relatively"') + ', ' + em('"huge" → "substantial, marked"'),
+               '· use the Voice & Tone panel to locate each occurrence',
+               '· colloquial register undermines the credibility of the manuscript']) });
+    }
+
+    // Quantificadores vagos
+    if (opts.vagueCount > 8) {
+      issues.push({ level: opts.vagueCount > 25 ? 'alert' : 'warn',
+        text: pt
+          ? opts.vagueCount + ' quantificadores vagos sem dados precisos (' + em('muitos, vários, alguns…') + ')'
+          : opts.vagueCount + ' vague quantifiers without precise data (' + em('many, several, some…') + ')',
+        detail: pt
+          ? D(['· substitua por valores exatos: ' + em('"muitos" → "43 (82%)"'),
+               '· se o número exato não for relevante, use: ' + em('"a maioria (>75%)"'),
+               '· quantificadores vagos são aceitáveis apenas em contexto qualitativo explícito',
+               '· valores em _variables.yml facilitam a parametrização desses dados'])
+          : D(['· replace with exact values: ' + em('"many" → "43 (82%)"'),
+               '· if exact count is not meaningful, use: ' + em('"the majority (>75%)"'),
+               '· vague quantifiers are acceptable only in explicitly qualitative contexts',
+               '· define values in _variables.yml to keep numbers updateable']) });
+    }
+
+    // Frases com abertura fraca (It is / There is / This is)
+    if (opts.weakOpenerCount > 3) {
+      issues.push({ level: opts.weakOpenerCount > 10 ? 'alert' : 'warn',
+        text: pt
+          ? opts.weakOpenerCount + (opts.weakOpenerCount === 1 ? ' frase abre' : ' frases abrem') + ' com sujeito vazio (estrutura It is / There is)'
+          : opts.weakOpenerCount + (opts.weakOpenerCount === 1 ? ' sentence opens' : ' sentences open') + ' with an empty subject (It is / There is / This is)',
+        detail: pt
+          ? D(['· converta: ' + em('"É importante notar que…" → "Nota-se que…" ou omita'),
+               '· converta: ' + em('"Há evidências de que…" → "Evidências indicam que…"'),
+               '· converta: ' + em('"This is consistent with…" → "These findings are consistent with…"'),
+               '· sujeito direto comunica com mais clareza e autoridade'])
+          : D(['· convert: ' + em('"It is important to note that…" → "Notably,…" or omit'),
+               '· convert: ' + em('"There is evidence that…" → "Evidence indicates that…"'),
+               '· convert: ' + em('"This is consistent with…" → "These findings are consistent with…"'),
+               '· direct subject communicates with greater clarity and authority']) });
+    }
+
+    // Frases iniciando com citação
+    if (opts.citationSentStartCount > 3) {
+      issues.push({ level: 'warn',
+        text: pt
+          ? opts.citationSentStartCount + (opts.citationSentStartCount === 1 ? ' frase inicia' : ' frases iniciam') + ' com citação — o argumento deve preceder a referência'
+          : opts.citationSentStartCount + (opts.citationSentStartCount === 1 ? ' sentence starts' : ' sentences start') + ' with a citation — the argument should precede the reference',
+        detail: pt
+          ? D(['· reestruture: ' + em('"@Smith2020 mostrou que X" → "X foi demonstrado [@Smith2020]"'),
+               '· a ideia do autor deve abrir a frase; a citação ancora ao final',
+               '· excepção: revisões de literatura podem citar o autor como sujeito'])
+          : D(['· restructure: ' + em('"@Smith2020 showed that X" → "X has been demonstrated [@Smith2020]"'),
+               '· the author\'s idea should open the sentence; the citation anchors at the end',
+               '· exception: literature reviews may use the cited author as grammatical subject']) });
+    }
+
+    // Siglas não definidas
+    if (opts.undefinedAcronyms && opts.undefinedAcronyms.length > 0) {
+      var acroList = opts.undefinedAcronyms.slice(0, 6).map(function(a) { return a.acronym; }).join(', ');
+      issues.push({ level: opts.undefinedAcronyms.length > 2 ? 'alert' : 'warn',
+        text: pt
+          ? opts.undefinedAcronyms.length + (opts.undefinedAcronyms.length === 1 ? ' sigla usada' : ' siglas usadas') + ' sem definição prévia'
+          : opts.undefinedAcronyms.length + (opts.undefinedAcronyms.length === 1 ? ' acronym used' : ' acronyms used') + ' without prior definition',
+        detail: pt
+          ? D(['· siglas: ' + em(acroList),
+               '· defina na primeira ocorrência: ' + em('Nome Completo (NC)'),
+               '· exceção: siglas universalmente conhecidas (DNA, RNA, pH, CO₂)',
+               '· verifique também se a sigla está consistente ao longo do texto'])
+          : D(['· acronyms: ' + em(acroList),
+               '· define at first use: ' + em('Full Name (FN)'),
+               '· exception: universally recognized acronyms (DNA, RNA, pH, CO₂)',
+               '· also verify consistent capitalization throughout the text']) });
+    }
+
+    // Frases com expressões prolixas
+    if (opts.wordyCount > 5) {
+      issues.push({ level: opts.wordyCount > 20 ? 'alert' : 'warn',
+        text: pt
+          ? opts.wordyCount + (opts.wordyCount === 1 ? ' expressão prolixa' : ' expressões prolixas') + ' detectada' + (opts.wordyCount === 1 ? '' : 's'  )
+          : opts.wordyCount + (opts.wordyCount === 1 ? ' wordy phrase' : ' wordy phrases') + ' detected',
+        detail: pt
+          ? D(['· substitua: ' + em('"pelo fato de que" → "porque"'),
+               '· substitua: ' + em('"no que diz respeito a" → "sobre"') + ', ' + em('"com o objetivo de" → "para"'),
+               '· substitua: ' + em('"é necessário que" → "deve"') + ', ' + em('"em função de" → "por"'),
+               '· use o painel de Tom/Estilo para localizar cada ocorrência'])
+          : D(['· replace: ' + em('"due to the fact that" → "because"'),
+               '· replace: ' + em('"in order to" → "to"') + ', ' + em('"with regard to" → "regarding"'),
+               '· replace: ' + em('"it is necessary to" → "must"') + ', ' + em('"in the event that" → "if"'),
+               '· use the Voice & Tone panel to locate each occurrence']) });
+    }
+
+    // Inconsistência de unidades
+    if (opts.unitInconsistency && opts.unitInconsistency.length > 0) {
+      var unitList = opts.unitInconsistency.slice(0, 4).join('; ');
+      issues.push({ level: 'alert',
+        text: pt
+          ? opts.unitInconsistency.length + (opts.unitInconsistency.length === 1 ? ' inconsistência de unidade' : ' inconsistências de unidades') + ' detectada' + (opts.unitInconsistency.length === 1 ? '' : 's')
+          : opts.unitInconsistency.length + (opts.unitInconsistency.length === 1 ? ' unit inconsistency' : ' unit inconsistencies') + ' detected',
+        detail: pt
+          ? D(['· conflitos: ' + em(unitList),
+               '· padronize: use ' + em('mg kg⁻¹') + ' ou ' + em('mg/kg') + ' — nunca os dois',
+               '· prefira notação com expoente negativo em periódicos científicos',
+               '· verifique também % vs. por cento e h vs. hora'])
+          : D(['· conflicts: ' + em(unitList),
+               '· standardize: use ' + em('mg kg⁻¹') + ' or ' + em('mg/kg') + ' — never both',
+               '· prefer negative exponent notation in scientific journals',
+               '· also check % vs. percent and h vs. hour']) });
+    }
+
+    // Variantes terminológicas
+    if (opts.termVariants && opts.termVariants.length > 3) {
+      var tvList = opts.termVariants.slice(0, 4).map(function(v) {
+        return v.forms ? v.forms.slice(0, 2).join('/') : '';
+      }).filter(Boolean).join(', ');
+      issues.push({ level: 'warn',
+        text: pt
+          ? opts.termVariants.length + ' grupos de variantes terminológicas — risco de ambiguidade conceitual'
+          : opts.termVariants.length + ' terminology variant groups — risk of conceptual ambiguity',
+        detail: pt
+          ? D((tvList ? ['· exemplos: ' + em(tvList)] : []).concat([
+               '· escolha uma forma canônica e use-a consistentemente',
+               '· variantes como ' + em('análise/analisar/analítico') + ' podem ser intencionais — revise',
+               '· inconsistência terminológica dificulta buscas bibliográficas']))
+          : D((tvList ? ['· examples: ' + em(tvList)] : []).concat([
+               '· choose a canonical form and use it consistently',
+               '· variants like ' + em('analyze/analysis/analytical') + ' may be intentional — review',
+               '· terminology inconsistency hampers literature search and review'])) });
+    }
+
+    // Repetição lexical global
+    if (opts.repeatedTermCount > 12) {
+      var repeatedList = topList(opts.topRepeated, 6, function (x) {
+        if (typeof x === 'string') return x;
+        return (x.text || '') + (x.count ? ' ×' + x.count : '');
+      });
+      issues.push({ level: opts.repeatedTermCount > 28 ? 'alert' : 'warn',
+        text: pt
+          ? opts.repeatedTermCount + ' termos com repetição forte no documento'
+          : opts.repeatedTermCount + ' strongly repeated terms in the document',
+        detail: pt
+          ? D((repeatedList ? ['· mais repetidos: ' + em(repeatedList)] : []).concat([
+               '· preserve palavras-chave técnicas quando forem necessárias para rastreabilidade',
+               '· revise repetições de verbos genéricos, conectores e nomes abstratos',
+               '· se o termo central domina muitas seções, varie a estrutura da frase em vez de trocar o termo']))
+          : D((repeatedList ? ['· most repeated: ' + em(repeatedList)] : []).concat([
+               '· preserve technical keywords when needed for traceability',
+               '· review repeated generic verbs, connectors, and abstract nouns',
+               '· if the central term dominates many sections, vary sentence structure rather than replacing the term'])) });
+    }
+
+    // Inícios repetidos de frase
+    if (opts.repeatedStarts && opts.repeatedStarts.length > 2) {
+      var startList = topList(opts.repeatedStarts, 4, function (x) { return (x.start || x.word || x.text) + ' ×' + x.count; });
+      issues.push({ level: opts.repeatedStarts.length > 6 ? 'alert' : 'warn',
+        text: pt
+          ? opts.repeatedStarts.length + ' padrões repetidos de início de frase'
+          : opts.repeatedStarts.length + ' repeated sentence-start patterns',
+        detail: pt
+          ? D((startList ? ['· exemplos: ' + em(startList)] : []).concat([
+               '· varie sujeito, conector e ordem da informação conhecida/nova',
+               '· repetição pode ser recurso retórico, mas perde força quando aparece por hábito',
+               '· revise principalmente sequências de Resultados']))
+          : D((startList ? ['· examples: ' + em(startList)] : []).concat([
+               '· vary subject, connector, and old/new information order',
+               '· repetition can be rhetorical, but weakens when it appears by habit',
+               '· review Results sequences first'])) });
+    }
+
+    // Baixa diversidade lexical
+    if (opts.lexDiv < 50) {
+      issues.push({ level: opts.lexDiv < 35 ? 'alert' : 'warn',
+        text: pt
+          ? 'Baixa diversidade lexical: ' + opts.lexDiv + '% (meta ≥ 50%)'
+          : 'Low lexical diversity: ' + opts.lexDiv + '% (target ≥ 50%)',
+        detail: pt
+          ? D(['· diversidade mede palavras únicas / total de palavras de conteúdo',
+               '· varie o vocabulário: use sinônimos precisos, não genéricos',
+               '· repetição controlada de termos técnicos é esperada — o problema é a repetição de verbo/conectivo',
+               '· revise os termos mais repetidos abaixo no painel de Vocabulário'])
+          : D(['· diversity measures unique / total content words in the document',
+               '· vary vocabulary: use precise synonyms, not generic ones',
+               '· controlled repetition of technical terms is expected — the issue is verb/connector repetition',
+               '· review most repeated terms in the Vocabulary panel below']) });
+    }
+
+    // Sinais NLP de densidade e fluxo
+    var nlpTotals = opts.nlpTotals || {};
+    if ((nlpTotals.nominalLoadCount || 0) > 5 || (nlpTotals.weakVerbCount || 0) > 8 || (nlpTotals.nounStackCount || 0) > 4) {
+      var nlpAlert = (nlpTotals.nominalLoadCount || 0) > 18 || (nlpTotals.weakVerbCount || 0) > 24 || (nlpTotals.nounStackCount || 0) > 12;
+      issues.push({ level: nlpAlert ? 'alert' : 'warn',
+        text: pt
+          ? 'NLP detectou densidade nominal/verbos fracos: ' + (nlpTotals.nominalLoadCount || 0) + ' frases densas, ' + (nlpTotals.weakVerbCount || 0) + ' verbos genéricos, ' + (nlpTotals.nounStackCount || 0) + ' noun stacks'
+          : 'NLP detected nominal density/weak predicates: ' + (nlpTotals.nominalLoadCount || 0) + ' dense sentences, ' + (nlpTotals.weakVerbCount || 0) + ' generic verbs, ' + (nlpTotals.nounStackCount || 0) + ' noun stacks',
+        detail: pt
+          ? D(['· substitua verbos genéricos por relações científicas precisas: aumenta, reduz, prediz, modula',
+               '· quebre cadeias nominais com preposições ou frases relativas curtas',
+               '· revise os highlights NLP antes de editar terminologia técnica'])
+          : D(['· replace generic verbs with precise scientific relations: increases, reduces, predicts, modulates',
+               '· break noun chains with prepositions or short relative clauses',
+               '· review NLP highlights before editing technical terminology']) });
+    }
+    if ((nlpTotals.entityOverloadCount || 0) > 0 || opts.nlpEntityDensity > 8) {
+      issues.push({ level: (nlpTotals.entityOverloadCount || 0) > 5 || opts.nlpEntityDensity > 16 ? 'alert' : 'warn',
+        text: pt
+          ? 'Alta concentração de entidades/nomes próprios (' + round1(opts.nlpEntityDensity || 0) + '/100p)'
+          : 'High concentration of entities/proper names (' + round1(opts.nlpEntityDensity || 0) + '/100w)',
+        detail: pt
+          ? D(['· agrupe nomes institucionais, softwares e locais quando possível',
+               '· explique a função do nome próprio na primeira menção',
+               '· frases com muitas entidades tendem a obscurecer a relação científica'])
+          : D(['· group institutional names, software, and locations where possible',
+               '· explain the role of a proper name at first mention',
+               '· entity-heavy sentences can obscure the scientific relationship']) });
+    }
+    if (opts.nlpActionVerbScore < 55 || opts.nlpSemanticRedundancy > 22 || (opts.nlpFlowScore > 0 && opts.nlpFlowScore < 45) || (nlpTotals.termDriftCount || 0) > 0) {
+      issues.push({ level: opts.nlpActionVerbScore < 35 || opts.nlpSemanticRedundancy > 35 || (opts.nlpFlowScore > 0 && opts.nlpFlowScore < 30) ? 'alert' : 'warn',
+        text: pt
+          ? 'Sinais NLP de fluxo/redundância: ação ' + round1(opts.nlpActionVerbScore || 0) + '%, redundância ' + round1(opts.nlpSemanticRedundancy || 0) + '%, fluxo ' + round1(opts.nlpFlowScore || 0) + '%'
+          : 'NLP flow/redundancy signals: action ' + round1(opts.nlpActionVerbScore || 0) + '%, redundancy ' + round1(opts.nlpSemanticRedundancy || 0) + '%, flow ' + round1(opts.nlpFlowScore || 0) + '%',
+        detail: pt
+          ? D(['· frases vizinhas muito parecidas devem ser fundidas ou diferenciadas',
+               '· baixo fluxo geralmente pede conector ou retomada explícita do conceito anterior',
+               '· drift terminológico sugere escolher uma forma canônica para o mesmo conceito'])
+          : D(['· very similar adjacent sentences should be merged or differentiated',
+               '· low flow usually needs a connector or explicit reprise of the previous concept',
+               '· term drift suggests choosing one canonical form for the same concept']) });
+    }
+    if (LANG === 'en' && ((nlpTotals.contractionCount || 0) > 0 || (nlpTotals.questionCount || 0) > 1)) {
+      issues.push({ level: 'warn',
+        text: (nlpTotals.contractionCount || 0) + ' contractions and ' + (nlpTotals.questionCount || 0) + ' interrogative sentences detected',
+        detail: D(['· avoid contractions in formal scientific English',
+                   '· convert rhetorical questions into explicit knowledge gaps or objectives',
+                   '· questions are acceptable only when the article genre explicitly supports them']) });
+    }
+    if (opts.winkStats && opts.winkStats.winkAvailable && (
+      (opts.winkStats.complexWordDensity || 0) > 18 ||
+      (opts.winkStats.pronounDensity || 0) > 5 ||
+      (opts.winkStats.auxiliaryVerbRatio || 0) > 70 ||
+      (opts.winkStats.posNounStackCount || 0) > 5
+    )) {
+      issues.push({ level: (opts.winkStats.complexWordDensity || 0) > 24 || (opts.winkStats.posNounStackCount || 0) > 14 ? 'alert' : 'warn',
+        text: pt
+          ? 'wink-nlp reforça sinais de prosa densa em inglês'
+          : 'wink-nlp confirms dense English prose signals',
+        detail: pt
+          ? D(['· revise palavras complexas, pronomes, auxiliares e noun stacks nos cards wink',
+               '· essa checagem usa POS tagging e complementa as heurísticas internas'])
+          : D(['· review complex words, pronouns, auxiliaries, and noun stacks in wink cards',
+               '· this check uses POS tagging and complements the built-in heuristics']) });
+    }
+
+    // Referências não citadas
+    if (opts.unusedRefs && opts.unusedRefs.length > 0) {
+      var unusedRefList = opts.unusedRefs.slice(0, 5).join(', ');
+      issues.push({ level: 'warn',
+        text: pt
+          ? opts.unusedRefs.length + (opts.unusedRefs.length === 1 ? ' referência definida' : ' referências definidas') + ' em ref.bib mas não citada' + (opts.unusedRefs.length === 1 ? '' : 's') + ' no texto'
+          : opts.unusedRefs.length + (opts.unusedRefs.length === 1 ? ' reference defined' : ' references defined') + ' in ref.bib but not cited in text',
+        detail: pt
+          ? D(['· chaves: ' + em(unusedRefList),
+               '· remova do .bib se não for relevante para o manuscrito atual',
+               '· ou insira uma citação onde o trabalho sustenta uma afirmação',
+               '· bibliografias infladas são penalizadas em revisão por pares'])
+          : D(['· keys: ' + em(unusedRefList),
+               '· remove from .bib if not relevant to the current manuscript',
+               '· or insert a citation where the work supports a claim',
+               '· inflated reference lists are flagged in peer review']) });
+    }
+
+    var alerts = issues.filter(function(i) { return i.level === 'alert'; });
+    var warns  = issues.filter(function(i) { return i.level === 'warn'; });
+
+    function renderIssue(iss) {
+      return '<div class="ws-sum-issue ws-sum-issue-' + iss.level + '">' +
+        (iss.level === 'alert' ? '⚠ ' : '› ') + escapeHTML(iss.text) +
+        (iss.detail ? '<br>' + iss.detail : '') +
+      '</div>';
+    }
+
+    var html = buildTextProfile();
+    if (issues.length === 0) {
+      html += '<div class="ws-sum-ok">' + (pt ? '✓ Nenhum problema detectado.' : '✓ No issues detected.') + '</div>';
+    } else {
+      if (alerts.length > 0) {
+        html += '<div class="ws-sum-section-label ws-sum-section-alert">' + (pt ? 'Problemas críticos' : 'Key issues') + '</div>';
+        html += alerts.map(renderIssue).join('');
+      }
+      if (warns.length > 0) {
+        html += '<div class="ws-sum-section-label ws-sum-section-warn">' + (pt ? 'Atenções' : 'Notices') + '</div>';
+        html += warns.map(renderIssue).join('');
+      }
+    }
+
+    return '<div class="ws-doc-summary">' +
+      '<div class="ws-sum-header">' +
+        '<span class="ws-sum-title">' + (pt ? 'Análise do documento' : 'Document analysis') + '</span>' +
+        '<span class="ws-sum-badge">' + (pt ? 'automático' : 'auto') + '</span>' +
+      '</div>' +
+      html +
+    '</div>';
+  }
+
+// src/ui/modal.js — Metric row and search control render helpers.
+// Built into ../scientific-writing.js by build/build-scientific-writing.mjs.
+
   function metricItem(label, value, focus, title) {
     return '<div class="ws-doc-metric"' +
       (focus ? ' data-ws-focus="' + focus + '"' : '') +
@@ -3856,212 +5160,6 @@
       '</div>' +
       '<span class="ws-doc-regex-count">0 ' + L.regexMatches + '</span>' +
     '</div>';
-  }
-
-  function sectionTypeFromTitle(title) {
-    var t = normalizeSectionName(title);
-    if (LANG === 'en') {
-      if (/\babstract\b/.test(t)) return 'abstract';
-      if (/\bintroduction\b/.test(t)) return 'introduction';
-      if (/\b(method|methods|materials|methodology)\b/.test(t)) return 'methods';
-      if (/\bresults\b/.test(t)) return 'results';
-      if (/\bdiscussion\b/.test(t)) return 'discussion';
-      if (/\b(conclusion|conclusions)\b/.test(t)) return 'conclusion';
-      return 'other';
-    }
-    if (/\b(resumo|abstract)\b/.test(t)) return 'abstract';
-    if (/\bintroducao\b/.test(t)) return 'introduction';
-    if (/\b(metodo|metodos|material|materiais|metodologia)\b/.test(t)) return 'methods';
-    if (/\bresultados\b/.test(t)) return 'results';
-    if (/\bdiscussao\b/.test(t)) return 'discussion';
-    if (/\b(conclusao|conclusoes)\b/.test(t)) return 'conclusion';
-    return 'other';
-  }
-
-  function hasAnyPattern(text, patterns) {
-    return (patterns || []).some(function (re) { return re.test(text); });
-  }
-
-  function analyzeSectionConceptCoverage(title, sectionText) {
-    var raw = String(sectionText || '');
-    var text = normalizeSectionName(raw);
-    var sectionType = sectionTypeFromTitle(title);
-    var checks = [];
-
-    if (sectionType === 'introduction' || sectionType === 'abstract') {
-      checks.push({
-        label: L.conceptGap,
-        ok: hasAnyPattern(text, LANG === 'en'
-          ? [/\b(gap|unknown|unclear|remains unknown|little is known|not well understood)\b/]
-          : [/\b(lacuna|desconhecid|nao se sabe|pouco se sabe|nao esta claro)\b/]),
-      });
-      checks.push({
-        label: L.conceptObjective,
-        ok: hasAnyPattern(text, LANG === 'en'
-          ? [/\b(objective|aim|we hypothesize|hypothesis|this study investigates|this study evaluates|we tested)\b/]
-          : [/\b(objetivo|hipotese|este estudo investig|este estudo avali|testamos|avaliamos)\b/]),
-      });
-      checks.push({
-        label: L.conceptSignificance,
-        ok: hasAnyPattern(text, LANG === 'en'
-          ? [/\b(important|relevant|impact|implication|significance|clinical relevance|practical relevance)\b/]
-          : [/\b(importante|relevante|impacto|implicac|significancia|relevancia clinica|relevancia pratica)\b/]),
-      });
-    }
-
-    if (sectionType === 'methods') {
-      checks.push({
-        label: L.conceptDesign,
-        ok: hasAnyPattern(text, LANG === 'en'
-          ? [/\b(randomized|controlled|experimental design|study design|n\s*=|sample|replicate|participants)\b/]
-          : [/\b(delineamento|desenho experimental|n\s*=|amostra|replic|participantes|controle|randomiz)\b/]),
-      });
-      checks.push({
-        label: L.conceptReproducibility,
-        ok: hasAnyPattern(text, LANG === 'en'
-          ? [/\b(protocol|according to|as described|anova|regression|confidence interval|p\s*[<=>]|statistical analysis)\b/]
-          : [/\b(protocolo|conforme|como descrito|anova|regress|intervalo de confianca|p\s*[<=>]|analise estatistica)\b/]),
-      });
-    }
-
-    if (sectionType === 'results' || sectionType === 'abstract') {
-      checks.push({
-        label: L.conceptQuantResult,
-        ok: hasAnyPattern(raw, LANG === 'en'
-          ? [/\b\d+(?:[.,]\d+)?\b/, /\bp\s*[<=>]\s*0?\.?\d+/i, /\b\d+(?:[.,]\d+)?\s*(%|mg|g|kg|ml|l|mm|cm|m|s|min|h|days?)\b/i]
-          : [/\b\d+(?:[.,]\d+)?\b/, /\bp\s*[<=>]\s*0?\.?\d+/i, /\b\d+(?:[.,]\d+)?\s*(%|mg|g|kg|ml|l|mm|cm|m|s|min|h|dias?)\b/i]),
-      });
-    }
-
-    if (sectionType === 'discussion' || sectionType === 'conclusion') {
-      checks.push({
-        label: L.conceptInterpretation,
-        ok: hasAnyPattern(text, LANG === 'en'
-          ? [/\b(suggest|indicate|indicates|interpreted|interpretation|explain|explains)\b/]
-          : [/\b(sugere|indica|indicam|interpret|explica|explicam)\b/]),
-      });
-      checks.push({
-        label: L.conceptLimitations,
-        ok: hasAnyPattern(text, LANG === 'en'
-          ? [/\b(limitation|limitations|constraint|constraints|caution)\b/]
-          : [/\b(limitac|restric|cautela)\b/]),
-      });
-      checks.push({
-        label: L.conceptImplications,
-        ok: hasAnyPattern(text, LANG === 'en'
-          ? [/\b(implication|implications|future work|future studies|further research|therefore)\b/]
-          : [/\b(implicac|estudos futuros|trabalhos futuros|pesquisas futuras|portanto)\b/]),
-      });
-    }
-
-    if (!checks.length) {
-      return {
-        sectionType: sectionType,
-        score: 100,
-        missingCount: 0,
-        missing: [],
-      };
-    }
-
-    var okCount = checks.filter(function (c) { return c.ok; }).length;
-    var missing = checks.filter(function (c) { return !c.ok; }).map(function (c) { return c.label; });
-    var score = Math.round((okCount / checks.length) * 100);
-
-    return {
-      sectionType: sectionType,
-      score: score,
-      missingCount: missing.length,
-      missing: missing,
-    };
-  }
-
-  function sectionSummary(id, title, statsList, totalWords, sectionText) {
-    var sentLens = [];
-    var passive = 0;
-    var longSentences = 0;
-    var lexSum = 0;
-    statsList.forEach(function (stats) {
-      passive += stats.passiveCount;
-      lexSum += stats.lexDiv;
-      stats.sentences.forEach(function (sent) {
-        var n = countWords(sent);
-        if (n > 0) {
-          sentLens.push(n);
-          if (n > SENT_LONG) longSentences++;
-        }
-      });
-    });
-    var citationMarkers = statsList.reduce(function (sum, stats) { return sum + (stats.citationMarkers || 0); }, 0);
-    var citationKeys = statsList.reduce(function (sum, stats) { return sum + (stats.citationKeyCount || 0); }, 0);
-    var summary = {
-      id: id,
-      title: title,
-      text: sectionText || '',
-      words: totalWords,
-      paras: statsList.length,
-      sentences: sentLens.length,
-      passive: passive,
-      citationMarkers: citationMarkers,
-      citationKeys: citationKeys,
-      longSentences: longSentences,
-      avgSentence: mean(sentLens),
-      avgParagraph: mean(statsList.map(function (stats) { return stats.wordCount; })),
-      lexicalDiversity: statsList.length ? (lexSum / statsList.length) : 1,
-      isMethods: isMethodsTitle(title),
-    };
-
-    var secSentences = getSentences(sectionText || '');
-    var secNlp = analyzeScientificNlp(sectionText || '', secSentences);
-    summary.nlpNounDensity = secNlp.nounDensity || 0;
-    summary.nlpEntityDensity = secNlp.entityDensity || 0;
-    summary.nlpEntityOverload = secNlp.entityOverloadCount || 0;
-    summary.nlpActionVerbScore = secNlp.actionVerbScore || 0;
-    summary.nlpPatternRepeats = secNlp.sentencePatternRepeatCount || 0;
-    summary.nlpSemanticRedundancy = secNlp.semanticRedundancyPct || 0;
-    summary.nlpFlowScore = secNlp.flowScore || 0;
-    summary.nlpTermDrift = secNlp.termDriftCount || 0;
-    summary.nlpTenseProfile = secNlp.tenseProfile || { past: 0, present: 0, future_modal: 0, other: 0 };
-    summary.nlpPosNounStacks = secNlp.nounStackCount || 0;
-    var concept = analyzeSectionConceptCoverage(title, sectionText || '');
-    summary.sectionType = concept.sectionType;
-    summary.conceptCoverage = concept.score;
-    summary.conceptMissingCount = concept.missingCount;
-    summary.conceptMissing = concept.missing;
-
-    summary.passiveDensity = summary.words ? (summary.passive / summary.words) * 1000 : 0;
-    summary.longSentenceRate = summary.sentences ? (summary.longSentences / summary.sentences) * 100 : 0;
-    var goals = evaluateSectionGoals(summary);
-    summary.goalIssueCount = goals.count;
-    summary.goalIssues = goals.details;
-    summary.score = calcSectionScore(summary);
-    return summary;
-  }
-
-  function buildDiagnostics(sections, passiveTotal, longSentenceRate) {
-    if (sections.length === 0) return '';
-
-    var rhythm = scaledBlocks(sections);
-    var methodPassive = sections
-      .filter(function (s) { return s.isMethods; })
-      .reduce(function (sum, s) { return sum + s.passive; }, 0);
-    var passiveRatio = passiveTotal > 0 ? methodPassive / passiveTotal : 0;
-
-    var dense = sections
-      .slice()
-      .sort(function (a, b) { return b.score - a.score; })
-      .slice(0, 2);
-
-    var passiveNote = passiveRatio >= 0.45 ? L.passiveExpected : L.passiveSpread;
-    var denseText = dense.length
-      ? dense.map(function (s) { return escapeHTML(s.title) + ' (' + s.score + '/100)'; }).join(', ')
-      : L.noDenseSections;
-
-    return '<div class="ws-doc-diagnostics">' +
-      '<div><span>' + L.rhythm + '</span><strong class="ws-doc-rhythm">' + rhythm + '</strong></div>' +
-      '<div><span>' + L.denseSections + '</span><strong>' + denseText + '</strong></div>' +
-      '<div><span>' + L.longSentenceRate + '</span><strong>' + round1(longSentenceRate) + '%</strong></div>' +
-      '<div><span>' + L.passive + '</span><strong>' + passiveNote + '</strong></div>' +
-      '</div>';
   }
 
   function wireMetricFocus(metrics) {
@@ -4115,6 +5213,174 @@
       });
     });
   }
+
+// src/ui/doi-tooltip.js — DOI validation tooltip (data pre-fetched at render time by Lua).
+// Built into ../scientific-writing.js by build/build-scientific-writing.mjs.
+
+  function tokenDiff(strA, strB) {
+    var tA = (strA || '').match(/\S+/g) || [];
+    var tB = (strB || '').match(/\S+/g) || [];
+    var m = tA.length, n = tB.length;
+    var dp = new Array(m + 1);
+    for (var i = 0; i <= m; i++) dp[i] = new Array(n + 1).fill(0);
+    for (var i = 1; i <= m; i++) {
+      for (var j = 1; j <= n; j++) {
+        dp[i][j] = tA[i-1].toLowerCase() === tB[j-1].toLowerCase()
+          ? dp[i-1][j-1] + 1
+          : Math.max(dp[i-1][j], dp[i][j-1]);
+      }
+    }
+    var mA = new Set(), mB = new Set();
+    var i = m, j = n;
+    while (i > 0 && j > 0) {
+      if (tA[i-1].toLowerCase() === tB[j-1].toLowerCase()) {
+        mA.add(i-1); mB.add(j-1); i--; j--;
+      } else if (dp[i-1][j] >= dp[i][j-1]) { i--; } else { j--; }
+    }
+    var bibHtml = tA.map(function (w, idx) {
+      return '<span class="' + (mA.has(idx) ? 'ws-diff-ok' : 'ws-diff-err') + '">' + escapeHTML(w) + '</span>';
+    }).join(' ');
+    var apiHtml = tB.map(function (w, idx) {
+      return '<span class="' + (mB.has(idx) ? 'ws-diff-ok' : 'ws-diff-add') + '">' + escapeHTML(w) + '</span>';
+    }).join(' ');
+    return { bibHtml: bibHtml, apiHtml: apiHtml };
+  }
+
+  var _doiTipEl = null;
+  var _doiTipAnchor = null;
+
+  function _doiTip() {
+    if (!_doiTipEl) {
+      _doiTipEl = document.createElement('div');
+      _doiTipEl.className = 'ws-doi-tip';
+      document.body.appendChild(_doiTipEl);
+      _doiTipEl.addEventListener('mouseenter', function () { _clearDOIHideTimer(); });
+      _doiTipEl.addEventListener('mouseleave', function () { hideDOITip(); });
+    }
+    return _doiTipEl;
+  }
+
+  var _doiHideTimer = null;
+  function _clearDOIHideTimer() {
+    if (_doiHideTimer) { clearTimeout(_doiHideTimer); _doiHideTimer = null; }
+  }
+
+  function hideDOITip() {
+    _doiHideTimer = setTimeout(function () {
+      var el = _doiTipEl;
+      if (el) { el.classList.remove('ws-doi-tip-visible'); el.innerHTML = ''; }
+      _doiTipAnchor = null;
+    }, 120);
+  }
+
+  function positionDOITip(anchor) {
+    var el = _doiTip();
+    var rect = anchor.getBoundingClientRect();
+    var scrollY = window.scrollY || document.documentElement.scrollTop;
+    var scrollX = window.scrollX || document.documentElement.scrollLeft;
+    var vw = window.innerWidth || document.documentElement.clientWidth;
+    var vh = window.innerHeight || document.documentElement.clientHeight;
+    var tipH = el.offsetHeight;
+    var gap = 6;
+    var top;
+    if (vh - rect.bottom - gap >= tipH || rect.top < tipH + gap) {
+      top = rect.bottom + scrollY + gap;
+    } else {
+      top = rect.top + scrollY - tipH - gap;
+    }
+    var left = Math.max(8, Math.min(rect.left + scrollX, vw - 10));
+    el.style.top = top + 'px';
+    el.style.left = left + 'px';
+    el.style.maxWidth = Math.min(460, vw - left - 10) + 'px';
+  }
+
+  function renderDOITip(anchor, doi, comparison) {
+    var el = _doiTip();
+    var pt = LANG === 'pt';
+
+    var rows = comparison.map(function (r) {
+      if (r.status === 'skip') return '';
+      var icon = r.status === 'ok' ? '✓'
+               : r.status === 'warn' ? '⚠'
+               : '✗';
+      var cls = 'ws-doi-tip-' + (r.status === 'ok' ? 'ok' : r.status === 'warn' ? 'warn' : 'err');
+      var val = (r.status === 'ok' && r.value)
+        ? ' <span class="ws-doi-tip-val">(' + escapeHTML(String(r.value)) + ')</span>' : '';
+      var detail = '';
+      if (r.status !== 'ok') {
+        if (r.bib && r.api) {
+          var diff = tokenDiff(r.bib, r.api);
+          detail = '<div class="ws-doi-tip-diff">' +
+            '<span class="ws-doi-tip-lbl">bib:</span> ' + diff.bibHtml + '<br>' +
+            '<span class="ws-doi-tip-lbl">api:</span> ' + diff.apiHtml + '</div>';
+        } else if (r.notes && r.notes.length) {
+          detail = '<div class="ws-doi-tip-diff">' +
+            r.notes.map(function (n) { return escapeHTML(n); }).join('<br>') + '</div>';
+        }
+      }
+      return '<div class="ws-doi-tip-row ' + cls + '">' +
+        '<span class="ws-doi-tip-icon">' + icon + '</span>' +
+        '<span class="ws-doi-tip-field">' + escapeHTML(r.field) + '</span>' + val +
+        detail + '</div>';
+    }).join('');
+
+    var allOk = comparison.every(function (r) { return r.status === 'ok' || r.status === 'skip'; });
+    var hasError = comparison.some(function (r) { return r.status === 'error'; });
+
+    el.innerHTML =
+      '<div class="ws-doi-tip-hdr">' +
+        '<span class="ws-doi-tip-title">CrossRef ' + (pt ? 'validação' : 'validation') + '</span>' +
+        '<span class="ws-doi-tip-badge ws-doi-tip-badge-' + (allOk ? 'ok' : hasError ? 'err' : 'warn') + '">' +
+          (allOk ? (pt ? 'ok' : 'ok') : hasError ? (pt ? 'divergência' : 'mismatch') : (pt ? 'aviso' : 'warning')) +
+        '</span>' +
+      '</div>' +
+      '<div class="ws-doi-tip-doi">' + escapeHTML(doi) + '</div>' +
+      rows;
+
+    el.classList.add('ws-doi-tip-visible');
+    positionDOITip(anchor);
+  }
+
+  function wireDOITooltips(root) {
+    var validation = (window.WritingStatsConfig || {}).doiValidation;
+    if (!validation || !Object.keys(validation).length) return;
+
+    // Find all DOI links in the bibliography section
+    var refSections = root.querySelectorAll('#refs, .references');
+    refSections.forEach(function (sec) {
+      sec.querySelectorAll('a[href]').forEach(function (link) {
+        if (!/doi\.org/i.test(link.href)) return;
+        var doi = link.href.replace(/^.*doi\.org\//i, '').toLowerCase();
+        var comparison = validation[doi];
+        if (!comparison || !comparison.length) return;
+
+        link.classList.add('ws-doi-checkable');
+        var hasIssue = comparison.some(function (r) { return r.status === 'error'; });
+        var hasWarn  = comparison.some(function (r) { return r.status === 'warn'; });
+        if (hasIssue) link.classList.add('ws-doi-has-error');
+        else if (hasWarn) link.classList.add('ws-doi-has-warn');
+        else link.classList.add('ws-doi-verified');
+
+        link.addEventListener('mouseenter', function () {
+          _clearDOIHideTimer();
+          _doiTipAnchor = link;
+          renderDOITip(link, doi, comparison);
+        });
+        link.addEventListener('mouseleave', function (e) {
+          var related = e.relatedTarget;
+          if (_doiTipEl && related && _doiTipEl.contains(related)) return;
+          hideDOITip();
+        });
+      });
+    });
+
+    document.addEventListener('scroll', function () {
+      if (_doiTipEl) _doiTipEl.classList.remove('ws-doi-tip-visible');
+    }, { passive: true });
+  }
+
+// src/ui/regex.js — Regex search parsing, matching and highlight wiring.
+// Built into ../scientific-writing.js by build/build-scientific-writing.mjs.
 
   function parseRegexInput(raw) {
     var value = String(raw || '').trim();
@@ -4350,12 +5616,8 @@
     updateScopeVisibility();
   }
 
-  function highlightItalicText(p) {
-    p.querySelectorAll('em, i').forEach(function (el) {
-      el.classList.add('ws-italic-text');
-      markReason(el, 'italic', L.italicText);
-    });
-  }
+// src/ui/report.js — Markdown/text report generation and export.
+// Built into ../scientific-writing.js by build/build-scientific-writing.mjs.
 
   function buildMarkdownReport() {
     var r = window.WritingStatsReport;
@@ -4495,6 +5757,9 @@
     setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
   }
 
+// src/analysis/document.js — Document-level metrics, report export and metric wiring.
+// Built into ../scientific-writing.js by build/build-scientific-writing.mjs.
+
   function analysisModeLabel(mode) {
     return mode === 'worker' ? L.analysisWorker : L.analysisSync;
   }
@@ -4563,6 +5828,7 @@
     var cohesionGaps = countCohesionGaps(statsList.map(function (s) { return s.text || ''; }).filter(Boolean));
     var abstractCoverage = getAbstractCoverage(sections);
     var colloquialCount = countColloquialisms(docText);
+    var vagueCount = countVagueQuantifiers(docText);
     var noVerbCount = statsList.reduce(function (sum, stats) {
       return sum + (stats.noVerbCount || 0);
     }, 0);
@@ -4584,6 +5850,17 @@
     var sectionBalance = getSectionBalance(sections);
     var referenceUsage = getReferenceUsage(root);
     var crossRefUsage = getCrossRefUsage(root);
+    var doiValidationData = (window.WritingStatsConfig || {}).doiValidation || {};
+    var doiKeys = Object.keys(doiValidationData);
+    var doiTotal = doiKeys.length;
+    var doiWithError = doiKeys.filter(function (doi) {
+      return doiValidationData[doi].some(function (r) { return r.status === 'error'; });
+    }).length;
+    var doiWithWarn = doiKeys.filter(function (doi) {
+      return !doiValidationData[doi].some(function (r) { return r.status === 'error'; }) &&
+             doiValidationData[doi].some(function (r) { return r.status === 'warn'; });
+    }).length;
+    var doiOk = doiTotal - doiWithError - doiWithWarn;
     var avgSectionScore = sections.length
       ? Math.round(sections.reduce(function (sum, s) { return sum + (s.score || 0); }, 0) / sections.length)
       : 0;
@@ -4858,6 +6135,8 @@
       metricItem(L.sectionBalance, sectionBalance.cv + (sectionBalance.outliers.length ? ' | ' + sectionBalance.outliers.slice(0, 2).join(', ') : ''), null, L.sectionBalanceDesc) +
       metricItem(L.denseSections, denseText, null, null) +
       metricItem(L.rhythm, rhythmHtml, null, L.rhythmTitle) +
+      metricItem(L.abstractWordCount, abstractWordCount + ' ' + L.words, null, L.abstractWordCountDesc) +
+      metricItem(L.abstractCoverage, abstractCoverage.score + '%', null, L.abstractCoverageDesc + (abstractCoverage.missing.length ? (' | missing: ' + abstractCoverage.missing.join(', ')) : '')) +
       // ── Legibilidade ─────────────────────────────────────────────────────────
       metricGroup(L.groupReadability) +
       metricItem(L.readability + ' (' + L.flesch + ')', readability.flesch, null, L.fleschDesc) +
@@ -4895,6 +6174,15 @@
       // ── Citações & Referências ───────────────────────────────────────────────
       metricGroup(L.groupCitations) +
       metricItem(L.citationsTotal, referenceUsage.markerCount, null, L.citationsTotalDesc) +
+      (doiTotal > 0 ? (function () {
+        try {
+          var parts = [];
+          if (doiOk > 0) parts.push('<span class="ws-doi-tip-badge ws-doi-tip-badge-ok">' + doiOk + ' ok</span>');
+          if (doiWithWarn > 0) parts.push('<span class="ws-doi-tip-badge ws-doi-tip-badge-warn">' + doiWithWarn + ' ⚠</span>');
+          if (doiWithError > 0) parts.push('<span class="ws-doi-tip-badge ws-doi-tip-badge-err">' + doiWithError + ' ✗</span>');
+          return metricItem(L.doiValidation, parts.join(' '), null, L.doiValidationDesc);
+        } catch (e) { return ''; }
+      })() : '') +
       metricItem(L.referencesUsed, referenceUsage.used.length + ' / ' + referenceUsage.defined, null,
         L.referencesUsedDesc +
         (referenceUsage.unused.length ? ' | ' + (LANG === 'pt' ? 'n\u00e3o usadas' : 'unused') + ': ' + referenceUsage.unused.join(', ') : '') +
@@ -4978,25 +6266,130 @@
           metricItem(L.nlpWinkPosNounStacks, winkStats.posNounStackCount || 0, 'nlp-nounstack', L.nlpWinkPosNounStacksDesc) +
           metricItem(L.nlpWinkVerbDiversity, winkStats.verbLemmaDiversity != null ? winkStats.verbLemmaDiversity + '%' : '—', null, L.nlpWinkVerbDiversityDesc)
         : '') +
-      // ── Resumo ───────────────────────────────────────────────────────────────
-      metricGroup(L.groupAbstract) +
-      metricItem(L.abstractWordCount, abstractWordCount + ' ' + L.words, null, L.abstractWordCountDesc) +
-      metricItem(L.abstractCoverage, abstractCoverage.score + '%', null, L.abstractCoverageDesc + (abstractCoverage.missing.length ? (' | missing: ' + abstractCoverage.missing.join(', ')) : '')) +
       // ── Busca & Seleção ─────────────────────────────────────────────────────
       metricGroup(L.groupSearchSelection) +
       metricItem(L.italicText, italicTextCount, 'italic', L.italicTextDesc) +
       metricRegexSearch();
 
+    var _summaryHtml = buildDocSummaryCard((function () {
+        var nmWords = 0, nmPassive = 0;
+        sections.forEach(function (s) {
+          if (!s.isMethods && (s.words || 0) > 0) {
+            nmWords += s.words;
+            nmPassive += s.passive || 0;
+          }
+        });
+        return {
+          sentLengths: sentenceLengths,
+          sentStd: sentStd,
+          maxSentLen: maxSentLen,
+          readability: readability,
+          complexSentenceCount: complexSentenceCount,
+          complexSentenceRate: complexSentenceRate,
+          noVerbCount: noVerbCount,
+          longSentenceRate: longSentenceRate,
+          longSentenceCount: longSentenceCount,
+          paraLengths: paraLengths,
+          longParagraphCount: longParagraphCount,
+          paraOpeningRepeats: paraOpeningRepeats,
+          repeatedStarts: repeatedStarts,
+          cohesionGaps: cohesionGaps,
+          avgSectionScore: avgSectionScore,
+          conceptCoverageAvg: conceptCoverageAvg,
+          conceptMissingTotal: conceptMissingTotal,
+          conceptWeakSections: conceptWeakSections,
+          citationGapCount: citationGapCount,
+          resultsCitationCount: resultsCitationCount,
+          referencesDefined: referenceUsage.defined,
+          referencesUsed: referenceUsage.used.length,
+          citationsTotal: referenceUsage.markerCount,
+          undefinedRefs: referenceUsage.undefinedKeys || [],
+          unusedVars: varUsage.unused,
+          variableCount: VARIABLE_COUNT,
+          usedVarCount: usedVarCount,
+          evidenceHardcoded: evidenceHardcoded,
+          evidenceCited: evidenceCited,
+          evidenceParameterized: evidenceParameterized,
+          evidenceUnparameterized: evidenceUnparameterized,
+          evidenceDensity: evidenceDensity,
+          figureMissing: crossRefUsage.figureMissing || [],
+          figureOrderIssues: crossRefUsage.figureOrder ? crossRefUsage.figureOrder.count : 0,
+          figureOrderExamples: crossRefUsage.figureOrder ? crossRefUsage.figureOrder.examples : [],
+          tableMissing: crossRefUsage.tableMissing || [],
+          tableOrderIssues: crossRefUsage.tableOrder ? crossRefUsage.tableOrder.count : 0,
+          tableOrderExamples: crossRefUsage.tableOrder ? crossRefUsage.tableOrder.examples : [],
+          figuresTotal: crossRefUsage.figureCount,
+          figureCrossRefs: crossRefUsage.figureReferenced,
+          tablesTotal: crossRefUsage.tableCount,
+          tableCrossRefs: crossRefUsage.tableReferenced,
+          abstractWordCount: abstractWordCount,
+          abstractCoverage: abstractCoverage,
+          sectionBalance: sectionBalance,
+          passiveDensity: passiveDensity,
+          nonMethodsPassiveDensity: nmWords > 0 ? (nmPassive / nmWords) * 1000 : 0,
+          passiveTotal: passiveTotal,
+          hedgeCount: hedgeCount,
+          hedgeDensity: hedgeDensity,
+          totalWords: totalWords,
+          connectorCount: connectorCount,
+          connectorByCat: connectorByCat,
+          colloquialCount: colloquialCount,
+          vagueCount: vagueCount,
+          wordyCount: wordyCount,
+          nominalizationCount: nominalizationCount,
+          pronounAmbigCount: pronounAmbigCount,
+          modalVerbCount: modalVerbCount,
+          firstPersonCount: firstPersonCount,
+          emphaticPunct: emphaticPunct,
+          lexDiv: lexDiv,
+          undefinedAcronyms: undefinedAcronyms,
+          unitInconsistency: unitInconsistency,
+          termVariants: termVariants,
+          topRepeated: globalRepeatedItems.slice(0, 8),
+          repeatedTermCount: repeatedTermCount,
+          unusedRefs: referenceUsage.unused || [],
+          weakOpenerCount: winkStats.weakOpenerCount || 0,
+          citationSentStartCount: citationSentStartCount,
+          nlpTotals: nlpTotals,
+          nlpNounVerbRatio: nlpNounVerbRatio,
+          nlpVerbDiversity: nlpVerbDiversity,
+          nlpNounDensity: nlpNounDensity,
+          nlpEntityDensity: nlpEntityDensity,
+          nlpActionVerbScore: nlpActionVerbScore,
+          nlpSemanticRedundancy: nlpSemanticRedundancy,
+          nlpFlowScore: nlpFlowScore,
+          nlpKeyTerms: nlpKeyTerms,
+          nlpTopics: nlpTopics,
+          nlpEntities: nlpEntities,
+          nlpAdverbs: nlpAdverbs,
+          winkStats: winkStats,
+          sections: sections.map(function (s) {
+            return {
+              title: s.title,
+              words: s.words || 0,
+              paras: s.paras || 0,
+              sentences: s.sentences || 0,
+              avgSentence: s.avgSentence || 0,
+              avgParagraph: s.avgParagraph || 0
+            };
+          })
+        };
+      })());
+
     var anchor = document.getElementById('title-block-header') || root.querySelector('section');
     if (anchor) {
       anchor.after(badge);
       badge.after(metrics);
+      metrics.insertAdjacentHTML('afterend', _summaryHtml);
       wireMetricGroups(metrics);
       wireMetricFocus(metrics);
       wireRegexSearch(metrics, root);
       wireRhythmNavigation(metrics);
     }
   }
+
+// src/ui/focus.js — Focus/dim interaction for margin notes.
+// Built into ../scientific-writing.js by build/build-scientific-writing.mjs.
 
   // ── Focus mode ─────────────────────────────────────────────────────────────
 
@@ -5014,6 +6407,9 @@
       });
     });
   }
+
+// src/ui/controls.js — Floating controls for annotation visibility, filters and report export.
+// Built into ../scientific-writing.js by build/build-scientific-writing.mjs.
 
   // ── Controls ───────────────────────────────────────────────────────────────
 
@@ -5071,6 +6467,9 @@
     alertBtn.classList.toggle('ws-control-on', alertsOnly);
   }
 
+// src/index.js — Main orchestration and DOMContentLoaded entrypoint.
+// Built into ../scientific-writing.js by build/build-scientific-writing.mjs.
+
   // ── Main ───────────────────────────────────────────────────────────────────
 
   async function run() {
@@ -5122,6 +6521,18 @@
     var globalRepeatedSet = new Set(getGlobalRepeatedItems(preAnalysisText, 3, 0).map(function (item) {
       return item.text;
     }));
+    var globalMaxSentLen = sections.reduce(function (mx, section) {
+      return Array.from(section.querySelectorAll(':scope > p')).reduce(function (smx, p) {
+        var text = p.innerText || p.textContent || '';
+        return getSentences(text).reduce(function (pmx, sent) {
+          return Math.max(pmx, countWords(sent));
+        }, smx);
+      }, mx);
+    }, 0);
+    // subtract 1 so the longest sentence (at or below SENT_LONG) is caught by wrapLongSentences
+    var _longWrapThreshold = globalMaxSentLen > 1 && globalMaxSentLen <= SENT_LONG
+      ? globalMaxSentLen - 1
+      : SENT_LONG;
     for (var sIdx = 0; sIdx < sections.length; sIdx++) {
       var section = sections[sIdx];
       var paras = Array.from(section.querySelectorAll(':scope > p'));
@@ -5197,7 +6608,7 @@
         }
 
         // Order matters: long sentences → passive → repeated words
-        if (maxSentLen > SENT_LONG) wrapLongSentences(p, SENT_LONG);
+        if (maxSentLen > _longWrapThreshold) wrapLongSentences(p, _longWrapThreshold);
         wrapNoVerbSentences(p);
         // Functions that use p.innerHTML = must run FIRST to avoid destroying other highlights
         highlightComplexSentences(p);
@@ -5303,9 +6714,20 @@
     });
   }
 
+  function bootDOITooltips() {
+    var r = document.getElementById('quarto-document-content') ||
+            document.querySelector('main') ||
+            document.body;
+    try { wireDOITooltips(r); } catch (e) {
+      console.error('[scientific-writing] wireDOITooltips failed', e);
+    }
+  }
+
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', runSafe);
+    document.addEventListener('DOMContentLoaded', bootDOITooltips);
   } else {
     runSafe();
+    bootDOITooltips();
   }
 })();

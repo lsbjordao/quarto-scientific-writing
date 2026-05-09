@@ -9,6 +9,7 @@ format:
     toc-location: left
     page-layout: article
     theme: cosmo
+    embed-resources: true
 filters:
   - scientific-writing
 bibliography: ref.bib
