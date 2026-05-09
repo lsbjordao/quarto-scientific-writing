@@ -108,6 +108,13 @@ body:has(.ws-note:hover) .ws-wrapper:has(.ws-note:hover) .ws-note {
   padding: 0 1px;
 }
 
+.ws-spelling {
+  background: #fca5a5;
+  border-bottom: 2px wavy #7f1d1d;
+  border-radius: 2px;
+  padding-bottom: 1px;
+}
+
 .ws-acronym-first {
   background-color: #fff1f2;
   border-bottom: 2px solid #e11d48;
@@ -1016,6 +1023,7 @@ body.ws-annotations-hidden .ws-wink-propn,
 body.ws-annotations-hidden .ws-wordy,
 body.ws-annotations-hidden .ws-firstperson,
 body.ws-annotations-hidden .ws-citation-start,
+body.ws-annotations-hidden .ws-spelling,
 body.ws-annotations-hidden .ws-colloquial,
 body.ws-annotations-hidden .ws-complex-sent,
 body.ws-annotations-hidden .ws-repeated-start,
@@ -1082,6 +1090,7 @@ body.ws-final-review .ws-wrapper:not(.ws-has-critical) .ws-wink-propn,
 body.ws-final-review .ws-wrapper:not(.ws-has-critical) .ws-wordy,
 body.ws-final-review .ws-wrapper:not(.ws-has-critical) .ws-firstperson,
 body.ws-final-review .ws-wrapper:not(.ws-has-critical) .ws-citation-start,
+body.ws-final-review .ws-wrapper:not(.ws-has-critical) .ws-spelling,
 body.ws-final-review .ws-wrapper:not(.ws-has-critical) .ws-colloquial,
 body.ws-final-review .ws-wrapper:not(.ws-has-critical) .ws-complex-sent,
 body.ws-final-review .ws-wrapper:not(.ws-has-critical) .ws-repeated-start,
@@ -1129,6 +1138,7 @@ body.ws-alerts-only .ws-wrapper:not(.ws-has-alert) .ws-wink-propn,
 body.ws-alerts-only .ws-wrapper:not(.ws-has-alert) .ws-wordy,
 body.ws-alerts-only .ws-wrapper:not(.ws-has-alert) .ws-firstperson,
 body.ws-alerts-only .ws-wrapper:not(.ws-has-alert) .ws-citation-start,
+body.ws-alerts-only .ws-wrapper:not(.ws-has-alert) .ws-spelling,
 body.ws-alerts-only .ws-wrapper:not(.ws-has-alert) .ws-colloquial,
 body.ws-alerts-only .ws-wrapper:not(.ws-has-alert) .ws-complex-sent,
 body.ws-alerts-only .ws-wrapper:not(.ws-has-alert) .ws-repeated-start,
@@ -1197,6 +1207,7 @@ body.ws-focus-figure-ref-order .ws-wrapper,
 body.ws-focus-table-ref-order .ws-wrapper,
 body.ws-focus-italic .ws-wrapper,
 body.ws-focus-regex .ws-wrapper,
+body.ws-focus-spelling .ws-wrapper,
 body.ws-focus-results-citation .ws-wrapper {
   opacity: 0.35;
 }
@@ -1248,6 +1259,7 @@ body.ws-focus-figure-ref-order .ws-wrapper:has(.ws-xref-order-fig),
 body.ws-focus-table-ref-order .ws-wrapper:has(.ws-xref-order-tbl),
 body.ws-focus-italic .ws-wrapper:has(.ws-italic-text),
 body.ws-focus-regex .ws-wrapper:has(.ws-regex-match),
+body.ws-focus-spelling .ws-wrapper:has(.ws-spelling),
 body.ws-focus-results-citation .ws-wrapper:has(.ws-results-citation) {
   opacity: 1;
 }
@@ -1499,6 +1511,11 @@ body.ws-focus-regex .ws-regex-match {
   padding: 0;
 }
 
+body.ws-focus-spelling .ws-spelling {
+  background: #f87171;
+  border-bottom-color: #7f1d1d;
+}
+
 /* ── Responsive: stack notes below paragraph on narrow screens ───────────── */
 @media (max-width: 1100px) {
   .ws-note {
@@ -1570,6 +1587,7 @@ body.ws-focus-regex .ws-regex-match {
   .ws-wink-propn,
   .ws-firstperson,
   .ws-citation-start,
+  .ws-spelling,
   .ws-colloquial,
   .ws-complex-sent,
   .ws-repeated-start,

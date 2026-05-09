@@ -925,6 +925,37 @@
                '· this check uses POS tagging and complements the built-in heuristics']) });
     }
 
+    // Erros/avisos de DOI
+    if (opts.doiWithError && opts.doiWithError > 0) {
+      issues.push({ level: 'alert',
+        text: pt
+          ? opts.doiWithError + (opts.doiWithError === 1 ? ' DOI com erro' : ' DOIs com erro') + ' — validação falhou ou URL inválida'
+          : opts.doiWithError + (opts.doiWithError === 1 ? ' DOI failed' : ' DOIs failed') + ' validation or invalid URL',
+        detail: pt
+          ? D(['· abra o tooltip DOI (passe o mouse) para ver detalhes do erro',
+               '· DOIs devem estar no formato 10.xxxx/yyyyy',
+               '· verifique em https://doi.org/SEU-DOI',
+               '· corrija ou remova DOIs inválidos das referências'])
+          : D(['· open DOI tooltip (hover) to see error details',
+               '· DOIs must be in format 10.xxxx/yyyyy',
+               '· verify at https://doi.org/YOUR-DOI',
+               '· fix or remove invalid DOIs from references']) });
+    } else if (opts.doiWithWarn && opts.doiWithWarn > 0) {
+      issues.push({ level: 'warn',
+        text: pt
+          ? opts.doiWithWarn + (opts.doiWithWarn === 1 ? ' DOI com aviso' : ' DOIs com aviso') + ' — validação lenta ou metadata incompleta'
+          : opts.doiWithWarn + (opts.doiWithWarn === 1 ? ' DOI has warning' : ' DOIs have warnings') + ' — slow validation or incomplete metadata',
+        detail: pt
+          ? D(['· abra o tooltip DOI (passe o mouse) para ver detalhes do aviso',
+               '· avisos geralmente indicam problema de timeout ou API indisponível',
+               '· tente recarregar a página em alguns segundos',
+               '· se persistir, verifique a URL original no registro bibliográfico'])
+          : D(['· open DOI tooltip (hover) to see warning details',
+               '· warnings usually indicate timeout or API unavailability',
+               '· try reloading the page in a few seconds',
+               '· if persistent, check the original URL in the bibliographic record']) });
+    }
+
     // Referências não citadas
     if (opts.unusedRefs && opts.unusedRefs.length > 0) {
       var unusedRefList = opts.unusedRefs.slice(0, 5).join(', ');

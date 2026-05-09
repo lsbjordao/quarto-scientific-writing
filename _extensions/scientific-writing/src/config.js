@@ -21,6 +21,12 @@
   var SOURCE_EVIDENCE_TOKENS = [];
   var SOURCE_EVIDENCE_INDEX = 0;
   var REFERENCE_KEYS = [];
+  var SPELLCHECK_ENABLED = false;
+  var SPELLCHECK_PROVIDER = 'languagetool';
+  var SPELLCHECK_ENDPOINT = 'https://api.languagetool.org/v2/check';
+  var SPELLCHECK_LANGUAGE = '';
+  var SPELLCHECK_IGNORE_TERMS = new Set();
+  var SPELLCHECK_TIMEOUT_MS = 8000;
   var NLP_CDN_ENABLED = true;
   var NLP_CDN_URL = 'https://cdn.jsdelivr.net/npm/compromise/builds/compromise.min.js';
   var NLP_LIB = null;
@@ -101,6 +107,18 @@
     return EXCLUDED_TERMS.has(normalizeWord(w));
   }
 
+  function defaultSpellcheckLanguage() {
+    var raw = ((document.documentElement.getAttribute('lang') || '') + '').trim();
+    if (/^en\b/i.test(raw)) return raw.indexOf('-') > 0 ? raw : 'en-US';
+    if (/^pt\b/i.test(raw)) return raw.indexOf('-') > 0 ? raw : 'pt-BR';
+    return LANG === 'en' ? 'en-US' : 'pt-BR';
+  }
+
+  function shouldIgnoreSpellingWord(w) {
+    var norm = normalizeWord(w).replace(/^[^\wáéíóúàâêôãõüçñ]+|[^\wáéíóúàâêôãõüçñ]+$/gi, '');
+    return !norm || SPELLCHECK_IGNORE_TERMS.has(norm) || EXCLUDED_TERMS.has(norm);
+  }
+
   function applyConfig() {
     CFG = window.WritingStatsConfig || CFG || {};
     PARA_LONG = Number(CFG.paragraphLong) || PARA_LONG;
@@ -131,6 +149,17 @@
     SOURCE_EVIDENCE_TOKENS = Array.isArray(CFG.sourceEvidenceTokens) ? CFG.sourceEvidenceTokens : [];
     SOURCE_EVIDENCE_INDEX = 0;
     REFERENCE_KEYS = Array.isArray(CFG.referenceKeys) ? CFG.referenceKeys : [];
+    SPELLCHECK_ENABLED = CFG.spellcheckEnabled === true;
+    SPELLCHECK_PROVIDER = String(CFG.spellcheckProvider || SPELLCHECK_PROVIDER).toLowerCase();
+    SPELLCHECK_ENDPOINT = String(CFG.spellcheckEndpoint || SPELLCHECK_ENDPOINT);
+    SPELLCHECK_LANGUAGE = String(CFG.spellcheckLanguage || defaultSpellcheckLanguage());
+    SPELLCHECK_TIMEOUT_MS = Math.max(1000, Number(CFG.spellcheckTimeoutMs) || SPELLCHECK_TIMEOUT_MS);
+    SPELLCHECK_IGNORE_TERMS = new Set(
+      parseTermList(CFG.spellcheckIgnoreTerms)
+        .concat(parseTermList(CFG.ignoreTerms))
+        .map(normalizeWord)
+        .filter(Boolean)
+    );
     NLP_CDN_ENABLED = CFG.nlpCdn !== false;
     NLP_CDN_URL = String(CFG.nlpCdnUrl || NLP_CDN_URL);
   }

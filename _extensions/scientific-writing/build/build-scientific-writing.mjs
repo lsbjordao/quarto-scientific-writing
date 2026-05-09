@@ -29,6 +29,7 @@ const parts = [
   'src/analysis/section.js',
   'src/ui/highlight-core.js',
   'src/ui/highlights.js',
+  'src/ui/spelling.js',
   'src/ui/evidence.js',
   'src/ui/nlp-highlights.js',
   'src/ui/wink-highlights.js',

@@ -46,6 +46,7 @@
     'ws-results-citation': 'results-citation',
     'ws-italic-text': 'italic',
     'ws-regex-match': 'regex',
+    'ws-spelling': 'spelling',
   };
 
   function markReason(el, focus, reason) {

@@ -41,7 +41,9 @@ var L_EN = {
   reasonHedge: 'excessive hedging',
   reasonFewCitations: 'few citations in section',
   reasonResultsCitation: 'citation in Results',
-  analysisPreparing: 'analyzing text...', analysisEngine: 'JS-only engine',
+  analysisPreparing: 'analyzing text...', spellcheckPreparing: 'checking spelling...',
+  spellingIssue: 'possible spelling issue',
+  analysisEngine: 'JS-only engine',
   analysisLoadingNlp: 'loading NLP from CDN...',
   analysisWorker: 'worker', analysisSync: 'direct', analysisCache: 'cache', analysisTime: 'time',
   nlpEngine: 'NLP engine',
@@ -262,4 +264,3 @@ var L_EN = {
   tenseWarningDesc: 'The dominant verb tense in this section appears to diverge from the expected pattern for this type of scientific section.',
   acronymFirstUse: 'acronym without initial definition',
 };
-

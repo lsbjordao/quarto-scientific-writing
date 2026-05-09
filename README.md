@@ -4,7 +4,7 @@ A Quarto extension that provides real-time, in-browser analysis of academic manu
 
 ## Features
 
-- **Inline highlights** — long sentences, passive voice, hedging language, nominalizations, repeated words, connectors, colloquialisms, wordy phrases, and more
+- **Inline highlights** — long sentences, passive voice, hedging language, nominalizations, repeated words, connectors, colloquialisms, wordy phrases, optional spelling issues, and more
 - **Per-paragraph notes** — metrics sidebar for every paragraph (word count, sentence count, lexical diversity, passive density, readability)
 - **Per-section summary** — section-level scoring and concept-coverage tracking
 - **Document Analysis card** — always-visible overview with a structured text profile (sentences, paragraphs, readability, style, evidence) plus key issues and notices
@@ -123,6 +123,35 @@ scientific-writing:
     - vulgaris
   # List of words (case-insensitive) to exclude from repetition detection.
   # Use for domain-specific terminology that is necessarily repeated.
+  # These terms are also ignored by the optional spellchecker.
+
+  # ── Spellcheck ──────────────────────────────────────────────────────────────
+
+  spellcheck: false
+  # Enable API-backed spellcheck underlines.
+  # Default: false, because enabling it sends paragraph text to the configured
+  # provider from the reader's browser.
+
+  spellcheck-provider: languagetool
+  # Currently supported provider: languagetool.
+
+  spellcheck-endpoint: "https://api.languagetool.org/v2/check"
+  # LanguageTool-compatible HTTP endpoint. You can point this to a self-hosted
+  # LanguageTool instance if you do not want to use the public service.
+
+  spellcheck-language: pt-BR
+  # LanguageTool language code. If omitted, the extension derives pt-BR/en-US
+  # from the document's <html lang="...">.
+
+  spellcheck-ignore-terms:
+    - Phaseolus
+    - cultivar
+    - SPAD
+  # Case-insensitive terms to ignore only for spelling checks. This is useful
+  # for scientific names, acronyms, cultivar names, software names, and jargon.
+
+  spellcheck-timeout-ms: 8000
+  # Request timeout per paragraph. Default: 8000.
 
   # ── Display defaults ─────────────────────────────────────────────────────────
 
@@ -208,7 +237,7 @@ wink-nlp is bundled separately via esbuild (see `build/build.mjs`), producing `w
 
 ### `src/config.js`
 
-Reads `window.WritingStatsConfig` (injected by the Lua filter) and exposes all threshold constants and runtime flags used throughout the extension. Key exports: `PARA_LONG`, `SENT_LONG`, `PASSIVE_ALERT`, `HEDGE_ALERT`, `LEX_LOW`, `REPEATED_STRONG`, `SECTION_GOALS`, `EXCLUDED_TERMS`, `LANG`, `CONNECTOR_AMBIGUITY_MODE`.
+Reads `window.WritingStatsConfig` (injected by the Lua filter) and exposes all threshold constants and runtime flags used throughout the extension. Key exports: `PARA_LONG`, `SENT_LONG`, `PASSIVE_ALERT`, `HEDGE_ALERT`, `LEX_LOW`, `REPEATED_STRONG`, `SECTION_GOALS`, `EXCLUDED_TERMS`, `LANG`, `CONNECTOR_AMBIGUITY_MODE`, and optional spellcheck settings.
 
 ### `src/lang/pt.js` and `src/lang/en.js`
 
@@ -358,6 +387,10 @@ Pattern-specific highlight wrappers:
 - `highlightModalVerbs(p)` / `highlightFirstPerson(p)` — modal and first-person highlights
 - `highlightCitationSentStart(p)` — highlights sentences starting with a citation
 - `highlightPronounAmbig(p)` — highlights ambiguous pronoun references
+
+### `src/ui/spelling.js`
+
+Optional spellcheck integration. When `scientific-writing.spellcheck` is enabled, the browser sends paragraph text to a LanguageTool-compatible endpoint, filters misspellings through `spellcheck-ignore-terms` and `ignore-terms`, and wraps possible errors with `.ws-spelling`.
 
 ### `src/ui/nlp-highlights.js` and `src/ui/wink-highlights.js`
 

@@ -37,6 +37,7 @@
     var allStats      = [];
     var allTexts      = [];
     var allSections   = [];
+    var spellcheckJobs = [];
 
     var sections = Array.from(root.querySelectorAll('section.level1, section.level2, section.level3, section.level4'));
     var preAnalysisText = sections.map(function (section) {
@@ -176,6 +177,12 @@
         highlightCitationSentStart(p);
         highlightPronounAmbig(p);
         refreshHighlightTooltips(p);
+        if (SPELLCHECK_ENABLED) {
+          spellcheckJobs.push(highlightSpelling(p, text).catch(function (err) {
+            console.warn('[scientific-writing] spellcheck paragraph failed', err);
+            return 0;
+          }));
+        }
 
         var stats = {
           text: text,
@@ -231,6 +238,10 @@
     }
 
     await winkPromise;
+    if (spellcheckJobs.length) {
+      if (loadingPill) loadingPill.textContent = L.spellcheckPreparing || 'checking spelling...';
+      await Promise.all(spellcheckJobs);
+    }
     var _docText = allTexts.join('\n\n');
     var _winkStats = analyzeWinkNlp(_docText);
     buildDocStats(root, totalDocWords, allStats, allSections, _docText, _winkStats);

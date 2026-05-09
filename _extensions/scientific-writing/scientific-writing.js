@@ -24,6 +24,12 @@
   var SOURCE_EVIDENCE_TOKENS = [];
   var SOURCE_EVIDENCE_INDEX = 0;
   var REFERENCE_KEYS = [];
+  var SPELLCHECK_ENABLED = false;
+  var SPELLCHECK_PROVIDER = 'languagetool';
+  var SPELLCHECK_ENDPOINT = 'https://api.languagetool.org/v2/check';
+  var SPELLCHECK_LANGUAGE = '';
+  var SPELLCHECK_IGNORE_TERMS = new Set();
+  var SPELLCHECK_TIMEOUT_MS = 8000;
   var NLP_CDN_ENABLED = true;
   var NLP_CDN_URL = 'https://cdn.jsdelivr.net/npm/compromise/builds/compromise.min.js';
   var NLP_LIB = null;
@@ -104,6 +110,18 @@
     return EXCLUDED_TERMS.has(normalizeWord(w));
   }
 
+  function defaultSpellcheckLanguage() {
+    var raw = ((document.documentElement.getAttribute('lang') || '') + '').trim();
+    if (/^en\b/i.test(raw)) return raw.indexOf('-') > 0 ? raw : 'en-US';
+    if (/^pt\b/i.test(raw)) return raw.indexOf('-') > 0 ? raw : 'pt-BR';
+    return LANG === 'en' ? 'en-US' : 'pt-BR';
+  }
+
+  function shouldIgnoreSpellingWord(w) {
+    var norm = normalizeWord(w).replace(/^[^\wáéíóúàâêôãõüçñ]+|[^\wáéíóúàâêôãõüçñ]+$/gi, '');
+    return !norm || SPELLCHECK_IGNORE_TERMS.has(norm) || EXCLUDED_TERMS.has(norm);
+  }
+
   function applyConfig() {
     CFG = window.WritingStatsConfig || CFG || {};
     PARA_LONG = Number(CFG.paragraphLong) || PARA_LONG;
@@ -134,6 +152,17 @@
     SOURCE_EVIDENCE_TOKENS = Array.isArray(CFG.sourceEvidenceTokens) ? CFG.sourceEvidenceTokens : [];
     SOURCE_EVIDENCE_INDEX = 0;
     REFERENCE_KEYS = Array.isArray(CFG.referenceKeys) ? CFG.referenceKeys : [];
+    SPELLCHECK_ENABLED = CFG.spellcheckEnabled === true;
+    SPELLCHECK_PROVIDER = String(CFG.spellcheckProvider || SPELLCHECK_PROVIDER).toLowerCase();
+    SPELLCHECK_ENDPOINT = String(CFG.spellcheckEndpoint || SPELLCHECK_ENDPOINT);
+    SPELLCHECK_LANGUAGE = String(CFG.spellcheckLanguage || defaultSpellcheckLanguage());
+    SPELLCHECK_TIMEOUT_MS = Math.max(1000, Number(CFG.spellcheckTimeoutMs) || SPELLCHECK_TIMEOUT_MS);
+    SPELLCHECK_IGNORE_TERMS = new Set(
+      parseTermList(CFG.spellcheckIgnoreTerms)
+        .concat(parseTermList(CFG.ignoreTerms))
+        .map(normalizeWord)
+        .filter(Boolean)
+    );
     NLP_CDN_ENABLED = CFG.nlpCdn !== false;
     NLP_CDN_URL = String(CFG.nlpCdnUrl || NLP_CDN_URL);
   }
@@ -253,7 +282,9 @@ var L_PT = {
   tenseWarning: 'tempo verbal inadequado',
   tenseWarningDesc: 'O tempo verbal predominante nesta seção parece divergir do padrão esperado para este tipo de seção científica.',
   acronymFirstUse: 'sigla sem definição inicial',
-  analysisPreparing: 'analisando texto...', analysisEngine: 'motor JS-only',
+  analysisPreparing: 'analisando texto...', spellcheckPreparing: 'verificando ortografia...',
+  spellingIssue: 'possível erro ortográfico',
+  analysisEngine: 'motor JS-only',
   analysisLoadingNlp: 'carregando NLP via CDN...',
   analysisWorker: 'worker', analysisSync: 'direto', analysisCache: 'cache', analysisTime: 'tempo',
   nlpEngine: 'motor NLP',
@@ -513,7 +544,9 @@ var L_EN = {
   reasonHedge: 'excessive hedging',
   reasonFewCitations: 'few citations in section',
   reasonResultsCitation: 'citation in Results',
-  analysisPreparing: 'analyzing text...', analysisEngine: 'JS-only engine',
+  analysisPreparing: 'analyzing text...', spellcheckPreparing: 'checking spelling...',
+  spellingIssue: 'possible spelling issue',
+  analysisEngine: 'JS-only engine',
   analysisLoadingNlp: 'loading NLP from CDN...',
   analysisWorker: 'worker', analysisSync: 'direct', analysisCache: 'cache', analysisTime: 'time',
   nlpEngine: 'NLP engine',
@@ -3200,6 +3233,7 @@ var L_EN = {
     'ws-results-citation': 'results-citation',
     'ws-italic-text': 'italic',
     'ws-regex-match': 'regex',
+    'ws-spelling': 'spelling',
   };
 
   function markReason(el, focus, reason) {
@@ -3657,6 +3691,165 @@ var L_EN = {
         );
       });
     });
+  }
+
+// src/ui/spelling.js — Optional API-backed spelling underlines.
+// Built into ../scientific-writing.js by build/build-scientific-writing.mjs.
+
+  var SPELLCHECK_CACHE = Object.create(null);
+
+  function spellingLabelFor(match, word) {
+    var replacements = Array.isArray(match.replacements)
+      ? match.replacements.map(function (r) { return r && r.value; }).filter(Boolean).slice(0, 4)
+      : [];
+    var base = L.spellingIssue || 'Possible spelling issue';
+    var msg = match.message || base;
+    var out = base + ': ' + word;
+    if (replacements.length) out += ' -> ' + replacements.join(', ');
+    if (msg && msg !== base) out += ' (' + msg + ')';
+    return out;
+  }
+
+  function isSpellingMatch(match) {
+    var rule = match && match.rule || {};
+    var issueType = String(rule.issueType || '').toLowerCase();
+    var category = String(rule.category && rule.category.id || '').toUpperCase();
+    return issueType === 'misspelling' || category === 'TYPOS';
+  }
+
+  function cleanSpellingMatches(text, matches) {
+    return (matches || []).filter(function (match) {
+      if (!isSpellingMatch(match)) return false;
+      var start = Number(match.offset);
+      var len = Number(match.length);
+      if (!isFinite(start) || !isFinite(len) || len <= 0) return false;
+      var word = text.slice(start, start + len);
+      if (!/[A-Za-zÁÉÍÓÚÀÂÊÔÃÕÜÇÑáéíóúàâêôãõüçñ]/.test(word)) return false;
+      if (/[0-9/@]/.test(word)) return false;
+      if (/^[A-ZÁÉÍÓÚÀÂÊÔÃÕÜÇÑ]{2,}$/.test(word)) return false;
+      if (shouldIgnoreSpellingWord(word)) return false;
+      return true;
+    }).sort(function (a, b) {
+      return a.offset - b.offset || b.length - a.length;
+    });
+  }
+
+  function requestLanguageTool(text) {
+    var key = SPELLCHECK_LANGUAGE + '\u0000' + hashText(text);
+    if (SPELLCHECK_CACHE[key]) return SPELLCHECK_CACHE[key];
+
+    var controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+    var timer = controller ? setTimeout(function () { controller.abort(); }, SPELLCHECK_TIMEOUT_MS) : null;
+    var body = new URLSearchParams();
+    body.set('text', text);
+    body.set('language', SPELLCHECK_LANGUAGE);
+    body.set('enabledOnly', 'false');
+
+    SPELLCHECK_CACHE[key] = fetch(SPELLCHECK_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: body.toString(),
+      signal: controller ? controller.signal : undefined,
+    })
+      .then(function (res) {
+        if (!res.ok) throw new Error('spellcheck HTTP ' + res.status);
+        return res.json();
+      })
+      .then(function (json) {
+        return cleanSpellingMatches(text, json && json.matches);
+      })
+      .catch(function (err) {
+        console.warn('[scientific-writing] spellcheck failed', err);
+        return [];
+      })
+      .finally(function () {
+        if (timer) clearTimeout(timer);
+      });
+
+    return SPELLCHECK_CACHE[key];
+  }
+
+  function wrapRangesInTextNodes(root, ranges, cls) {
+    if (!ranges.length) return 0;
+    var rangeIndex = 0;
+    var offset = 0;
+    var wrapped = 0;
+
+    function visit(node) {
+      if (rangeIndex >= ranges.length) return;
+      if (node.nodeType === Node.TEXT_NODE) {
+        var text = node.textContent;
+        var nodeStart = offset;
+        var nodeEnd = offset + text.length;
+        offset = nodeEnd;
+        var local = [];
+        while (rangeIndex < ranges.length && ranges[rangeIndex].end <= nodeStart) rangeIndex++;
+        var scan = rangeIndex;
+        while (scan < ranges.length && ranges[scan].start < nodeEnd) {
+          var item = ranges[scan];
+          if (item.start >= nodeStart && item.end <= nodeEnd) {
+            local.push({
+              start: item.start - nodeStart,
+              end: item.end - nodeStart,
+              reason: item.reason,
+            });
+          }
+          scan++;
+        }
+        if (!local.length) return;
+
+        var frag = document.createDocumentFragment();
+        var pos = 0;
+        local.forEach(function (item) {
+          if (item.start > pos) frag.appendChild(document.createTextNode(text.slice(pos, item.start)));
+          var span = document.createElement('span');
+          span.className = cls;
+          markReason(span, HIGHLIGHT_FOCUS_CLASSES[cls] || '', item.reason);
+          span.textContent = text.slice(item.start, item.end);
+          frag.appendChild(span);
+          pos = item.end;
+          wrapped++;
+        });
+        if (pos < text.length) frag.appendChild(document.createTextNode(text.slice(pos)));
+        node.parentNode.replaceChild(frag, node);
+      } else if (node.nodeType === Node.ELEMENT_NODE) {
+        if (
+          node.tagName === 'SCRIPT' ||
+          node.tagName === 'STYLE' ||
+          node.classList.contains('ws-note') ||
+          node.classList.contains('citation') ||
+          node.classList.contains('csl-entry') ||
+          node.classList.contains('ws-spelling') ||
+          node.id === 'refs'
+        ) {
+          offset += (node.textContent || '').length;
+          return;
+        }
+        Array.from(node.childNodes).forEach(visit);
+      }
+    }
+
+    visit(root);
+    return wrapped;
+  }
+
+  async function highlightSpelling(p, text) {
+    if (!SPELLCHECK_ENABLED) return 0;
+    if (SPELLCHECK_PROVIDER !== 'languagetool') return 0;
+    if (!text || text.length < 3 || typeof fetch !== 'function' || typeof URLSearchParams !== 'function') return 0;
+
+    var matches = await requestLanguageTool(text);
+    var ranges = [];
+    matches.forEach(function (match) {
+      var start = Number(match.offset);
+      var end = start + Number(match.length);
+      if (ranges.length && start < ranges[ranges.length - 1].end) return;
+      var word = text.slice(start, end);
+      ranges.push({ start: start, end: end, reason: spellingLabelFor(match, word) });
+    });
+    var count = wrapRangesInTextNodes(p, ranges, 'ws-spelling');
+    if (count) refreshHighlightTooltips(p);
+    return count;
   }
 
 // src/ui/evidence.js — Variable usage and numeric evidence highlighting.
@@ -5070,6 +5263,37 @@ var L_EN = {
                '· this check uses POS tagging and complements the built-in heuristics']) });
     }
 
+    // Erros/avisos de DOI
+    if (opts.doiWithError && opts.doiWithError > 0) {
+      issues.push({ level: 'alert',
+        text: pt
+          ? opts.doiWithError + (opts.doiWithError === 1 ? ' DOI com erro' : ' DOIs com erro') + ' — validação falhou ou URL inválida'
+          : opts.doiWithError + (opts.doiWithError === 1 ? ' DOI failed' : ' DOIs failed') + ' validation or invalid URL',
+        detail: pt
+          ? D(['· abra o tooltip DOI (passe o mouse) para ver detalhes do erro',
+               '· DOIs devem estar no formato 10.xxxx/yyyyy',
+               '· verifique em https://doi.org/SEU-DOI',
+               '· corrija ou remova DOIs inválidos das referências'])
+          : D(['· open DOI tooltip (hover) to see error details',
+               '· DOIs must be in format 10.xxxx/yyyyy',
+               '· verify at https://doi.org/YOUR-DOI',
+               '· fix or remove invalid DOIs from references']) });
+    } else if (opts.doiWithWarn && opts.doiWithWarn > 0) {
+      issues.push({ level: 'warn',
+        text: pt
+          ? opts.doiWithWarn + (opts.doiWithWarn === 1 ? ' DOI com aviso' : ' DOIs com aviso') + ' — validação lenta ou metadata incompleta'
+          : opts.doiWithWarn + (opts.doiWithWarn === 1 ? ' DOI has warning' : ' DOIs have warnings') + ' — slow validation or incomplete metadata',
+        detail: pt
+          ? D(['· abra o tooltip DOI (passe o mouse) para ver detalhes do aviso',
+               '· avisos geralmente indicam problema de timeout ou API indisponível',
+               '· tente recarregar a página em alguns segundos',
+               '· se persistir, verifique a URL original no registro bibliográfico'])
+          : D(['· open DOI tooltip (hover) to see warning details',
+               '· warnings usually indicate timeout or API unavailability',
+               '· try reloading the page in a few seconds',
+               '· if persistent, check the original URL in the bibliographic record']) });
+    }
+
     // Referências não citadas
     if (opts.unusedRefs && opts.unusedRefs.length > 0) {
       var unusedRefList = opts.unusedRefs.slice(0, 5).join(', ');
@@ -6363,6 +6587,10 @@ var L_EN = {
           nlpEntities: nlpEntities,
           nlpAdverbs: nlpAdverbs,
           winkStats: winkStats,
+          doiTotal: doiTotal,
+          doiWithError: doiWithError,
+          doiWithWarn: doiWithWarn,
+          doiOk: doiOk,
           sections: sections.map(function (s) {
             return {
               title: s.title,
@@ -6506,6 +6734,7 @@ var L_EN = {
     var allStats      = [];
     var allTexts      = [];
     var allSections   = [];
+    var spellcheckJobs = [];
 
     var sections = Array.from(root.querySelectorAll('section.level1, section.level2, section.level3, section.level4'));
     var preAnalysisText = sections.map(function (section) {
@@ -6645,6 +6874,12 @@ var L_EN = {
         highlightCitationSentStart(p);
         highlightPronounAmbig(p);
         refreshHighlightTooltips(p);
+        if (SPELLCHECK_ENABLED) {
+          spellcheckJobs.push(highlightSpelling(p, text).catch(function (err) {
+            console.warn('[scientific-writing] spellcheck paragraph failed', err);
+            return 0;
+          }));
+        }
 
         var stats = {
           text: text,
@@ -6700,6 +6935,10 @@ var L_EN = {
     }
 
     await winkPromise;
+    if (spellcheckJobs.length) {
+      if (loadingPill) loadingPill.textContent = L.spellcheckPreparing || 'checking spelling...';
+      await Promise.all(spellcheckJobs);
+    }
     var _docText = allTexts.join('\n\n');
     var _winkStats = analyzeWinkNlp(_docText);
     buildDocStats(root, totalDocWords, allStats, allSections, _docText, _winkStats);

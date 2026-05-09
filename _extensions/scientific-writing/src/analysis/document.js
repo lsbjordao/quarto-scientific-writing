@@ -604,6 +604,10 @@
           nlpEntities: nlpEntities,
           nlpAdverbs: nlpAdverbs,
           winkStats: winkStats,
+          doiTotal: doiTotal,
+          doiWithError: doiWithError,
+          doiWithWarn: doiWithWarn,
+          doiOk: doiOk,
           sections: sections.map(function (s) {
             return {
               title: s.title,

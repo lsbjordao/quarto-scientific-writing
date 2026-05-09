@@ -14,6 +14,11 @@ bibliography: ref.bib
 filters:
   - scientific-writing
 scientific-writing:
+  spellcheck: true
+  spellcheck-language: en-US
+  spellcheck-ignore-terms:
+    - Phaseolus
+    - vulgaris
   connector-ambiguity-mode: balanced
   connector-ambiguity-overrides:
     as: strict
@@ -36,7 +41,7 @@ scientific-writing:
 
 # Abstract
 
-Temperature regulates essential physiological processes in common bean, including germination, leaf expansion, photosynthesis, and biomass allocation. This manuscript evaluates the effect of four constant thermal regimes on the early development of common bean plants (*Phaseolus vulgaris* L.) grown under greenhouse conditions. Temperatures of 15°C, 20°C, 25°C, and 30°C were compared for {{< var n_days >}} days after sowing, with {{< var n_replicates >}} replicates per treatment. Plant height, leaf number, leaf area, and shoot dry mass were measured as growth indicators.
+Temperature regulates essential physiological processes in common bean, including germination, leaf expansion, potosynthesis, and biomass allocation. This manuscript evaluates the effect of four constant thermal regimes on the early development of common bean plants (*Phaseolus vulgaris* L.) grown under greenhouse conditions. Temperatures of 15°C, 20°C, 25°C, and 30°C were compared for {{< var n_days >}} days after sowing, with {{< var n_replicates >}} replicates per treatment. Plant height, leaf number, leaf area, and shoot dry mass were measured as growth indicators.
 
 The results showed a super significant plant response to the temperature gradient. The 25°C treatment promoted the strongest vegetative growth, whereas 15°C reduced biomass accumulation and delayed leaf emergence. The observed response suggests that moderate temperatures support coordination between leaf expansion and assimilate production, while low temperatures restrict metabolism and delay the formation of photosynthetically active leaf area. These findings reinforce the importance of thermal management and sowing-date planning in production systems exposed to climatic variation.
 

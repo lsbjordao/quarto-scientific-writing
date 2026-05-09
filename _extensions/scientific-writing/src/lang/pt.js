@@ -47,7 +47,9 @@ var L_PT = {
   tenseWarning: 'tempo verbal inadequado',
   tenseWarningDesc: 'O tempo verbal predominante nesta seção parece divergir do padrão esperado para este tipo de seção científica.',
   acronymFirstUse: 'sigla sem definição inicial',
-  analysisPreparing: 'analisando texto...', analysisEngine: 'motor JS-only',
+  analysisPreparing: 'analisando texto...', spellcheckPreparing: 'verificando ortografia...',
+  spellingIssue: 'possível erro ortográfico',
+  analysisEngine: 'motor JS-only',
   analysisLoadingNlp: 'carregando NLP via CDN...',
   analysisWorker: 'worker', analysisSync: 'direto', analysisCache: 'cache', analysisTime: 'tempo',
   nlpEngine: 'motor NLP',
@@ -263,4 +265,3 @@ var L_PT = {
   noCitationsIntroDiscussion: 'Introdução/Discussão sem citação neste parágrafo.',
   resultsCitationDesc: 'Resultados com citação: verifique se é realmente necessário.',
 };
-
