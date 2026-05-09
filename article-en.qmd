@@ -19,6 +19,7 @@ scientific-writing:
   spellcheck-ignore-terms:
     - Phaseolus
     - vulgaris
+    - Tukey
   connector-ambiguity-mode: balanced
   connector-ambiguity-overrides:
     as: strict

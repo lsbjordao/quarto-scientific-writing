@@ -51,6 +51,7 @@
     box.appendChild(alertBtn);
     box.appendChild(reviewBtn);
     box.appendChild(exportBtn);
+    if (typeof initSpellingSourceControls === 'function') initSpellingSourceControls(box);
     document.body.appendChild(box);
 
     document.body.classList.toggle('ws-alerts-only', alertsOnly);
