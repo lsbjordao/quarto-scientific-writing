@@ -7285,9 +7285,12 @@ var L_EN = {
         // Functions that use p.innerHTML = must run FIRST to avoid destroying other highlights
         highlightComplexSentences(p);
         if (nlpStats.nominalLoadCount > 0) highlightNlpNominalLoad(p);
-        if (nlpStats.weakVerbCount > 0) highlightNlpWeakVerbs(p);
         if (LANG === 'en' && WINK_NLP && nlpStats && nlpStats.passiveSentenceCount > 0) highlightWinkPassiveSentences(p);
+        // highlightPatternInNode must run before highlightNlpWeakVerbs: weak verb highlighting
+        // fragments auxiliary verbs (was/were/been) into individual spans, breaking the passive
+        // regex which needs to match "auxiliary + past participle" as a continuous text node.
         if (passiveCount > 0)       highlightPatternInNode(p, PASSIVE_PATTERNS, 'ws-passive');
+        if (nlpStats.weakVerbCount > 0) highlightNlpWeakVerbs(p);
         // Now run functions that preserve highlights
         if (LANG === 'en' && WINK_NLP && nlpStats && nlpStats.winkComplexWordCount > 0) highlightWinkComplexWords(p, nlpStats);
         if (LANG === 'en' && WINK_NLP && nlpStats && nlpStats.winkModalCount > 0) highlightWinkModalVerbs(p, nlpStats);
