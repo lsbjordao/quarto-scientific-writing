@@ -687,10 +687,20 @@ body:has(.ws-note:hover) .ws-wrapper:has(.ws-note:hover) .ws-note {
   cursor: pointer;
 }
 
-.ws-doc-metric[data-ws-focus]:hover,
-.ws-doc-metric-active {
+.ws-doc-metric[data-ws-focus]:hover {
   border-color: #0284c7;
   background: #f0f9ff;
+}
+
+.ws-doc-metric-active {
+  border-color: #0369a1;
+  background: #bae6fd;
+  box-shadow: inset 0 0 0 1px #0369a1;
+}
+
+.ws-doc-metric-active .ws-doc-metric-label,
+.ws-doc-metric-active .ws-doc-metric-value {
+  color: #0c4a6e;
 }
 
 .ws-doc-metric-label {

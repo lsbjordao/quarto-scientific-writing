@@ -293,19 +293,19 @@
 
   function initSpellingSourceControls(box) {
     if (!SPELLCHECK_ENABLED || !box) return;
+    // The "connect source" button relies on the File System Access API
+    // (window.showOpenFilePicker), available only in Chromium-based browsers.
+    // On Firefox/Safari, omit the control entirely rather than show a disabled,
+    // broken-looking button.
+    if (!supportsSourceFileAccess()) return;
     SPELLING_SOURCE_BUTTON = makeControlButton(L.sourceConnectBtn || 'connect source', L.sourceConnectTitle || 'Connect source .qmd');
     SPELLING_SOURCE_BUTTON.classList.add('ws-source-file-btn');
-    if (!supportsSourceFileAccess()) {
-      SPELLING_SOURCE_BUTTON.disabled = true;
-      SPELLING_SOURCE_BUTTON.title = L.sourceUnsupported || 'Direct source editing is not supported in this browser.';
-    } else {
-      SPELLING_SOURCE_BUTTON.addEventListener('click', function () {
-        connectSpellingSourceFile().catch(function (err) {
-          console.warn('[scientific-writing] source connect failed', err);
-          showSpellingToast(err && err.message ? err.message : String(err), 'warn');
-        });
+    SPELLING_SOURCE_BUTTON.addEventListener('click', function () {
+      connectSpellingSourceFile().catch(function (err) {
+        console.warn('[scientific-writing] source connect failed', err);
+        showSpellingToast(err && err.message ? err.message : String(err), 'warn');
       });
-    }
+    });
     setSpellingSourceButtonState();
     box.appendChild(SPELLING_SOURCE_BUTTON);
   }
