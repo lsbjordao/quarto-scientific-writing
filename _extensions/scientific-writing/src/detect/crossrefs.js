@@ -14,13 +14,21 @@
     var figureTargets = new Set();
     var tableTargets = new Set();
 
+    // Quarto emits a secondary anchor for every float caption with an id like
+    // "tbl-foo-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca". These share the
+    // fig-/tbl- prefix but are not cross-reference targets, so counting them
+    // double-counts every figure/table. Skip them.
+    function isCaptionAnchorId(id) {
+      return /-caption-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+    }
+
     scope.querySelectorAll('[id^="fig-"]').forEach(function (node) {
       var id = String(node.id || '').trim();
-      if (id) figureTargets.add(id);
+      if (id && !isCaptionAnchorId(id)) figureTargets.add(id);
     });
     scope.querySelectorAll('[id^="tbl-"]').forEach(function (node) {
       var id = String(node.id || '').trim();
-      if (id) tableTargets.add(id);
+      if (id && !isCaptionAnchorId(id)) tableTargets.add(id);
     });
 
     var figureRefs = new Set();
