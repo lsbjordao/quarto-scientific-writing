@@ -477,7 +477,7 @@ function Meta(meta)
   if quarto.doc.is_format("html") then
     local cfg = meta["scientific-writing"] or {}
     local nlp_cdn_enabled = meta_bool(cfg["nlp-cdn"], true)
-    local nlp_cdn_url = js_json(cfg["nlp-cdn-url"], '"https://cdnjs.cloudflare.com/ajax/libs/nlp_compromise/4.8.2/nlp_compromise.min.js"')
+    local nlp_cdn_url = js_json(cfg["nlp-cdn-url"], '"https://cdn.jsdelivr.net/npm/compromise/builds/compromise.min.js"')
     local nlp_cdn_script = ""
     if nlp_cdn_enabled then
       local src = nlp_cdn_url:gsub('^"', ''):gsub('"$', '')
@@ -485,7 +485,7 @@ function Meta(meta)
     end
 
     -- ── DOI validation via CrossRef ─────────────────────────────────────────
-    local doi_validation_enabled = meta_bool(cfg["doi-validation"], true)
+    local doi_validation_enabled = meta_bool(cfg["doi-validation"], false)
     local doi_results = {}  -- keyed by lowercase DOI
 
     if doi_validation_enabled then

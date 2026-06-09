@@ -2,3 +2,6 @@
 **/*.quarto_ipynb
 
 /.luarc.json
+
+# Build tooling — never ship to consumers via `quarto add`
+**/node_modules/

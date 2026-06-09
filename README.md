@@ -153,6 +153,16 @@ scientific-writing:
   spellcheck-timeout-ms: 8000
   # Request timeout per paragraph. Default: 8000.
 
+  # ── DOI validation (CrossRef) ────────────────────────────────────────────────
+
+  doi-validation: false
+  # Validate each DOI in `ref.bib` against the CrossRef API *at render time*.
+  # When enabled, the Lua filter runs `curl` to https://api.crossref.org for
+  # every entry that has a `doi` field, comparing title, year, authors, journal,
+  # volume, and pages against the registered metadata, and reports mismatches.
+  # Default: false, because it requires network access during rendering, slows
+  # the build, and sends each DOI to an external service.
+
   # ── Display defaults ─────────────────────────────────────────────────────────
 
   default-compact: false
@@ -194,6 +204,22 @@ If a `ref.bib` file exists at the project root, the extension reads its citation
 - Identify undefined citation keys (used in text but not in the bibliography)
 - Report unused references (defined but never cited)
 
+## Privacy & network
+
+Most analysis runs entirely in the reader's browser with no network access. Three
+optional features reach external services — review them before publishing:
+
+| Feature | Default | What leaves the machine | How to disable |
+| --- | --- | --- | --- |
+| NLP (compromise.js) | **on** | Loads a script from a CDN into the reader's browser | `nlp-cdn: false` (or self-host via `nlp-cdn-url`) |
+| DOI validation | off | Each DOI in `ref.bib` is sent to `api.crossref.org` **at render time** | leave `doi-validation` unset/`false` |
+| Spellcheck | off | Paragraph text is sent to a LanguageTool endpoint from the reader's browser | leave `spellcheck` unset/`false` |
+
+The compiled JavaScript and CSS are injected into **every** HTML output. The bundle
+is sizeable (`wink-bundle.min.js` is ~3.6 MB), so the extension is intended as a
+drafting aid — remove the filter from the front matter before producing the final
+published artifact if you do not want the review UI shipped to readers.
+
 ## How it works
 
 ### Runtime flow
@@ -224,11 +250,11 @@ node build-scientific-writing.mjs
 
 This reads all modules listed in `build-scientific-writing.mjs`, concatenates them, wraps the result in an IIFE (`(function () { 'use strict'; ... })();`), and writes `scientific-writing.js`.
 
-After building, copy the updated file to the article's lib folder if you are working with a pre-rendered HTML file:
+After building, copy the updated file to the article's lib folder if you are working with a pre-rendered HTML file (the version segment matches `version:` in `_extension.yml`):
 
 ```bash
 cp ../scientific-writing.js \
-   ../../../article-en_files/libs/quarto-contrib/scientific-writing-1.0.0/scientific-writing.js
+   ../../../<article>_files/libs/quarto-contrib/scientific-writing-<version>/scientific-writing.js
 ```
 
 wink-nlp is bundled separately via esbuild (see `build/build.mjs`), producing `wink-bundle.min.js`.
@@ -427,6 +453,10 @@ The card is always visible and not part of any collapsible group. It uses ~50 is
 ### `src/ui/modal.js`
 
 Modal verb focus panel: clicking the modal verb metric isolates paragraphs with modal constructions.
+
+### `src/ui/doi-tooltip.js`
+
+Renders the DOI-validation tooltips from the comparison data pre-fetched at render time by the Lua filter (only present when `doi-validation: true`). Builds a word-level diff between the `ref.bib` field and the CrossRef metadata so mismatches in title, authors, journal, volume, and pages are highlighted inline.
 
 ### `src/ui/regex.js`
 
