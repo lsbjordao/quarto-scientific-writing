@@ -826,6 +826,15 @@ body:has(.ws-note:hover) .ws-wrapper:has(.ws-note:hover) .ws-note {
   padding: 0.32rem 0.45rem;
   font-size: 0.76rem;
   font-family: ui-monospace, "Cascadia Code", "Fira Code", monospace;
+  /* Explicit colors so the field stays readable on dark themes, where the
+     inherited form-control background/text would otherwise be dark-on-dark. */
+  background: #ffffff;
+  color: #1f2937;
+}
+
+.ws-doc-regex-input::placeholder {
+  color: #9ca3af;
+  opacity: 1;
 }
 
 .ws-doc-regex-input:focus-visible {
