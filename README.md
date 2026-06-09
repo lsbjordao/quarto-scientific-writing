@@ -163,6 +163,14 @@ scientific-writing:
   # Default: false, because it requires network access during rendering, slows
   # the build, and sends each DOI to an external service.
 
+  # ── Output mode ──────────────────────────────────────────────────────────────
+
+  review: true
+  # Master switch for the review UI. When false, the filter injects no script,
+  # no stylesheet, and no extension markup — producing a clean published HTML.
+  # Default: true. See "Final / published render" below for the recommended
+  # profile-based workflow that does not require editing the document.
+
   # ── Display defaults ─────────────────────────────────────────────────────────
 
   default-compact: false
@@ -215,10 +223,43 @@ optional features reach external services — review them before publishing:
 | DOI validation | off | Each DOI in `ref.bib` is sent to `api.crossref.org` **at render time** | leave `doi-validation` unset/`false` |
 | Spellcheck | off | Paragraph text is sent to a LanguageTool endpoint from the reader's browser | leave `spellcheck` unset/`false` |
 
-The compiled JavaScript and CSS are injected into **every** HTML output. The bundle
-is sizeable (`wink-bundle.min.js` is ~3.6 MB), so the extension is intended as a
-drafting aid — remove the filter from the front matter before producing the final
-published artifact if you do not want the review UI shipped to readers.
+By default the compiled JavaScript and CSS are injected into **every** HTML output,
+and the bundle is sizeable (`wink-bundle.min.js` is ~3.6 MB). The extension is a
+drafting aid, so for the final published artifact you usually want a clean output
+with none of the review machinery — see the next section.
+
+## Final / published render
+
+The extension is meant for use while you write and revise. For the version you ship
+to readers (a journal, a website, a colleague) you typically want a clean,
+lightweight HTML without the highlights, the metrics panel, or the ~4 MB of
+JavaScript. The in-browser "Final review" button only *hides* the highlights; the
+payload is still embedded. To leave it out entirely, turn the review UI off.
+
+**Recommended — a publish profile (no document edits):**
+
+```bash
+quarto render --profile publish
+```
+
+The bundled `_quarto-publish.yml` activates the `publish` profile, and the filter
+detects it by name (via the `QUARTO_PROFILE` environment variable Quarto exports)
+and injects nothing — no script, no stylesheet, no extension markup. Your everyday
+`quarto render` keeps the full review UI. Name additional profiles whatever you
+like; only `publish` switches the extension off.
+
+**Alternative — per document:**
+
+```yaml
+scientific-writing:
+  review: false
+```
+
+Set this in a document's front matter to keep that one file clean regardless of how
+it is rendered.
+
+When the review UI is off, the filter also skips the render-time DOI/CrossRef
+network calls, since they only feed the UI.
 
 ## How it works
 

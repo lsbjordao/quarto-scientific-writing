@@ -1,0 +1,13 @@
+# Publish profile — produce a clean HTML without the review UI.
+#
+# Activate with:  quarto render --profile publish
+#
+# Primary trigger: the scientific-writing filter detects the "publish" profile by
+# name (via the QUARTO_PROFILE environment variable Quarto exports) and injects no
+# script, no stylesheet, and no extension markup.
+#
+# The key below is a fallback: it disables the review UI for documents that do not
+# define their own `scientific-writing:` block (a document-level block would
+# otherwise shadow this project-level value).
+scientific-writing:
+  review: false

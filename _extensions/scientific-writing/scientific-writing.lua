@@ -7,6 +7,11 @@ local function meta_bool(value, default)
   return default
 end
 
+-- Whether the review UI is injected. Set from `scientific-writing.review` in the
+-- Meta pass (default true); when false the filter produces a clean published HTML
+-- with no script, no stylesheet, and no extension markup.
+local REVIEW_ENABLED = true
+
 -- Read and parse _variables.yml to extract variable names and numeric values
 local function read_variables_file()
   local candidates = { "_variables.yml", "_variables.yaml" }
@@ -350,11 +355,13 @@ local function mark_var_shortcodes(inlines)
 end
 
 function Para(el)
+  if not REVIEW_ENABLED then return nil end
   el.content = mark_var_shortcodes(el.content)
   return el
 end
 
 function Plain(el)
+  if not REVIEW_ENABLED then return nil end
   el.content = mark_var_shortcodes(el.content)
   return el
 end
@@ -473,9 +480,33 @@ local function js_json(value, default)
   return json_encode(as_lua)
 end
 
+-- The review UI is disabled for the "publish" Quarto profile. A nested key such
+-- as `scientific-writing.review` set in a profile/_quarto.yml does NOT reach the
+-- filter when the document defines its own `scientific-writing:` block (document
+-- metadata shadows it), so the profile is detected by name via QUARTO_PROFILE,
+-- which Quarto exports to filters. QUARTO_PROFILE may list several profiles,
+-- comma- or whitespace-separated.
+local function publish_profile_active()
+  local profiles = os.getenv("QUARTO_PROFILE") or ""
+  for token in profiles:gmatch("[^,%s]+") do
+    if token:lower() == "publish" then return true end
+  end
+  return false
+end
+
 function Meta(meta)
+  local cfg = meta["scientific-writing"] or {}
+  REVIEW_ENABLED = meta_bool(cfg["review"], true)
+  if publish_profile_active() then
+    -- The publish profile always wins over a document-level review: true.
+    REVIEW_ENABLED = false
+  end
+  if not REVIEW_ENABLED then
+    -- Final/published render: inject nothing and make no network calls.
+    return meta
+  end
+
   if quarto.doc.is_format("html") then
-    local cfg = meta["scientific-writing"] or {}
     local nlp_cdn_enabled = meta_bool(cfg["nlp-cdn"], true)
     local nlp_cdn_url = js_json(cfg["nlp-cdn-url"], '"https://cdn.jsdelivr.net/npm/compromise/builds/compromise.min.js"')
     local nlp_cdn_script = ""
@@ -586,3 +617,10 @@ window.WritingStatsConfig = {
   end
   return meta
 end
+
+-- Two-pass filter: Meta runs first so REVIEW_ENABLED is set before Para/Plain
+-- decide whether to mark `{{< var >}}` shortcodes.
+return {
+  { Meta = Meta },
+  { Para = Para, Plain = Plain },
+}
