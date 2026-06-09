@@ -680,6 +680,9 @@ body:has(.ws-note:hover) .ws-wrapper:has(.ws-note:hover) .ws-note {
   border: 1px solid #e5e7eb;
   border-radius: 6px;
   background: #ffffff;
+  /* Default text color so any card content without its own color stays dark on
+     the white card — guards against light theme text bleeding through. */
+  color: #374151;
   padding: 0.45rem 0.55rem;
 }
 
@@ -687,7 +690,7 @@ body:has(.ws-note:hover) .ws-wrapper:has(.ws-note:hover) .ws-note {
   cursor: pointer;
 }
 
-.ws-doc-metric[data-ws-focus]:hover {
+.ws-doc-metric[data-ws-focus]:not(.ws-doc-metric-active):hover {
   border-color: #0284c7;
   background: #f0f9ff;
 }
