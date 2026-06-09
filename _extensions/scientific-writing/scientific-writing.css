@@ -1679,6 +1679,62 @@ body.ws-focus-spelling .ws-spelling {
   text-decoration-thickness: 2px;
 }
 
+/* ── Focus highlight contrast ───────────────────────────────────────────────
+   Each focus rule above gives its highlight a pale background but leaves the text
+   color inherited. On dark themes (e.g. darkly, which Quarto still labels
+   body.quarto-light, so dark mode can't be detected by selector) the inherited
+   light text is unreadable on the pale fill. Force dark text on the *active*
+   highlight only — each focus paired with its own highlight — so highlights that
+   are present but not currently focused (still transparent) keep the inherited
+   color and don't vanish into a dark background. Paragraph-level markers
+   (cohesion/citation-low/results-citation) and the underline-only spelling
+   highlight are intentionally excluded. */
+body.ws-focus-long .ws-long-sentence,
+body.ws-focus-repeated .ws-repeated,
+body.ws-focus-repeated-start .ws-repeated-start,
+body.ws-focus-passive .ws-passive,
+body.ws-focus-passive .ws-wink-passive,
+body.ws-focus-wink-passive .ws-wink-passive,
+body.ws-focus-nominal .ws-nominalization,
+body.ws-focus-noverb .ws-no-verb,
+body.ws-focus-hedge .ws-hedge,
+body.ws-focus-wordy .ws-wordy,
+body.ws-focus-colloquial .ws-colloquial,
+body.ws-focus-complexsent .ws-complex-sent,
+body.ws-focus-pronounambig .ws-pronoun-ambig,
+body.ws-focus-modal .ws-modal,
+body.ws-focus-firstperson .ws-firstperson,
+body.ws-focus-citation-start .ws-citation-start,
+body.ws-focus-italic .ws-italic-text,
+body.ws-focus-regex .ws-regex-match,
+body.ws-focus-connectors .ws-connector,
+body.ws-focus-connectors-add .ws-connector-add,
+body.ws-focus-connectors-contrast .ws-connector-contrast,
+body.ws-focus-connectors-cause .ws-connector-cause,
+body.ws-focus-connectors-conclusion .ws-connector-conclusion,
+body.ws-focus-connectors-time .ws-connector-time,
+body.ws-focus-evidence .ws-evidence,
+body.ws-focus-evidence-hardcoded .ws-evidence-hardcoded,
+body.ws-focus-evidence-parameterized .ws-evidence-parameterized,
+body.ws-focus-evidence-unparameterized .ws-evidence,
+body.ws-focus-evidence-unparameterized .ws-evidence-hardcoded,
+body.ws-focus-figure-ref-order .ws-xref-order-fig,
+body.ws-focus-table-ref-order .ws-xref-order-tbl,
+body.ws-focus-wink-complex .ws-wink-complex,
+body.ws-focus-wink-pronoun .ws-wink-pronoun,
+body.ws-focus-wink-auxiliary .ws-wink-auxiliary,
+body.ws-focus-wink-numeric .ws-wink-numeric,
+body.ws-focus-wink-propn .ws-wink-propn,
+body.ws-focus-nlp-nominal-load .ws-nlp-nominal-load,
+body.ws-focus-nlp-weakverb .ws-nlp-weak-verb,
+body.ws-focus-nlp-nounstack .ws-nlp-noun-stack,
+body.ws-focus-nlp-topics .ws-nlp-topic,
+body.ws-focus-nlp-entities .ws-nlp-entity,
+body.ws-focus-nlp-values-dates .ws-nlp-value-date,
+body.ws-focus-nlp-adverbs .ws-nlp-adverb {
+  color: #1f2937;
+}
+
 /* ── Responsive: stack notes below paragraph on narrow screens ───────────── */
 @media (max-width: 1100px) {
   .ws-note {
