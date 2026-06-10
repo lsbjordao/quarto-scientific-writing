@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="logo.png" alt="scientific-writing logo" width="200">
+  <img src="logo.png" alt="scientific-writing logo" width="500">
 </p>
 
 # scientific-writing
