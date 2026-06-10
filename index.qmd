@@ -28,6 +28,7 @@ bibliography: ref.bib
 filters:
   - scientific-writing
 scientific-writing:
+  doi-validation: true
   spellcheck: true
   spellcheck-language: en-US
   spellcheck-ignore-terms:
