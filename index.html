@@ -11553,6 +11553,16 @@ text-decoration-color: #b45309 !important;
 text-decoration-style: dashed !important;
 }
 </style>
+<style>
+
+:not(pre) > code {
+background-color: #343a40;
+color: #f1a8cd;
+padding: 0.1em 0.4em;
+border-radius: 4px;
+border: 1px solid #41464b;
+}
+</style>
 <script>/**
  * Skipped minification because the original files appears to be already minified.
  * Original file: /npm/compromise@14.15.1/builds/compromise.js
@@ -11573,10 +11583,10 @@ window.WritingStatsConfig = {
   hedgeThreshold: 4,
   defaultCompact: false,
   defaultAlertsOnly: false,
-  sectionGoals: {"Discussion":{"minLexicalDiversity":["0.58"]},"Abstract":{"maxAvgSentence":["24"],"maxLongSentenceRate":["18"]},"Materials and Methods":{"maxPassivePer1000":["30"]}},
+  sectionGoals: {"Materials and Methods":{"maxPassivePer1000":["30"]},"Abstract":{"maxLongSentenceRate":["18"],"maxAvgSentence":["24"]},"Discussion":{"minLexicalDiversity":["0.58"]}},
   ignoreTerms: [["bean"],["phaseolus"],["vulgaris"]],
   connectorAmbiguityMode: ["balanced"],
-  connectorAmbiguityOverrides: {"then":["balanced"],"as":["strict"],"since":["lenient"]},
+  connectorAmbiguityOverrides: {"since":["lenient"],"as":["strict"],"then":["balanced"]},
   variableCount: 30,
   variableEntries: [{"value":"4","name":"n_tratamentos"},{"value":"5","name":"n_repeticoes"},{"value":"20","name":"n_unidades"},{"value":"30","name":"n_dias"},{"value":"3","name":"profundidade_semeadura"},{"value":"15","name":"temp_baixa"},{"value":"20","name":"temp_media_baixa"},{"value":"25","name":"temp_otima"},{"value":"30","name":"temp_alta"},{"value":"2.3","name":"incremento_25"},{"value":"0.8","name":"incremento_15"},{"value":"62","name":"area_foliar_deficit"},{"value":"23","name":"temp_max_area_foliar_min"},{"value":"27","name":"temp_max_area_foliar_max"},{"value":"5","name":"alpha_tukey"},{"value":"4","name":"n_treatments"},{"value":"5","name":"n_replicates"},{"value":"20","name":"n_units"},{"value":"30","name":"n_days"},{"value":"3","name":"sowing_depth_cm"},{"value":"15","name":"temp_low_c"},{"value":"20","name":"temp_mid_low_c"},{"value":"25","name":"temp_optimal_c"},{"value":"30","name":"temp_high_c"},{"value":"2.3","name":"growth_increment_optimal_cm_day"},{"value":"0.8","name":"growth_increment_low_cm_day"},{"value":"62","name":"leaf_area_deficit_pct"},{"value":"23","name":"leaf_area_temp_min_c"},{"value":"27","name":"leaf_area_temp_max_c"},{"value":"5","name":"tukey_alpha_pct"}],
   sourceEvidenceTokens: [{"value":"15"},{"value":"20"},{"value":"25"},{"value":"30"},{"value":"30","name":"n_days"},{"value":"5","name":"n_replicates"},{"value":"25"},{"value":"15"},{"value":"2017"},{"value":"2015"},{"value":"2017"},{"value":"2001"},{"value":"2007"},{"value":"15"},{"value":"20"},{"value":"25"},{"value":"30"},{"value":"5","name":"n_replicates"},{"value":"20"},{"value":"3","name":"sowing_depth_cm"},{"value":"30","name":"n_days"},{"value":"5","name":"tukey_alpha_pct"},{"value":"2024"},{"value":"25"},{"value":"2.3"},{"value":"15"},{"value":"0.8"},{"value":"20"},{"value":"30"},{"value":"25"},{"value":"25"},{"value":"15"},{"value":"25"},{"value":"30"},{"value":"23"},{"value":"27"},{"value":"2007"},{"value":"15"},{"value":"62","name":"leaf_area_deficit_pct"},{"value":"25"},{"value":"15"},{"value":"30"},{"value":"1"},{"value":"15"},{"value":"5"},{"value":"1"},{"value":"2"},{"value":"20"},{"value":"5"},{"value":"1"},{"value":"3"},{"value":"25"},{"value":"5"},{"value":"1"},{"value":"4"},{"value":"30"},{"value":"5"},{"value":"1"},{"value":"30"},{"value":"15"},{"value":"0.8"},{"value":"38"},{"value":"42"},{"value":"20"},{"value":"1.5"},{"value":"74"},{"value":"79"},{"value":"25"},{"value":"2.3"},{"value":"100"},{"value":"100"},{"value":"30"},{"value":"1.9"},{"value":"88"},{"value":"91"},{"value":"25"},{"value":"15"},{"value":"30"},{"value":"2007"},{"value":"2007"},{"value":"25"},{"value":"15"},{"value":"30"},{"value":"25"}],

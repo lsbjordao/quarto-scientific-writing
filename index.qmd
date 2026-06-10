@@ -12,6 +12,18 @@ format:
     page-layout: article
     theme: darkly
     embed-resources: true
+    include-in-header:
+      text: |
+        <style>
+          /* Inline code readability on the dark (darkly) theme */
+          :not(pre) > code {
+            background-color: #343a40;
+            color: #f1a8cd;
+            padding: 0.1em 0.4em;
+            border-radius: 4px;
+            border: 1px solid #41464b;
+          }
+        </style>
 bibliography: ref.bib
 filters:
   - scientific-writing
