@@ -1,8 +1,10 @@
 ---
-title: "Influence of Temperature on the Growth of Common Bean Plants (*Phaseolus vulgaris* L.)"
+title: "Quarto Scientific Writing Extension"
 author: "Corresponding Author"
 date: today
 lang: en-US
+abstract: >-
+  This document demonstrates the Quarto Scientific Writing Extension. The manuscript below — a short, fictional study on the effect of temperature on common bean growth — is included only as an example to exercise the extension's features, not as real research. As the document renders, the extension annotates the HTML in the reader's browser with style and linguistic diagnostics (long sentences, passive voice, hedging, ambiguous connectors, diagnostics (long sentences, passive voice, hedging, ambiguous connectors, wordy phrases, repetition, nominalizations, and optional spellchecking), readability scores, per-paragraph and per-section notes, an always-visible Document Analysis card, and a panel of 70+ document-level metrics. It also audits scholarly structure: it checks in-text citations and references against `ref.bib`, validates DOIs against the CrossRef API, verifies figure and table cross-references for coverage and citation order, and tracks numeric evidence — separating parameterized values (drawn from `_variables.yml` via `var` shortcodes) from hard-coded numbers. All analysis runs client-side and can be switched off for the final published render via the publish profile.
 format:
   html:
     toc: true

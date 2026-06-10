@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="logo.png" alt="scientific-writing logo" width="200">
+</p>
+
 # scientific-writing
 
 A Quarto extension that provides real-time, in-browser analysis of academic manuscripts. It annotates your rendered HTML document with style, structure, and linguistic diagnostics — helping you write cleaner, more rigorous scientific prose.
