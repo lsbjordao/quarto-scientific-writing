@@ -9683,7 +9683,29 @@ var L_EN = {
   }
 })();
 </script>
-<style type="text/css">
+<style type="text/css">:root {
+--ws-card-bg: rgba(15, 23, 42, 0.045);
+--ws-card-bg-alert: rgba(220, 38, 38, 0.06);
+--ws-card-bg-hover: rgba(2, 132, 199, 0.10);
+--ws-card-bg-active: rgba(2, 132, 199, 0.22);
+--ws-card-bg-muted: rgba(15, 23, 42, 0.07);
+--ws-card-border: rgba(124, 58, 237, 0.28);
+--ws-card-border-neutral: rgba(148, 163, 184, 0.35);
+--ws-card-shadow: rgba(15, 23, 42, 0.12);
+}
+html:has(#quarto-bootstrap[data-mode="dark"]),
+html.quarto-dark,
+html[data-bs-theme="dark"] {
+--ws-card-bg: rgba(255, 255, 255, 0.055);
+--ws-card-bg-alert: rgba(255, 255, 255, 0.07);
+--ws-card-bg-hover: rgba(255, 255, 255, 0.10);
+--ws-card-bg-active: rgba(255, 255, 255, 0.16);
+--ws-card-bg-muted: rgba(255, 255, 255, 0.08);
+--ws-card-border: rgba(255, 255, 255, 0.18);
+--ws-card-border-neutral: rgba(255, 255, 255, 0.16);
+--ws-card-shadow: rgba(0, 0, 0, 0.18);
+}
+
 .ws-wrapper {
 position: relative;
 overflow: visible;
@@ -10277,11 +10299,10 @@ animation: ws-fade-in-up 300ms ease;
 }
 .ws-doc-metric {
 min-width: 0;
-border: 1px solid #e5e7eb;
+border: 1px solid var(--ws-card-border-neutral);
 border-radius: 6px;
-background: #ffffff;
-
-color: #374151;
+background: var(--ws-card-bg);
+color: inherit;
 padding: 0.45rem 0.55rem;
 }
 .ws-doc-metric[data-ws-focus] {
@@ -10289,20 +10310,20 @@ cursor: pointer;
 }
 .ws-doc-metric[data-ws-focus]:not(.ws-doc-metric-active):hover {
 border-color: #0284c7;
-background: #f0f9ff;
+background: var(--ws-card-bg-hover);
 }
 .ws-doc-metric-active {
 border-color: #0369a1;
-background: #bae6fd;
-box-shadow: inset 0 0 0 1px #0369a1;
+background: var(--ws-card-bg-active);
+box-shadow: inset 0 0 0 1px rgba(3, 105, 161, 0.7);
 }
 .ws-doc-metric-active .ws-doc-metric-label,
 .ws-doc-metric-active .ws-doc-metric-value {
-color: #0c4a6e;
+color: inherit;
 }
 .ws-doc-metric-label {
 display: block;
-color: #6b7280;
+color: color-mix(in srgb, currentColor 62%, transparent);
 font-size: 0.66rem;
 line-height: 1.15;
 text-transform: uppercase;
@@ -10310,7 +10331,7 @@ letter-spacing: 0.04em;
 }
 .ws-doc-metric-value {
 display: block;
-color: #374151;
+color: inherit;
 font-size: 0.88rem;
 font-weight: 700;
 line-height: 1.35;
@@ -10470,10 +10491,10 @@ grid-column: 1 / -1;
 display: grid;
 grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
 gap: 0.45rem;
-border: 1px solid #e5e7eb;
+border: 1px solid var(--ws-card-border-neutral);
 border-left: 3px solid #0284c7;
 border-radius: 6px;
-background: #f8fafc;
+background: var(--ws-card-bg-muted);
 padding: 0.55rem;
 }
 .ws-doc-diagnostics div {
@@ -10481,7 +10502,7 @@ min-width: 0;
 }
 .ws-doc-diagnostics span {
 display: block;
-color: #64748b;
+color: color-mix(in srgb, currentColor 62%, transparent);
 font-size: 0.64rem;
 line-height: 1.15;
 text-transform: uppercase;
@@ -10489,7 +10510,7 @@ letter-spacing: 0.04em;
 }
 .ws-doc-diagnostics strong {
 display: block;
-color: #0f172a;
+color: inherit;
 font-size: 0.8rem;
 line-height: 1.35;
 margin-top: 0.1rem;
@@ -11298,10 +11319,10 @@ padding: 0 !important;
 }
 
 .ws-doc-summary {
-border: 1px solid #e5e7eb;
+border: 1px solid var(--ws-card-border-neutral);
 border-left: 3px solid #7c3aed;
 border-radius: 8px;
-background: #faf9ff;
+background: var(--ws-card-bg);
 padding: 0.65rem 0.85rem 0.6rem;
 font-family: ui-sans-serif, system-ui, sans-serif;
 animation: ws-fade-in-up 320ms ease;
@@ -11313,7 +11334,7 @@ align-items: center;
 justify-content: space-between;
 margin-bottom: 0.45rem;
 padding-bottom: 0.3rem;
-border-bottom: 1px solid #ede9fe;
+border-bottom: 1px solid var(--ws-card-border);
 }
 .ws-sum-title {
 font-size: 0.63rem;
@@ -11327,8 +11348,8 @@ font-size: 0.55rem;
 font-weight: 700;
 text-transform: uppercase;
 letter-spacing: 0.04em;
-color: #9ca3af;
-background: #f3f4f6;
+color: color-mix(in srgb, currentColor 62%, transparent);
+background: var(--ws-card-bg-muted);
 border-radius: 20px;
 padding: 0.1rem 0.4rem;
 }
@@ -11367,15 +11388,15 @@ font-size: 0.58rem;
 font-weight: 700;
 text-transform: uppercase;
 letter-spacing: 0.05em;
-color: #9ca3af;
+color: color-mix(in srgb, currentColor 56%, transparent);
 flex-shrink: 0;
 }
 .ws-profile-vals {
-color: #374151;
+color: inherit;
 flex: 1;
 }
 .ws-profile-val {
-color: #374151;
+color: inherit;
 }
 .ws-profile-val.ws-profile-alert {
 color: #b91c1c;
@@ -11396,17 +11417,17 @@ display: inline-flex;
 align-items: center;
 gap: 0.2rem;
 max-width: 100%;
-border: 1px solid #e9d5ff;
+border: 1px solid var(--ws-card-border);
 border-radius: 999px;
-background: #fff;
-color: #6b21a8;
+background: var(--ws-card-bg-muted);
+color: inherit;
 font-size: 0.62rem;
 line-height: 1.35;
 padding: 0.12rem 0.42rem;
 white-space: normal;
 }
 .ws-sum-section-pill strong {
-color: #4c1d95;
+color: inherit;
 font-weight: 700;
 }
 .ws-sum-issue {
@@ -11419,14 +11440,14 @@ padding: 0.04rem 0;
 .ws-sum-detail {
 display: block;
 font-size: 0.66rem;
-color: #6b7280;
+color: color-mix(in srgb, currentColor 68%, transparent);
 padding-left: 1.1rem;
 line-height: 1.55;
 margin-bottom: 0.1rem;
 }
 .ws-sum-detail em {
 font-style: normal;
-color: #374151;
+color: inherit;
 }
 .ws-sum-ok {
 font-size: 0.73rem;
@@ -11575,7 +11596,7 @@ window.WritingStatsConfig = {
   sectionGoals: {"Material e Métodos":{"maxPassivePer1000":["30"]},"Resumo":{"maxAvgSentence":["24"],"maxLongSentenceRate":["18"]},"Discussão":{"minLexicalDiversity":["0.58"]}},
   ignoreTerms: [["feijoeiro"],["feijão"],["phaseolus"],["vulgaris"]],
   connectorAmbiguityMode: ["balanced"],
-  connectorAmbiguityOverrides: {"pois":["lenient"],"assim":["strict"],"logo":["strict"]},
+  connectorAmbiguityOverrides: {"logo":["strict"],"pois":["lenient"],"assim":["strict"]},
   variableCount: 30,
   variableEntries: [{"name":"n_tratamentos","value":"4"},{"name":"n_repeticoes","value":"5"},{"name":"n_unidades","value":"20"},{"name":"n_dias","value":"30"},{"name":"profundidade_semeadura","value":"3"},{"name":"temp_baixa","value":"15"},{"name":"temp_media_baixa","value":"20"},{"name":"temp_otima","value":"25"},{"name":"temp_alta","value":"30"},{"name":"incremento_25","value":"2.3"},{"name":"incremento_15","value":"0.8"},{"name":"area_foliar_deficit","value":"62"},{"name":"temp_max_area_foliar_min","value":"23"},{"name":"temp_max_area_foliar_max","value":"27"},{"name":"alpha_tukey","value":"5"},{"name":"n_treatments","value":"4"},{"name":"n_replicates","value":"5"},{"name":"n_units","value":"20"},{"name":"n_days","value":"30"},{"name":"sowing_depth_cm","value":"3"},{"name":"temp_low_c","value":"15"},{"name":"temp_mid_low_c","value":"20"},{"name":"temp_optimal_c","value":"25"},{"name":"temp_high_c","value":"30"},{"name":"growth_increment_optimal_cm_day","value":"2.3"},{"name":"growth_increment_low_cm_day","value":"0.8"},{"name":"leaf_area_deficit_pct","value":"62"},{"name":"leaf_area_temp_min_c","value":"23"},{"name":"leaf_area_temp_max_c","value":"27"},{"name":"tukey_alpha_pct","value":"5"}],
   sourceEvidenceTokens: [{"name":"temp_baixa","value":"15"},{"name":"temp_media_baixa","value":"20"},{"name":"temp_otima","value":"25"},{"name":"temp_alta","value":"30"},{"value":"5"},{"value":"25"},{"value":"15"},{"value":"2017"},{"value":"2015"},{"value":"2001"},{"value":"2007"},{"name":"n_tratamentos","value":"4"},{"name":"temp_baixa","value":"15"},{"name":"temp_media_baixa","value":"20"},{"name":"temp_otima","value":"25"},{"name":"temp_alta","value":"30"},{"name":"n_repeticoes","value":"5"},{"name":"n_unidades","value":"20"},{"name":"profundidade_semeadura","value":"3"},{"value":"30"},{"value":"5"},{"value":"2024"},{"name":"temp_otima","value":"25"},{"value":"2.3"},{"name":"temp_baixa","value":"15"},{"value":"0.8"},{"value":"20"},{"value":"30"},{"value":"25"},{"value":"25"},{"value":"15"},{"value":"25"},{"value":"30"},{"value":"2007"},{"name":"temp_max_area_foliar_min","value":"23"},{"name":"temp_max_area_foliar_max","value":"27"},{"name":"temp_baixa","value":"15"},{"value":"62"},{"value":"25"},{"value":"15"},{"value":"30"},{"value":"25"},{"value":"2017"},{"value":"2007"},{"value":"15"},{"value":"2015"},{"value":"30"},{"value":"25"},{"value":"15"},{"value":"30"},{"value":"25"}],
@@ -11637,7 +11658,7 @@ window.WritingStatsConfig = {
     <div>
     <div class="quarto-title-meta-heading">Data de Publicação</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">9 de junho de 2026</p>
+      <p class="date">11 de junho de 2026</p>
     </div>
   </div>
   
