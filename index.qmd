@@ -10,7 +10,9 @@ format:
     toc: true
     toc-location: left
     page-layout: article
-    theme: darkly
+    theme: 
+      dark: darkly
+      light: cosmo
     embed-resources: true
     include-in-header:
       text: |

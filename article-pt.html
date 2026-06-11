@@ -9692,9 +9692,14 @@ var L_EN = {
 --ws-card-border: rgba(124, 58, 237, 0.28);
 --ws-card-border-neutral: rgba(148, 163, 184, 0.35);
 --ws-card-shadow: rgba(15, 23, 42, 0.12);
+--ws-summary-accent: #5b21b6;
+--ws-summary-alert: #b91c1c;
+--ws-summary-warn: #92400e;
+--ws-summary-warn-label: #b45309;
+--ws-summary-ok: #15803d;
 }
-html:has(#quarto-bootstrap[data-mode="dark"]),
-html.quarto-dark,
+html:has(link#quarto-bootstrap[data-mode="dark"]:not([rel="disabled-stylesheet"])),
+body.quarto-dark,
 html[data-bs-theme="dark"] {
 --ws-card-bg: rgba(255, 255, 255, 0.055);
 --ws-card-bg-alert: rgba(255, 255, 255, 0.07);
@@ -9704,6 +9709,11 @@ html[data-bs-theme="dark"] {
 --ws-card-border: rgba(255, 255, 255, 0.18);
 --ws-card-border-neutral: rgba(255, 255, 255, 0.16);
 --ws-card-shadow: rgba(0, 0, 0, 0.18);
+--ws-summary-accent: #c4b5fd;
+--ws-summary-alert: #fca5a5;
+--ws-summary-warn: #fbbf24;
+--ws-summary-warn-label: #fcd34d;
+--ws-summary-ok: #86efac;
 }
 
 .ws-wrapper {
@@ -11341,7 +11351,7 @@ font-size: 0.63rem;
 font-weight: 700;
 text-transform: uppercase;
 letter-spacing: 0.07em;
-color: #5b21b6;
+color: var(--ws-summary-accent);
 }
 .ws-sum-badge {
 font-size: 0.55rem;
@@ -11363,9 +11373,9 @@ margin-bottom: 0.15rem;
 padding-bottom: 0.12rem;
 border-bottom: 1px dashed currentColor;
 }
-.ws-sum-section-alert { color: #b91c1c; }
-.ws-sum-section-warn { color: #b45309; }
-.ws-sum-section-profile { color: #5b21b6; }
+.ws-sum-section-alert { color: var(--ws-summary-alert); }
+.ws-sum-section-warn { color: var(--ws-summary-warn-label); }
+.ws-sum-section-profile { color: var(--ws-summary-accent); }
 .ws-sum-profile {
 margin-bottom: 0.45rem;
 }
@@ -11399,11 +11409,11 @@ flex: 1;
 color: inherit;
 }
 .ws-profile-val.ws-profile-alert {
-color: #b91c1c;
+color: var(--ws-summary-alert);
 font-weight: 600;
 }
 .ws-profile-val.ws-profile-warn {
-color: #92400e;
+color: var(--ws-summary-warn);
 font-weight: 600;
 }
 .ws-sum-section-words {
@@ -11435,8 +11445,8 @@ font-size: 0.73rem;
 line-height: 1.6;
 padding: 0.04rem 0;
 }
-.ws-sum-issue-alert { color: #b91c1c; }
-.ws-sum-issue-warn { color: #92400e; }
+.ws-sum-issue-alert { color: var(--ws-summary-alert); }
+.ws-sum-issue-warn { color: var(--ws-summary-warn); }
 .ws-sum-detail {
 display: block;
 font-size: 0.66rem;
@@ -11451,7 +11461,7 @@ color: inherit;
 }
 .ws-sum-ok {
 font-size: 0.73rem;
-color: #15803d;
+color: var(--ws-summary-ok);
 }
 body.ws-annotations-hidden .ws-doc-summary {
 display: none !important;
@@ -11596,7 +11606,7 @@ window.WritingStatsConfig = {
   sectionGoals: {"Material e Métodos":{"maxPassivePer1000":["30"]},"Resumo":{"maxAvgSentence":["24"],"maxLongSentenceRate":["18"]},"Discussão":{"minLexicalDiversity":["0.58"]}},
   ignoreTerms: [["feijoeiro"],["feijão"],["phaseolus"],["vulgaris"]],
   connectorAmbiguityMode: ["balanced"],
-  connectorAmbiguityOverrides: {"logo":["strict"],"pois":["lenient"],"assim":["strict"]},
+  connectorAmbiguityOverrides: {"logo":["strict"],"assim":["strict"],"pois":["lenient"]},
   variableCount: 30,
   variableEntries: [{"name":"n_tratamentos","value":"4"},{"name":"n_repeticoes","value":"5"},{"name":"n_unidades","value":"20"},{"name":"n_dias","value":"30"},{"name":"profundidade_semeadura","value":"3"},{"name":"temp_baixa","value":"15"},{"name":"temp_media_baixa","value":"20"},{"name":"temp_otima","value":"25"},{"name":"temp_alta","value":"30"},{"name":"incremento_25","value":"2.3"},{"name":"incremento_15","value":"0.8"},{"name":"area_foliar_deficit","value":"62"},{"name":"temp_max_area_foliar_min","value":"23"},{"name":"temp_max_area_foliar_max","value":"27"},{"name":"alpha_tukey","value":"5"},{"name":"n_treatments","value":"4"},{"name":"n_replicates","value":"5"},{"name":"n_units","value":"20"},{"name":"n_days","value":"30"},{"name":"sowing_depth_cm","value":"3"},{"name":"temp_low_c","value":"15"},{"name":"temp_mid_low_c","value":"20"},{"name":"temp_optimal_c","value":"25"},{"name":"temp_high_c","value":"30"},{"name":"growth_increment_optimal_cm_day","value":"2.3"},{"name":"growth_increment_low_cm_day","value":"0.8"},{"name":"leaf_area_deficit_pct","value":"62"},{"name":"leaf_area_temp_min_c","value":"23"},{"name":"leaf_area_temp_max_c","value":"27"},{"name":"tukey_alpha_pct","value":"5"}],
   sourceEvidenceTokens: [{"name":"temp_baixa","value":"15"},{"name":"temp_media_baixa","value":"20"},{"name":"temp_otima","value":"25"},{"name":"temp_alta","value":"30"},{"value":"5"},{"value":"25"},{"value":"15"},{"value":"2017"},{"value":"2015"},{"value":"2001"},{"value":"2007"},{"name":"n_tratamentos","value":"4"},{"name":"temp_baixa","value":"15"},{"name":"temp_media_baixa","value":"20"},{"name":"temp_otima","value":"25"},{"name":"temp_alta","value":"30"},{"name":"n_repeticoes","value":"5"},{"name":"n_unidades","value":"20"},{"name":"profundidade_semeadura","value":"3"},{"value":"30"},{"value":"5"},{"value":"2024"},{"name":"temp_otima","value":"25"},{"value":"2.3"},{"name":"temp_baixa","value":"15"},{"value":"0.8"},{"value":"20"},{"value":"30"},{"value":"25"},{"value":"25"},{"value":"15"},{"value":"25"},{"value":"30"},{"value":"2007"},{"name":"temp_max_area_foliar_min","value":"23"},{"name":"temp_max_area_foliar_max","value":"27"},{"name":"temp_baixa","value":"15"},{"value":"62"},{"value":"25"},{"value":"15"},{"value":"30"},{"value":"25"},{"value":"2017"},{"value":"2007"},{"value":"15"},{"value":"2015"},{"value":"30"},{"value":"25"},{"value":"15"},{"value":"30"},{"value":"25"}],

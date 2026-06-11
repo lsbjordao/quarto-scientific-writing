@@ -7,10 +7,15 @@
   --ws-card-border: rgba(124, 58, 237, 0.28);
   --ws-card-border-neutral: rgba(148, 163, 184, 0.35);
   --ws-card-shadow: rgba(15, 23, 42, 0.12);
+  --ws-summary-accent: #5b21b6;
+  --ws-summary-alert: #b91c1c;
+  --ws-summary-warn: #92400e;
+  --ws-summary-warn-label: #b45309;
+  --ws-summary-ok: #15803d;
 }
 
-html:has(#quarto-bootstrap[data-mode="dark"]),
-html.quarto-dark,
+html:has(link#quarto-bootstrap[data-mode="dark"]:not([rel="disabled-stylesheet"])),
+body.quarto-dark,
 html[data-bs-theme="dark"] {
   --ws-card-bg: rgba(255, 255, 255, 0.055);
   --ws-card-bg-alert: rgba(255, 255, 255, 0.07);
@@ -20,6 +25,11 @@ html[data-bs-theme="dark"] {
   --ws-card-border: rgba(255, 255, 255, 0.18);
   --ws-card-border-neutral: rgba(255, 255, 255, 0.16);
   --ws-card-shadow: rgba(0, 0, 0, 0.18);
+  --ws-summary-accent: #c4b5fd;
+  --ws-summary-alert: #fca5a5;
+  --ws-summary-warn: #fbbf24;
+  --ws-summary-warn-label: #fcd34d;
+  --ws-summary-ok: #86efac;
 }
 
 /* ── Wrapper ──────────────────────────────────────────────────────────────── */
@@ -1885,7 +1895,7 @@ body.ws-focus-nlp-adverbs .ws-nlp-adverb {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.07em;
-  color: #5b21b6;
+  color: var(--ws-summary-accent);
 }
 
 .ws-sum-badge {
@@ -1909,9 +1919,9 @@ body.ws-focus-nlp-adverbs .ws-nlp-adverb {
   padding-bottom: 0.12rem;
   border-bottom: 1px dashed currentColor;
 }
-.ws-sum-section-alert { color: #b91c1c; }
-.ws-sum-section-warn  { color: #b45309; }
-.ws-sum-section-profile { color: #5b21b6; }
+.ws-sum-section-alert { color: var(--ws-summary-alert); }
+.ws-sum-section-warn  { color: var(--ws-summary-warn-label); }
+.ws-sum-section-profile { color: var(--ws-summary-accent); }
 
 .ws-sum-profile {
   margin-bottom: 0.45rem;
@@ -1952,12 +1962,12 @@ body.ws-focus-nlp-adverbs .ws-nlp-adverb {
 }
 
 .ws-profile-val.ws-profile-alert {
-  color: #b91c1c;
+  color: var(--ws-summary-alert);
   font-weight: 600;
 }
 
 .ws-profile-val.ws-profile-warn {
-  color: #92400e;
+  color: var(--ws-summary-warn);
   font-weight: 600;
 }
 
@@ -1994,8 +2004,8 @@ body.ws-focus-nlp-adverbs .ws-nlp-adverb {
   padding: 0.04rem 0;
 }
 
-.ws-sum-issue-alert { color: #b91c1c; }
-.ws-sum-issue-warn  { color: #92400e; }
+.ws-sum-issue-alert { color: var(--ws-summary-alert); }
+.ws-sum-issue-warn  { color: var(--ws-summary-warn); }
 
 .ws-sum-detail {
   display: block;
@@ -2012,7 +2022,7 @@ body.ws-focus-nlp-adverbs .ws-nlp-adverb {
 
 .ws-sum-ok {
   font-size: 0.73rem;
-  color: #15803d;
+  color: var(--ws-summary-ok);
 }
 
 body.ws-annotations-hidden .ws-doc-summary {
