@@ -342,6 +342,28 @@
     });
   }
 
+  function highlightTermVariants(p, forms) {
+    if (!forms || !forms.length) return;
+    highlightTermListInNode(p, forms.map(function (f) { return { text: f }; }), 'ws-term-variant', L.termVariants);
+  }
+
+  function highlightUndefinedAcronyms(p, acronyms) {
+    if (!acronyms || !acronyms.length) return;
+    var alts = acronyms.map(function (a) { return String(a).replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); });
+    highlightRegexInNode(p, new RegExp('\\b(?:' + alts.join('|') + ')s?\\b', 'g'), 'ws-undefined-acronym', L.undefinedAcronyms);
+  }
+
+  function highlightUnitInconsistency(p, regexes) {
+    if (!regexes || !regexes.length) return;
+    regexes.forEach(function (re) {
+      highlightRegexInNode(p, re, 'ws-unit-inconsistency', L.unitConsistency);
+    });
+  }
+
+  function highlightEmphaticPunct(p) {
+    highlightRegexInNode(p, /[!?](?:[!?]+)/g, 'ws-emphatic-punct', L.emphaticPunct);
+  }
+
   function highlightConnectors(p) {
     var categories = getConnectorCategories();
     var contextual = getContextualConnectorTerms();

@@ -97,9 +97,17 @@ Shoot dry mass followed a trend similar to leaf area. The highest accumulation w
 
 To intentionally stress-test cross-reference ordering, Figures @fig-demo-second and @fig-demo-temp are cited in reverse order, and Tables @tbl-demo-growth and @tbl-demo-treatments are also cited in reverse order. I think this will help verify that the system correctly identifies and reports cross-reference ordering issues, as well as ensuring that figure and table numbering is consistent throughout the document.
 
-![Demonstration placeholder image for the extension metrics panel.](assets/example-figure.png){#fig-demo-temp fig-alt="Demonstration placeholder PNG used to test figure counting and cross-references."}
+::: {#fig-demo-temp}
+{{< placeholder 400 200 format=svg >}}
 
-![Second demonstration placeholder image (same asset) used only to test cross-reference order checks.](assets/example-figure.png){#fig-demo-second fig-alt="Second placeholder PNG for intentional cross-reference ordering errors."}
+Demonstration placeholder image for the extension metrics panel.
+:::
+
+::: {#fig-demo-second}
+{{< placeholder 400 200 format=svg >}}
+
+Second demonstration placeholder image used only to test cross-reference order checks.
+:::
 
 Table: Demonstration thermal treatments and replication structure. {#tbl-demo-treatments}
 
@@ -136,6 +144,44 @@ Temperature strongly influenced the early growth of common bean plants. The 25°
 # Limitations and Future Work
 
 This study was conducted under controlled conditions and evaluated only early growth. Under field conditions, plant response may be modified by solar radiation, soil moisture, fertility, pathogens, and daily thermal fluctuations. Future studies should investigate the interaction between temperature and water availability, in addition to comparing cultivars with different levels of tolerance to thermal stress. It is also recommended to monitor the full crop cycle to verify whether early growth differences are reflected in grain yield.
+
+# Appendix: Diagnostic Demonstrations {#sec-diagnostics}
+
+The paragraphs in this appendix intentionally contain writing problems so that the extension's client-side diagnostics light up the matching metric cards. They are demonstrations only and are not part of the study. Each subheading names the card it is meant to trigger.
+
+## Named entities, topics, and entity overload
+
+Charles Darwin, Gregor Mendel, and Norman Borlaug shaped modern plant science across Brazil, Mexico, and the United States. Researchers at the University of São Paulo, Embrapa, and the International Maize and Wheat Improvement Center later extended that work in Argentina and Colombia.
+
+[@taiz2017plant] reported comparable thermal thresholds in related legumes, which is why this paragraph opens with a parenthetical citation marker rather than a capitalized word.
+
+## Sentence opening patterns
+
+Thermal regulation governs leaf expansion. Thermal regulation governs root elongation. Thermal regulation governs canopy closure.
+
+## Semantic redundancy
+
+The 25°C regime produced the greatest shoot dry mass among all thermal regimes. The 25°C regime produced the greatest shoot dry mass across all thermal regimes.
+
+## Contractions and interrogative sentences
+
+We didn't expect this, and it's clear the seedlings weren't fully acclimated, so we're not convinced they can't tolerate a brief chill. Why did 25°C maximize early growth? How much does the daily thermal amplitude really matter? Should sowing dates shift under a warming climate?
+
+## Emphatic punctuation
+
+The contrast between 15°C and 25°C was striking!! Could the cold treatment really halve the shoot dry mass that fast?!
+
+## Term variants
+
+For broader context, common bean was compared with tomato and potato as reference crops. The tomato plants and the potato plants were grown under identical regimes. Although tomatoes and potatoes are botanically distant from common bean, both tomato and potato tracked the same thermal optimum.
+
+## Unit inconsistency and undefined acronyms
+
+Substrate nitrogen was reported as 12 mg/kg in some pots and as 15 mg kg-1 in others, leaf area was logged as 30 cm2 here and as 32 cm² elsewhere, and overnight humidity fell by 8% (roughly eight percent). Canopy reflectance was summarized by NDVI and atmospheric demand by VPD, yet neither NDVI nor VPD was ever defined on first use.
+
+## Long paragraph
+
+Beyond the controlled comparison reported above, a much longer narrative paragraph is included here purely to exceed the configured word limit so that the long-paragraph diagnostic is exercised by this very block of text, because once a single paragraph runs past roughly one hundred and fifty words the extension marks it as a candidate for splitting, and the surrounding cards begin to reflect the additional length, the additional clauses, the additional subordinate ideas, and the additional connectors that authors often pile into one breathless unit when they have not yet decided where one thought should stop and the next should begin; the practical advice, of course, is to break a passage like this into shorter paragraphs, to let the first sentence state the topic and the last sentence close it, and to move any new sub-topic or fresh piece of evidence into its own paragraph, but for the purpose of this demonstration the words simply keep coming, sentence after sentence, clause after clause, until the threshold is comfortably passed and the long-paragraph card finally turns red.
 
 # References
 

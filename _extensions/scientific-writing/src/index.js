@@ -65,6 +65,13 @@
     var _longWrapThreshold = globalMaxSentLen > 1 && globalMaxSentLen <= SENT_LONG
       ? globalMaxSentLen - 1
       : SENT_LONG;
+    // Document-level lists for highlighters whose detection spans the whole text.
+    var docTermVariantForms = [];
+    getTerminologyVariants(preAnalysisText).forEach(function (v) {
+      (v.forms || []).forEach(function (f) { docTermVariantForms.push(f); });
+    });
+    var docUndefinedAcronyms = getUndefinedAcronyms(getSentences(preAnalysisText)).map(function (a) { return a.acronym; });
+    var docUnitRegexes = getUnitInconsistencyRegexes(preAnalysisText);
     for (var sIdx = 0; sIdx < sections.length; sIdx++) {
       var section = sections[sIdx];
       var paras = Array.from(section.querySelectorAll(':scope > p'));
@@ -139,6 +146,11 @@
           }
         }
 
+        // Sentence-level NLP wrappers run first, on the cleanest innerHTML, so each
+        // interrogative / repeated-opening sentence is wrapped precisely before the
+        // other innerHTML rewriters introduce span boundaries.
+        if (nlpStats.questionCount > 0) highlightNlpQuestions(p);
+        if (nlpStats.sentencePatternRepeatCount > 0) highlightNlpSentencePatternRepeats(p, nlpStats);
         // Order matters: long sentences → passive → repeated words
         if (maxSentLen > _longWrapThreshold) wrapLongSentences(p, _longWrapThreshold);
         wrapNoVerbSentences(p);
@@ -173,6 +185,12 @@
         if (nlpStats.entityCount > 0) highlightNlpEntities(p, nlpStats);
         if (nlpStats.dateValueCount > 0) highlightNlpValuesDates(p, nlpStats);
         if (nlpStats.adverbCount > 0) highlightNlpAdverbs(p, nlpStats);
+        if (LANG === 'en' && nlpStats.contractionCount > 0) highlightNlpContractions(p);
+        if (nlpStats.keyTerms && nlpStats.keyTerms.length) highlightNlpKeyTerms(p, nlpStats);
+        highlightTermVariants(p, docTermVariantForms);
+        highlightUndefinedAcronyms(p, docUndefinedAcronyms);
+        highlightUnitInconsistency(p, docUnitRegexes);
+        highlightEmphaticPunct(p);
         if (repeatedSet.size > 0)   highlightInNode(p, repeatedSet, 'ws-repeated');
         highlightEvidenceInParagraph(p);
         highlightModalVerbs(p);

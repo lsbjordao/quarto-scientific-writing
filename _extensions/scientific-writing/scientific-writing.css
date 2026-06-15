@@ -429,6 +429,62 @@ body:has(.ws-note:hover) .ws-wrapper:has(.ws-note:hover) .ws-note {
   padding: 0 1px;
 }
 
+.ws-nlp-contraction {
+  background: #fef2f2;
+  border-bottom: 1px solid #ef4444;
+  border-radius: 2px;
+  padding: 0 1px;
+}
+
+.ws-nlp-question {
+  background: #eff6ff;
+  border-bottom: 1px solid #3b82f6;
+  border-radius: 2px;
+  padding: 0 1px;
+}
+
+.ws-nlp-key-term {
+  background: #f0fdfa;
+  border-bottom: 1px solid #14b8a6;
+  border-radius: 2px;
+  padding: 0 1px;
+}
+
+.ws-nlp-sentence-repeat {
+  background: #faf5ff;
+  border-bottom: 1px solid #a855f7;
+  border-radius: 2px;
+  padding: 0 1px;
+}
+
+.ws-term-variant {
+  background: #fdf4ff;
+  border-bottom: 1px solid #d946ef;
+  border-radius: 2px;
+  padding: 0 1px;
+}
+
+.ws-unit-inconsistency {
+  background: #fffbeb;
+  border-bottom: 1px solid #f59e0b;
+  border-radius: 2px;
+  padding: 0 1px;
+}
+
+.ws-undefined-acronym {
+  background: #fff1f2;
+  border-bottom: 1px solid #fb7185;
+  border-radius: 2px;
+  padding: 0 1px;
+}
+
+.ws-emphatic-punct {
+  background: #fff1f2;
+  border-bottom: 1px solid #f43f5e;
+  border-radius: 2px;
+  padding: 0 1px;
+}
+
 /* Keep the manuscript visually clean until a metric is selected. */
 .ws-long-sentence,
 .ws-repeated,
@@ -478,7 +534,15 @@ body:has(.ws-note:hover) .ws-wrapper:has(.ws-note:hover) .ws-note {
 .ws-nlp-topic,
 .ws-nlp-entity,
 .ws-nlp-value-date,
-.ws-nlp-adverb {
+.ws-nlp-adverb,
+.ws-nlp-contraction,
+.ws-nlp-question,
+.ws-nlp-key-term,
+.ws-nlp-sentence-repeat,
+.ws-term-variant,
+.ws-unit-inconsistency,
+.ws-undefined-acronym,
+.ws-emphatic-punct {
   background: transparent;
   border-bottom-color: transparent;
   outline-color: transparent;
@@ -1240,7 +1304,15 @@ body.ws-annotations-hidden .ws-nlp-noun-stack,
 body.ws-annotations-hidden .ws-nlp-topic,
 body.ws-annotations-hidden .ws-nlp-entity,
 body.ws-annotations-hidden .ws-nlp-value-date,
-body.ws-annotations-hidden .ws-nlp-adverb {
+body.ws-annotations-hidden .ws-nlp-adverb,
+body.ws-annotations-hidden .ws-nlp-contraction,
+body.ws-annotations-hidden .ws-nlp-question,
+body.ws-annotations-hidden .ws-nlp-key-term,
+body.ws-annotations-hidden .ws-nlp-sentence-repeat,
+body.ws-annotations-hidden .ws-term-variant,
+body.ws-annotations-hidden .ws-unit-inconsistency,
+body.ws-annotations-hidden .ws-undefined-acronym,
+body.ws-annotations-hidden .ws-emphatic-punct {
   background: none !important;
   border: 0 !important;
   border-bottom: 0 !important;
@@ -1307,7 +1379,15 @@ body.ws-final-review .ws-wrapper:not(.ws-has-critical) .ws-nlp-noun-stack,
 body.ws-final-review .ws-wrapper:not(.ws-has-critical) .ws-nlp-topic,
 body.ws-final-review .ws-wrapper:not(.ws-has-critical) .ws-nlp-entity,
 body.ws-final-review .ws-wrapper:not(.ws-has-critical) .ws-nlp-value-date,
-body.ws-final-review .ws-wrapper:not(.ws-has-critical) .ws-nlp-adverb {
+body.ws-final-review .ws-wrapper:not(.ws-has-critical) .ws-nlp-adverb,
+body.ws-final-review .ws-wrapper:not(.ws-has-critical) .ws-nlp-contraction,
+body.ws-final-review .ws-wrapper:not(.ws-has-critical) .ws-nlp-question,
+body.ws-final-review .ws-wrapper:not(.ws-has-critical) .ws-nlp-key-term,
+body.ws-final-review .ws-wrapper:not(.ws-has-critical) .ws-nlp-sentence-repeat,
+body.ws-final-review .ws-wrapper:not(.ws-has-critical) .ws-term-variant,
+body.ws-final-review .ws-wrapper:not(.ws-has-critical) .ws-unit-inconsistency,
+body.ws-final-review .ws-wrapper:not(.ws-has-critical) .ws-undefined-acronym,
+body.ws-final-review .ws-wrapper:not(.ws-has-critical) .ws-emphatic-punct {
   background: none !important;
   border-bottom: none !important;
   outline: none !important;
@@ -1355,7 +1435,15 @@ body.ws-alerts-only .ws-wrapper:not(.ws-has-alert) .ws-nlp-noun-stack,
 body.ws-alerts-only .ws-wrapper:not(.ws-has-alert) .ws-nlp-topic,
 body.ws-alerts-only .ws-wrapper:not(.ws-has-alert) .ws-nlp-entity,
 body.ws-alerts-only .ws-wrapper:not(.ws-has-alert) .ws-nlp-value-date,
-body.ws-alerts-only .ws-wrapper:not(.ws-has-alert) .ws-nlp-adverb {
+body.ws-alerts-only .ws-wrapper:not(.ws-has-alert) .ws-nlp-adverb,
+body.ws-alerts-only .ws-wrapper:not(.ws-has-alert) .ws-nlp-contraction,
+body.ws-alerts-only .ws-wrapper:not(.ws-has-alert) .ws-nlp-question,
+body.ws-alerts-only .ws-wrapper:not(.ws-has-alert) .ws-nlp-key-term,
+body.ws-alerts-only .ws-wrapper:not(.ws-has-alert) .ws-nlp-sentence-repeat,
+body.ws-alerts-only .ws-wrapper:not(.ws-has-alert) .ws-term-variant,
+body.ws-alerts-only .ws-wrapper:not(.ws-has-alert) .ws-unit-inconsistency,
+body.ws-alerts-only .ws-wrapper:not(.ws-has-alert) .ws-undefined-acronym,
+body.ws-alerts-only .ws-wrapper:not(.ws-has-alert) .ws-emphatic-punct {
   background: none !important;
   border-bottom: none !important;
   outline: none !important;
@@ -1407,6 +1495,14 @@ body.ws-focus-nlp-topics .ws-wrapper,
 body.ws-focus-nlp-entities .ws-wrapper,
 body.ws-focus-nlp-values-dates .ws-wrapper,
 body.ws-focus-nlp-adverbs .ws-wrapper,
+body.ws-focus-nlp-contractions .ws-wrapper,
+body.ws-focus-nlp-questions .ws-wrapper,
+body.ws-focus-nlp-keyterms .ws-wrapper,
+body.ws-focus-nlp-sentence-repeats .ws-wrapper,
+body.ws-focus-term-variants .ws-wrapper,
+body.ws-focus-unit-consistency .ws-wrapper,
+body.ws-focus-undefined-acronyms .ws-wrapper,
+body.ws-focus-emphatic-punct .ws-wrapper,
 body.ws-focus-paragraph-long .ws-wrapper,
 body.ws-focus-citation-low .ws-wrapper,
 body.ws-focus-figure-ref-order .ws-wrapper,
@@ -1459,6 +1555,14 @@ body.ws-focus-nlp-topics .ws-wrapper:has(.ws-nlp-topic),
 body.ws-focus-nlp-entities .ws-wrapper:has(.ws-nlp-entity),
 body.ws-focus-nlp-values-dates .ws-wrapper:has(.ws-nlp-value-date),
 body.ws-focus-nlp-adverbs .ws-wrapper:has(.ws-nlp-adverb),
+body.ws-focus-nlp-contractions .ws-wrapper:has(.ws-nlp-contraction),
+body.ws-focus-nlp-questions .ws-wrapper:has(.ws-nlp-question),
+body.ws-focus-nlp-keyterms .ws-wrapper:has(.ws-nlp-key-term),
+body.ws-focus-nlp-sentence-repeats .ws-wrapper:has(.ws-nlp-sentence-repeat),
+body.ws-focus-term-variants .ws-wrapper:has(.ws-term-variant),
+body.ws-focus-unit-consistency .ws-wrapper:has(.ws-unit-inconsistency),
+body.ws-focus-undefined-acronyms .ws-wrapper:has(.ws-undefined-acronym),
+body.ws-focus-emphatic-punct .ws-wrapper:has(.ws-emphatic-punct),
 body.ws-focus-paragraph-long .ws-wrapper.ws-para-long,
 body.ws-focus-citation-low .ws-wrapper:has(.ws-citation-low),
 body.ws-focus-figure-ref-order .ws-wrapper:has(.ws-xref-order-fig),
@@ -1669,6 +1773,46 @@ body.ws-focus-nlp-adverbs .ws-nlp-adverb {
   border-bottom-color: #c2410c;
 }
 
+body.ws-focus-nlp-contractions .ws-nlp-contraction {
+  background: #fecaca;
+  border-bottom-color: #b91c1c;
+}
+
+body.ws-focus-nlp-questions .ws-nlp-question {
+  background: #bfdbfe;
+  border-bottom-color: #1d4ed8;
+}
+
+body.ws-focus-nlp-keyterms .ws-nlp-key-term {
+  background: #99f6e4;
+  border-bottom-color: #0f766e;
+}
+
+body.ws-focus-nlp-sentence-repeats .ws-nlp-sentence-repeat {
+  background: #e9d5ff;
+  border-bottom-color: #7e22ce;
+}
+
+body.ws-focus-term-variants .ws-term-variant {
+  background: #f5d0fe;
+  border-bottom-color: #a21caf;
+}
+
+body.ws-focus-unit-consistency .ws-unit-inconsistency {
+  background: #fde68a;
+  border-bottom-color: #b45309;
+}
+
+body.ws-focus-undefined-acronyms .ws-undefined-acronym {
+  background: #fecdd3;
+  border-bottom-color: #be123c;
+}
+
+body.ws-focus-emphatic-punct .ws-emphatic-punct {
+  background: #fecdd3;
+  border-bottom-color: #be123c;
+}
+
 body.ws-focus-cohesion .ws-cohesion-gap {
   border-left-color: #d97706;
   padding-left: 0.5rem;
@@ -1775,7 +1919,15 @@ body.ws-focus-nlp-nounstack .ws-nlp-noun-stack,
 body.ws-focus-nlp-topics .ws-nlp-topic,
 body.ws-focus-nlp-entities .ws-nlp-entity,
 body.ws-focus-nlp-values-dates .ws-nlp-value-date,
-body.ws-focus-nlp-adverbs .ws-nlp-adverb {
+body.ws-focus-nlp-adverbs .ws-nlp-adverb,
+body.ws-focus-nlp-contractions .ws-nlp-contraction,
+body.ws-focus-nlp-questions .ws-nlp-question,
+body.ws-focus-nlp-keyterms .ws-nlp-key-term,
+body.ws-focus-nlp-sentence-repeats .ws-nlp-sentence-repeat,
+body.ws-focus-term-variants .ws-term-variant,
+body.ws-focus-unit-consistency .ws-unit-inconsistency,
+body.ws-focus-undefined-acronyms .ws-undefined-acronym,
+body.ws-focus-emphatic-punct .ws-emphatic-punct {
   color: #1f2937;
 }
 
@@ -1861,7 +2013,15 @@ body.ws-focus-nlp-adverbs .ws-nlp-adverb {
   .ws-nlp-topic,
   .ws-nlp-entity,
   .ws-nlp-value-date,
-  .ws-nlp-adverb {
+  .ws-nlp-adverb,
+  .ws-nlp-contraction,
+  .ws-nlp-question,
+  .ws-nlp-key-term,
+  .ws-nlp-sentence-repeat,
+  .ws-term-variant,
+  .ws-unit-inconsistency,
+  .ws-undefined-acronym,
+  .ws-emphatic-punct {
     background: none !important;
     border: 0 !important;
     outline: 0 !important;

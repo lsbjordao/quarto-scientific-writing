@@ -2206,15 +2206,35 @@ var L_EN = {
     return abs ? (abs.words || 0) : 0;
   }
 
-  function getUnitInconsistency(text) {
+  // Single source of truth for unit-inconsistency detection and highlighting.
+  // A rule fires only when every pattern is present in the document; the same
+  // patterns are then reused to highlight the conflicting unit tokens in the text.
+  var UNIT_INCONSISTENCY_RULES = [
+    { label: 'mg/kg ~ mg kg\u207b\u00b9', patterns: [/\bmg\/kg\b/, /\bmg\s*kg[\-\u2212]1\b/] },
+    { label: 'g/kg ~ g kg\u207b\u00b9', patterns: [/\bg\/kg\b/, /\bg\s*kg[\-\u2212]1\b/] },
+    { label: 'mL/L ~ mL L\u207b\u00b9', patterns: [/\bml\/l\b/, /\bml\s*l[\-\u2212]1\b/] },
+    { label: '% ~ percent', patterns: [/\b\d+\s*%/, /\bpercent\b/] },
+    { label: 'cm2 ~ cm\u00b2', patterns: [/\bcm2\b/, /\bcm\u00b2\b/] },
+  ];
+
+  function firedUnitRules(text) {
     var src = String(text || '').toLowerCase();
-    var forms = [];
-    if (/\bmg\/kg\b/.test(src) && /\bmg\s*kg[\-\u2212]1\b/.test(src)) forms.push('mg/kg ~ mg kg\u207b\u00b9');
-    if (/\bg\/kg\b/.test(src) && /\bg\s*kg[\-\u2212]1\b/.test(src)) forms.push('g/kg ~ g kg\u207b\u00b9');
-    if (/\bml\/l\b/.test(src) && /\bml\s*l[\-\u2212]1\b/.test(src)) forms.push('mL/L ~ mL L\u207b\u00b9');
-    if (/\b\d+\s*%/.test(src) && /\bpercent\b/.test(src)) forms.push('% ~ percent');
-    if (/\bcm2\b/.test(src) && /\bcm\u00b2\b/.test(src)) forms.push('cm2 ~ cm\u00b2');
-    return forms;
+    return UNIT_INCONSISTENCY_RULES.filter(function (rule) {
+      return rule.patterns.every(function (re) { return re.test(src); });
+    });
+  }
+
+  function getUnitInconsistency(text) {
+    return firedUnitRules(text).map(function (rule) { return rule.label; });
+  }
+
+  // Flat list of regexes for the rules that fired \u2014 consumed by the highlighter.
+  function getUnitInconsistencyRegexes(text) {
+    var res = [];
+    firedUnitRules(text).forEach(function (rule) {
+      rule.patterns.forEach(function (re) { res.push(re); });
+    });
+    return res;
   }
 
   function getSectionBalance(sections) {
@@ -3267,6 +3287,14 @@ var L_EN = {
     'ws-nlp-entity': 'nlp-entities',
     'ws-nlp-value-date': 'nlp-values-dates',
     'ws-nlp-adverb': 'nlp-adverbs',
+    'ws-nlp-contraction': 'nlp-contractions',
+    'ws-nlp-question': 'nlp-questions',
+    'ws-nlp-key-term': 'nlp-keyterms',
+    'ws-nlp-sentence-repeat': 'nlp-sentence-repeats',
+    'ws-term-variant': 'term-variants',
+    'ws-unit-inconsistency': 'unit-consistency',
+    'ws-undefined-acronym': 'undefined-acronyms',
+    'ws-emphatic-punct': 'emphatic-punct',
     'ws-xref-order-fig': 'figure-ref-order',
     'ws-xref-order-tbl': 'table-ref-order',
     'ws-wink-passive': 'wink-passive',
@@ -3727,6 +3755,28 @@ var L_EN = {
       var title = L.wordyPhrases + (item.suggestion ? ' \u2192 ' + item.suggestion : '');
       highlightRegexInNode(p, item.re, 'ws-wordy', title);
     });
+  }
+
+  function highlightTermVariants(p, forms) {
+    if (!forms || !forms.length) return;
+    highlightTermListInNode(p, forms.map(function (f) { return { text: f }; }), 'ws-term-variant', L.termVariants);
+  }
+
+  function highlightUndefinedAcronyms(p, acronyms) {
+    if (!acronyms || !acronyms.length) return;
+    var alts = acronyms.map(function (a) { return String(a).replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); });
+    highlightRegexInNode(p, new RegExp('\\b(?:' + alts.join('|') + ')s?\\b', 'g'), 'ws-undefined-acronym', L.undefinedAcronyms);
+  }
+
+  function highlightUnitInconsistency(p, regexes) {
+    if (!regexes || !regexes.length) return;
+    regexes.forEach(function (re) {
+      highlightRegexInNode(p, re, 'ws-unit-inconsistency', L.unitConsistency);
+    });
+  }
+
+  function highlightEmphaticPunct(p) {
+    highlightRegexInNode(p, /[!?](?:[!?]+)/g, 'ws-emphatic-punct', L.emphaticPunct);
   }
 
   function highlightConnectors(p) {
@@ -4583,6 +4633,73 @@ var L_EN = {
   function highlightNlpAdverbs(p, nlpStats) {
     if (!nlpStats || !nlpStats.adverbs || !nlpStats.adverbs.length) return;
     highlightTermListInNode(p, nlpStats.adverbs, 'ws-nlp-adverb', L.nlpAdverbs);
+  }
+
+  // English contractions. n't / 're / 've / 'll / 'd / 'm are always contractions;
+  // 's only for a known whitelist so possessives ("Tukey's", "plant's") are left alone.
+  // The apostrophe class matches straight, curly and modifier-letter forms so it works
+  // regardless of Quarto's smart-quote conversion.
+  function highlightNlpContractions(p) {
+    if (LANG !== 'en') return;
+    var apos = "['’ʼ]";
+    var re = new RegExp(
+      '\\b[a-z]+n' + apos + 't\\b' +
+      '|\\b[a-z]+' + apos + '(?:re|ve|ll|d|m)\\b' +
+      '|\\b(?:it|he|she|that|there|here|what|who|where|how|when|why|let|one)' + apos + 's\\b',
+      'gi'
+    );
+    highlightRegexInNode(p, re, 'ws-nlp-contraction', L.nlpContractions);
+  }
+
+  // Interrogative sentences — wrap whole sentences ending in '?' (including '?!').
+  // Runs in the innerHTML-rewriting group; see index.js for ordering.
+  function highlightNlpQuestions(p) {
+    var title = L.nlpQuestions;
+    var marked = p.innerHTML.replace(
+      /([.!?]+\s+)(?=[A-ZÁÉÍÓÚÀÂÊÔÃÕÜÇÑ"])/g,
+      '$1\x00'
+    );
+    p.innerHTML = marked.split('\x00').map(function (part) {
+      var plain = part.replace(/<[^>]+>/g, ' ').trim();
+      return /\?[!?]*["'’)\]\s]*$/.test(plain)
+        ? '<span class="ws-nlp-question" data-ws-focus="nlp-questions" data-ws-reason="' + escapeHTML(title) + '" title="' + escapeHTML(title) + '">' + part + '</span>'
+        : part;
+    }).join('');
+  }
+
+  function highlightNlpKeyTerms(p, nlpStats) {
+    if (!nlpStats || !nlpStats.keyTerms || !nlpStats.keyTerms.length) return;
+    var terms = nlpStats.keyTerms.map(function (t) {
+      return { text: String(t).split(/\s+\xd7/)[0] };
+    });
+    highlightTermListInNode(p, terms, 'ws-nlp-key-term', L.nlpKeyTerms);
+  }
+
+  // Repeated sentence-opening patterns — wrap sentences whose first two content
+  // words match a repeated opening detected for this paragraph (same key logic as
+  // getSentenceStartRepeats). Runs in the innerHTML-rewriting group.
+  function highlightNlpSentencePatternRepeats(p, nlpStats) {
+    if (!nlpStats || !nlpStats.sentencePatternRepeats || !nlpStats.sentencePatternRepeats.length) return;
+    var repeatSet = new Set(nlpStats.sentencePatternRepeats.map(function (x) { return x.start; }));
+    var tokenRe = LANG === 'en' ? /\b[a-z]{2,}\b/gi : /\b[a-záéíóúàâêôãõüçñ]{2,}\b/gi;
+    function startKey(plain) {
+      var tokens = (plain.match(tokenRe) || [])
+        .map(normalizeWord)
+        .filter(function (w) { return !STOP_WORDS.has(w) && !shouldIgnoreWord(w); });
+      if (!tokens.length) return '';
+      return tokens.slice(0, Math.min(2, tokens.length)).join(' ');
+    }
+    var title = L.nlpSentencePatternRepeats;
+    var marked = p.innerHTML.replace(
+      /([.!?]+\s+)(?=[A-ZÁÉÍÓÚÀÂÊÔÃÕÜÇÑ"])/g,
+      '$1\x00'
+    );
+    p.innerHTML = marked.split('\x00').map(function (part) {
+      var plain = part.replace(/<[^>]+>/g, ' ');
+      return repeatSet.has(startKey(plain))
+        ? '<span class="ws-nlp-sentence-repeat" data-ws-focus="nlp-sentence-repeats" data-ws-reason="' + escapeHTML(title) + '" title="' + escapeHTML(title) + '">' + part + '</span>'
+        : part;
+    }).join('');
   }
 
 // src/ui/wink-highlights.js — wink-nlp-backed highlight helpers.
@@ -6897,9 +7014,9 @@ var L_EN = {
       metricItem(L.repeatedTerms, repeatedTermCount + (topRepeated.length ? ' | ' + topRepeated.join(', ') : ''), 'repeated', L.repeatedTermsDesc) +
       metricItem(L.repeatedStarts, repeatedStarts.length ? repeatedStarts.slice(0, 3).map(function (x) { return x.start + ' \xd7' + x.count; }).join(', ') : '0', 'repeated-start', L.repeatedStartsDesc) +
       metricItem(L.nominalization, nominalizationCount, 'nominal', L.nominalizationDesc) +
-      metricItem(L.termVariants, termVariants.length ? termVariants.slice(0, 3).map(function (x) { return x.forms.slice(0, 2).join('/'); }).join(', ') : '0', null, L.termVariantsDesc) +
-      metricItem(L.unitConsistency, unitInconsistency.length ? unitInconsistency.join('; ') : '0', null, L.unitConsistencyDesc) +
-      metricItem(L.undefinedAcronyms, undefinedAcronyms.length ? undefinedAcronyms.slice(0, 4).map(function (x) { return x.acronym + ' \xd7' + x.count; }).join(', ') : '0', null, L.undefinedAcronymsDesc) +
+      metricItem(L.termVariants, termVariants.length ? termVariants.slice(0, 3).map(function (x) { return x.forms.slice(0, 2).join('/'); }).join(', ') : '0', 'term-variants', L.termVariantsDesc) +
+      metricItem(L.unitConsistency, unitInconsistency.length ? unitInconsistency.join('; ') : '0', 'unit-consistency', L.unitConsistencyDesc) +
+      metricItem(L.undefinedAcronyms, undefinedAcronyms.length ? undefinedAcronyms.slice(0, 4).map(function (x) { return x.acronym + ' \xd7' + x.count; }).join(', ') : '0', 'undefined-acronyms', L.undefinedAcronymsDesc) +
       // ── Voz & Tom ────────────────────────────────────────────────────────────
       metricGroup(L.groupVoice) +
       metricItem(L.passiveTotal, passiveTotal, 'passive', L.passiveTotalDesc) +
@@ -6911,7 +7028,7 @@ var L_EN = {
       metricItem(L.modalVerbs, modalVerbCount, 'modal', L.modalVerbsDesc) +
       metricItem(L.firstPerson, firstPersonCount, 'firstperson', L.firstPersonDesc) +
       metricItem(L.colloquial, colloquialCount, 'colloquial', L.colloquialDesc) +
-      metricItem(L.emphaticPunct, emphaticPunct, null, L.emphaticPunctDesc) +
+      metricItem(L.emphaticPunct, emphaticPunct, 'emphatic-punct', L.emphaticPunctDesc) +
       // ── Conectores ───────────────────────────────────────────────────────────
       metricGroup(L.groupConnectors) +
       metricItem(L.connectors, connectorCount, 'connectors', L.connectorsDesc) +
@@ -6983,16 +7100,16 @@ var L_EN = {
       metricItem(L.nlpEntityDensity, nlpEntityDensity + '/100w', null, L.nlpEntityDensityDesc) +
       metricItem(L.nlpEntityOverload, nlpTotals.entityOverloadCount, null, L.nlpEntityOverloadDesc) +
       metricItem(L.nlpActionVerbScore, nlpActionVerbScore + '%', null, L.nlpActionVerbScoreDesc) +
-      metricItem(L.nlpSentencePatternRepeats, nlpTotals.sentencePatternRepeatCount, null, L.nlpSentencePatternRepeatsDesc) +
+      metricItem(L.nlpSentencePatternRepeats, nlpTotals.sentencePatternRepeatCount, 'nlp-sentence-repeats', L.nlpSentencePatternRepeatsDesc) +
       metricItem(L.nlpSemanticRedundancy, nlpSemanticRedundancy + '%', null, L.nlpSemanticRedundancyDesc) +
       metricItem(L.nlpFlowScore, nlpFlowScore + '%', null, L.nlpFlowScoreDesc) +
-      metricItem(L.nlpTermDrift, nlpTotals.termDriftCount, null, L.nlpTermDriftDesc) +
+      metricItem(L.nlpTermDrift, nlpTotals.termDriftCount, 'term-variants', L.nlpTermDriftDesc) +
       metricItem(L.nlpTenseProfile, nlpTenseProfileText, null, L.nlpTenseProfileDesc) +
-      (LANG === 'en' ? metricItem(L.nlpContractions, nlpTotals.contractionCount, null, L.nlpContractionsDesc) : '') +
-      metricItem(L.nlpQuestions, nlpTotals.questionCount, null, L.nlpQuestionsDesc) +
+      (LANG === 'en' ? metricItem(L.nlpContractions, nlpTotals.contractionCount, 'nlp-contractions', L.nlpContractionsDesc) : '') +
+      metricItem(L.nlpQuestions, nlpTotals.questionCount, 'nlp-questions', L.nlpQuestionsDesc) +
       metricItem(L.nlpNounVerbRatio, round1(nlpNounVerbRatio), null, L.nlpNounVerbRatioDesc) +
       metricItem(L.nlpVerbDiversity, round1(nlpVerbDiversity * 100) + '%', null, L.nlpVerbDiversityDesc) +
-      metricItem(L.nlpKeyTerms, nlpKeyTerms.length ? nlpKeyTerms.join(', ') : '0', null, L.nlpKeyTermsDesc) +
+      metricItem(L.nlpKeyTerms, nlpKeyTerms.length ? nlpKeyTerms.join(', ') : '0', 'nlp-keyterms', L.nlpKeyTermsDesc) +
       (LANG === 'en' && winkStats.winkAvailable
         ? metricSubgroup('wink-nlp', 'https://winkjs.org/wink-nlp/') +
           metricItem(L.nlpWinkReadingEase, winkStats.fleschReadingEase, null, L.nlpWinkReadingEaseDesc) +
@@ -7288,6 +7405,13 @@ var L_EN = {
     var _longWrapThreshold = globalMaxSentLen > 1 && globalMaxSentLen <= SENT_LONG
       ? globalMaxSentLen - 1
       : SENT_LONG;
+    // Document-level lists for highlighters whose detection spans the whole text.
+    var docTermVariantForms = [];
+    getTerminologyVariants(preAnalysisText).forEach(function (v) {
+      (v.forms || []).forEach(function (f) { docTermVariantForms.push(f); });
+    });
+    var docUndefinedAcronyms = getUndefinedAcronyms(getSentences(preAnalysisText)).map(function (a) { return a.acronym; });
+    var docUnitRegexes = getUnitInconsistencyRegexes(preAnalysisText);
     for (var sIdx = 0; sIdx < sections.length; sIdx++) {
       var section = sections[sIdx];
       var paras = Array.from(section.querySelectorAll(':scope > p'));
@@ -7362,6 +7486,11 @@ var L_EN = {
           }
         }
 
+        // Sentence-level NLP wrappers run first, on the cleanest innerHTML, so each
+        // interrogative / repeated-opening sentence is wrapped precisely before the
+        // other innerHTML rewriters introduce span boundaries.
+        if (nlpStats.questionCount > 0) highlightNlpQuestions(p);
+        if (nlpStats.sentencePatternRepeatCount > 0) highlightNlpSentencePatternRepeats(p, nlpStats);
         // Order matters: long sentences → passive → repeated words
         if (maxSentLen > _longWrapThreshold) wrapLongSentences(p, _longWrapThreshold);
         wrapNoVerbSentences(p);
@@ -7396,6 +7525,12 @@ var L_EN = {
         if (nlpStats.entityCount > 0) highlightNlpEntities(p, nlpStats);
         if (nlpStats.dateValueCount > 0) highlightNlpValuesDates(p, nlpStats);
         if (nlpStats.adverbCount > 0) highlightNlpAdverbs(p, nlpStats);
+        if (LANG === 'en' && nlpStats.contractionCount > 0) highlightNlpContractions(p);
+        if (nlpStats.keyTerms && nlpStats.keyTerms.length) highlightNlpKeyTerms(p, nlpStats);
+        highlightTermVariants(p, docTermVariantForms);
+        highlightUndefinedAcronyms(p, docUndefinedAcronyms);
+        highlightUnitInconsistency(p, docUnitRegexes);
+        highlightEmphaticPunct(p);
         if (repeatedSet.size > 0)   highlightInNode(p, repeatedSet, 'ws-repeated');
         highlightEvidenceInParagraph(p);
         highlightModalVerbs(p);

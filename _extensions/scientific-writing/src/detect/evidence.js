@@ -6,15 +6,35 @@
     return abs ? (abs.words || 0) : 0;
   }
 
-  function getUnitInconsistency(text) {
+  // Single source of truth for unit-inconsistency detection and highlighting.
+  // A rule fires only when every pattern is present in the document; the same
+  // patterns are then reused to highlight the conflicting unit tokens in the text.
+  var UNIT_INCONSISTENCY_RULES = [
+    { label: 'mg/kg ~ mg kg\u207b\u00b9', patterns: [/\bmg\/kg\b/, /\bmg\s*kg[\-\u2212]1\b/] },
+    { label: 'g/kg ~ g kg\u207b\u00b9', patterns: [/\bg\/kg\b/, /\bg\s*kg[\-\u2212]1\b/] },
+    { label: 'mL/L ~ mL L\u207b\u00b9', patterns: [/\bml\/l\b/, /\bml\s*l[\-\u2212]1\b/] },
+    { label: '% ~ percent', patterns: [/\b\d+\s*%/, /\bpercent\b/] },
+    { label: 'cm2 ~ cm\u00b2', patterns: [/\bcm2\b/, /\bcm\u00b2\b/] },
+  ];
+
+  function firedUnitRules(text) {
     var src = String(text || '').toLowerCase();
-    var forms = [];
-    if (/\bmg\/kg\b/.test(src) && /\bmg\s*kg[\-\u2212]1\b/.test(src)) forms.push('mg/kg ~ mg kg\u207b\u00b9');
-    if (/\bg\/kg\b/.test(src) && /\bg\s*kg[\-\u2212]1\b/.test(src)) forms.push('g/kg ~ g kg\u207b\u00b9');
-    if (/\bml\/l\b/.test(src) && /\bml\s*l[\-\u2212]1\b/.test(src)) forms.push('mL/L ~ mL L\u207b\u00b9');
-    if (/\b\d+\s*%/.test(src) && /\bpercent\b/.test(src)) forms.push('% ~ percent');
-    if (/\bcm2\b/.test(src) && /\bcm\u00b2\b/.test(src)) forms.push('cm2 ~ cm\u00b2');
-    return forms;
+    return UNIT_INCONSISTENCY_RULES.filter(function (rule) {
+      return rule.patterns.every(function (re) { return re.test(src); });
+    });
+  }
+
+  function getUnitInconsistency(text) {
+    return firedUnitRules(text).map(function (rule) { return rule.label; });
+  }
+
+  // Flat list of regexes for the rules that fired \u2014 consumed by the highlighter.
+  function getUnitInconsistencyRegexes(text) {
+    var res = [];
+    firedUnitRules(text).forEach(function (rule) {
+      rule.patterns.forEach(function (re) { res.push(re); });
+    });
+    return res;
   }
 
   function getSectionBalance(sections) {

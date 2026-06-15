@@ -389,9 +389,9 @@
       metricItem(L.repeatedTerms, repeatedTermCount + (topRepeated.length ? ' | ' + topRepeated.join(', ') : ''), 'repeated', L.repeatedTermsDesc) +
       metricItem(L.repeatedStarts, repeatedStarts.length ? repeatedStarts.slice(0, 3).map(function (x) { return x.start + ' \xd7' + x.count; }).join(', ') : '0', 'repeated-start', L.repeatedStartsDesc) +
       metricItem(L.nominalization, nominalizationCount, 'nominal', L.nominalizationDesc) +
-      metricItem(L.termVariants, termVariants.length ? termVariants.slice(0, 3).map(function (x) { return x.forms.slice(0, 2).join('/'); }).join(', ') : '0', null, L.termVariantsDesc) +
-      metricItem(L.unitConsistency, unitInconsistency.length ? unitInconsistency.join('; ') : '0', null, L.unitConsistencyDesc) +
-      metricItem(L.undefinedAcronyms, undefinedAcronyms.length ? undefinedAcronyms.slice(0, 4).map(function (x) { return x.acronym + ' \xd7' + x.count; }).join(', ') : '0', null, L.undefinedAcronymsDesc) +
+      metricItem(L.termVariants, termVariants.length ? termVariants.slice(0, 3).map(function (x) { return x.forms.slice(0, 2).join('/'); }).join(', ') : '0', 'term-variants', L.termVariantsDesc) +
+      metricItem(L.unitConsistency, unitInconsistency.length ? unitInconsistency.join('; ') : '0', 'unit-consistency', L.unitConsistencyDesc) +
+      metricItem(L.undefinedAcronyms, undefinedAcronyms.length ? undefinedAcronyms.slice(0, 4).map(function (x) { return x.acronym + ' \xd7' + x.count; }).join(', ') : '0', 'undefined-acronyms', L.undefinedAcronymsDesc) +
       // ── Voz & Tom ────────────────────────────────────────────────────────────
       metricGroup(L.groupVoice) +
       metricItem(L.passiveTotal, passiveTotal, 'passive', L.passiveTotalDesc) +
@@ -403,7 +403,7 @@
       metricItem(L.modalVerbs, modalVerbCount, 'modal', L.modalVerbsDesc) +
       metricItem(L.firstPerson, firstPersonCount, 'firstperson', L.firstPersonDesc) +
       metricItem(L.colloquial, colloquialCount, 'colloquial', L.colloquialDesc) +
-      metricItem(L.emphaticPunct, emphaticPunct, null, L.emphaticPunctDesc) +
+      metricItem(L.emphaticPunct, emphaticPunct, 'emphatic-punct', L.emphaticPunctDesc) +
       // ── Conectores ───────────────────────────────────────────────────────────
       metricGroup(L.groupConnectors) +
       metricItem(L.connectors, connectorCount, 'connectors', L.connectorsDesc) +
@@ -475,16 +475,16 @@
       metricItem(L.nlpEntityDensity, nlpEntityDensity + '/100w', null, L.nlpEntityDensityDesc) +
       metricItem(L.nlpEntityOverload, nlpTotals.entityOverloadCount, null, L.nlpEntityOverloadDesc) +
       metricItem(L.nlpActionVerbScore, nlpActionVerbScore + '%', null, L.nlpActionVerbScoreDesc) +
-      metricItem(L.nlpSentencePatternRepeats, nlpTotals.sentencePatternRepeatCount, null, L.nlpSentencePatternRepeatsDesc) +
+      metricItem(L.nlpSentencePatternRepeats, nlpTotals.sentencePatternRepeatCount, 'nlp-sentence-repeats', L.nlpSentencePatternRepeatsDesc) +
       metricItem(L.nlpSemanticRedundancy, nlpSemanticRedundancy + '%', null, L.nlpSemanticRedundancyDesc) +
       metricItem(L.nlpFlowScore, nlpFlowScore + '%', null, L.nlpFlowScoreDesc) +
-      metricItem(L.nlpTermDrift, nlpTotals.termDriftCount, null, L.nlpTermDriftDesc) +
+      metricItem(L.nlpTermDrift, nlpTotals.termDriftCount, 'term-variants', L.nlpTermDriftDesc) +
       metricItem(L.nlpTenseProfile, nlpTenseProfileText, null, L.nlpTenseProfileDesc) +
-      (LANG === 'en' ? metricItem(L.nlpContractions, nlpTotals.contractionCount, null, L.nlpContractionsDesc) : '') +
-      metricItem(L.nlpQuestions, nlpTotals.questionCount, null, L.nlpQuestionsDesc) +
+      (LANG === 'en' ? metricItem(L.nlpContractions, nlpTotals.contractionCount, 'nlp-contractions', L.nlpContractionsDesc) : '') +
+      metricItem(L.nlpQuestions, nlpTotals.questionCount, 'nlp-questions', L.nlpQuestionsDesc) +
       metricItem(L.nlpNounVerbRatio, round1(nlpNounVerbRatio), null, L.nlpNounVerbRatioDesc) +
       metricItem(L.nlpVerbDiversity, round1(nlpVerbDiversity * 100) + '%', null, L.nlpVerbDiversityDesc) +
-      metricItem(L.nlpKeyTerms, nlpKeyTerms.length ? nlpKeyTerms.join(', ') : '0', null, L.nlpKeyTermsDesc) +
+      metricItem(L.nlpKeyTerms, nlpKeyTerms.length ? nlpKeyTerms.join(', ') : '0', 'nlp-keyterms', L.nlpKeyTermsDesc) +
       (LANG === 'en' && winkStats.winkAvailable
         ? metricSubgroup('wink-nlp', 'https://winkjs.org/wink-nlp/') +
           metricItem(L.nlpWinkReadingEase, winkStats.fleschReadingEase, null, L.nlpWinkReadingEaseDesc) +
