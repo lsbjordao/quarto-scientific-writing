@@ -14,7 +14,7 @@
     { label: 'g/kg ~ g kg\u207b\u00b9', patterns: [/\bg\/kg\b/, /\bg\s*kg[\-\u2212]1\b/] },
     { label: 'mL/L ~ mL L\u207b\u00b9', patterns: [/\bml\/l\b/, /\bml\s*l[\-\u2212]1\b/] },
     { label: '% ~ percent', patterns: [/\b\d+\s*%/, /\bpercent\b/] },
-    { label: 'cm2 ~ cm\u00b2', patterns: [/\bcm2\b/, /\bcm\u00b2\b/] },
+    { label: 'cm2 ~ cm\u00b2', patterns: [/\bcm2\b/, /\bcm\u00b2/] },
   ];
 
   function firedUnitRules(text) {

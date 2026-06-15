@@ -2214,7 +2214,7 @@ var L_EN = {
     { label: 'g/kg ~ g kg\u207b\u00b9', patterns: [/\bg\/kg\b/, /\bg\s*kg[\-\u2212]1\b/] },
     { label: 'mL/L ~ mL L\u207b\u00b9', patterns: [/\bml\/l\b/, /\bml\s*l[\-\u2212]1\b/] },
     { label: '% ~ percent', patterns: [/\b\d+\s*%/, /\bpercent\b/] },
-    { label: 'cm2 ~ cm\u00b2', patterns: [/\bcm2\b/, /\bcm\u00b2\b/] },
+    { label: 'cm2 ~ cm\u00b2', patterns: [/\bcm2\b/, /\bcm\u00b2/] },
   ];
 
   function firedUnitRules(text) {
@@ -3276,6 +3276,7 @@ var L_EN = {
     'ws-modal': 'modal',
     'ws-firstperson': 'firstperson',
     'ws-citation-start': 'citation-start',
+    'ws-citation-end': 'citation-end',
     'ws-colloquial': 'colloquial',
     'ws-complex-sent': 'complexsent',
     'ws-repeated-start': 'repeated-start',
@@ -3541,6 +3542,25 @@ var L_EN = {
   function highlightCitationSentStart(p) {
     var re = /(?:^|(?<=[.!?]\s{1,3}))(\((?:[^)]*\d{4}[^)]*)\)|\[[0-9,\-\s]+\])/g;
     highlightRegexInNode(p, re, 'ws-citation-start', L.citationSentStart);
+  }
+
+  // Citation immediately before sentence-ending punctuation. The terminal '.' is a
+  // sibling text node of the .citation span, so this works on the DOM (the period is
+  // not inside the citation's own text node, which rules out a lookahead regex).
+  function highlightCitationSentEnd(p) {
+    if (!p.querySelectorAll) return;
+    p.querySelectorAll('.citation').forEach(function (cite) {
+      var after = '';
+      var n = cite.nextSibling;
+      while (n && after.length < 4) {
+        if (n.nodeType === Node.TEXT_NODE) { after += n.textContent; n = n.nextSibling; }
+        else break;
+      }
+      if (/^\s*[.!?]/.test(after)) {
+        cite.classList.add('ws-citation-end');
+        markReason(cite, 'citation-end', L.citationSentEnd);
+      }
+    });
   }
 
   function highlightRegexInNode(node, re, cls, title) {
@@ -7068,7 +7088,7 @@ var L_EN = {
         L.tableRefOrderDesc +
         (crossRefUsage.tableOrder.examples.length ? ' | ' + (LANG === 'pt' ? 'quebras' : 'breaks') + ': ' + crossRefUsage.tableOrder.examples.join(', ') : '')) +
       metricItem(L.citationSentStart, citationSentStartCount, 'citation-start', L.citationSentStartDesc) +
-      metricItem(L.citationSentEnd, citationSentEndCount, null, L.citationSentEndDesc) +
+      metricItem(L.citationSentEnd, citationSentEndCount, 'citation-end', L.citationSentEndDesc) +
       metricItem(L.citationGaps, citationGapCount, 'citation-low', L.citationGapsDesc) +
       metricItem(L.resultsCitations, resultsCitationCount, 'results-citation', L.resultsCitationsDesc) +
       // ── Evidências ───────────────────────────────────────────────────────────
@@ -7536,6 +7556,7 @@ var L_EN = {
         highlightModalVerbs(p);
         highlightFirstPerson(p);
         highlightCitationSentStart(p);
+        highlightCitationSentEnd(p);
         highlightPronounAmbig(p);
         refreshHighlightTooltips(p);
         if (SPELLCHECK_ENABLED) {

@@ -4400,7 +4400,7 @@ var L_EN = {
     { label: 'g/kg ~ g kg\u207b\u00b9', patterns: [/\bg\/kg\b/, /\bg\s*kg[\-\u2212]1\b/] },
     { label: 'mL/L ~ mL L\u207b\u00b9', patterns: [/\bml\/l\b/, /\bml\s*l[\-\u2212]1\b/] },
     { label: '% ~ percent', patterns: [/\b\d+\s*%/, /\bpercent\b/] },
-    { label: 'cm2 ~ cm\u00b2', patterns: [/\bcm2\b/, /\bcm\u00b2\b/] },
+    { label: 'cm2 ~ cm\u00b2', patterns: [/\bcm2\b/, /\bcm\u00b2/] },
   ];
 
   function firedUnitRules(text) {
@@ -5462,6 +5462,7 @@ var L_EN = {
     'ws-modal': 'modal',
     'ws-firstperson': 'firstperson',
     'ws-citation-start': 'citation-start',
+    'ws-citation-end': 'citation-end',
     'ws-colloquial': 'colloquial',
     'ws-complex-sent': 'complexsent',
     'ws-repeated-start': 'repeated-start',
@@ -5727,6 +5728,25 @@ var L_EN = {
   function highlightCitationSentStart(p) {
     var re = /(?:^|(?<=[.!?]\s{1,3}))(\((?:[^)]*\d{4}[^)]*)\)|\[[0-9,\-\s]+\])/g;
     highlightRegexInNode(p, re, 'ws-citation-start', L.citationSentStart);
+  }
+
+  // Citation immediately before sentence-ending punctuation. The terminal '.' is a
+  // sibling text node of the .citation span, so this works on the DOM (the period is
+  // not inside the citation's own text node, which rules out a lookahead regex).
+  function highlightCitationSentEnd(p) {
+    if (!p.querySelectorAll) return;
+    p.querySelectorAll('.citation').forEach(function (cite) {
+      var after = '';
+      var n = cite.nextSibling;
+      while (n && after.length < 4) {
+        if (n.nodeType === Node.TEXT_NODE) { after += n.textContent; n = n.nextSibling; }
+        else break;
+      }
+      if (/^\s*[.!?]/.test(after)) {
+        cite.classList.add('ws-citation-end');
+        markReason(cite, 'citation-end', L.citationSentEnd);
+      }
+    });
   }
 
   function highlightRegexInNode(node, re, cls, title) {
@@ -9254,7 +9274,7 @@ var L_EN = {
         L.tableRefOrderDesc +
         (crossRefUsage.tableOrder.examples.length ? ' | ' + (LANG === 'pt' ? 'quebras' : 'breaks') + ': ' + crossRefUsage.tableOrder.examples.join(', ') : '')) +
       metricItem(L.citationSentStart, citationSentStartCount, 'citation-start', L.citationSentStartDesc) +
-      metricItem(L.citationSentEnd, citationSentEndCount, null, L.citationSentEndDesc) +
+      metricItem(L.citationSentEnd, citationSentEndCount, 'citation-end', L.citationSentEndDesc) +
       metricItem(L.citationGaps, citationGapCount, 'citation-low', L.citationGapsDesc) +
       metricItem(L.resultsCitations, resultsCitationCount, 'results-citation', L.resultsCitationsDesc) +
       // ── Evidências ───────────────────────────────────────────────────────────
@@ -9722,6 +9742,7 @@ var L_EN = {
         highlightModalVerbs(p);
         highlightFirstPerson(p);
         highlightCitationSentStart(p);
+        highlightCitationSentEnd(p);
         highlightPronounAmbig(p);
         refreshHighlightTooltips(p);
         if (SPELLCHECK_ENABLED) {
@@ -10081,6 +10102,16 @@ padding: 0 1px;
 background: #ffedd5;
 border-bottom-color: #c2410c;
 }
+.ws-citation-end {
+background: #eef2ff;
+border-bottom: 2px solid #6366f1;
+border-radius: 2px;
+padding: 0 1px;
+}
+.ws-citation-end:hover {
+background: #e0e7ff;
+border-bottom-color: #4338ca;
+}
 .ws-cohesion-gap {
 border-left: 3px solid #f59e0b;
 padding-left: 0.5rem;
@@ -10271,6 +10302,8 @@ padding: 0 1px;
 .ws-firstperson:hover,
 .ws-citation-start,
 .ws-citation-start:hover,
+.ws-citation-end,
+.ws-citation-end:hover,
 .ws-connector,
 .ws-hedge,
 .ws-hedge:hover,
@@ -10957,6 +10990,7 @@ body.ws-annotations-hidden .ws-wink-propn,
 body.ws-annotations-hidden .ws-wordy,
 body.ws-annotations-hidden .ws-firstperson,
 body.ws-annotations-hidden .ws-citation-start,
+body.ws-annotations-hidden .ws-citation-end,
 body.ws-annotations-hidden .ws-spelling,
 body.ws-annotations-hidden .ws-colloquial,
 body.ws-annotations-hidden .ws-complex-sent,
@@ -11027,6 +11061,7 @@ body.ws-final-review .ws-wrapper:not(.ws-has-critical) .ws-wink-propn,
 body.ws-final-review .ws-wrapper:not(.ws-has-critical) .ws-wordy,
 body.ws-final-review .ws-wrapper:not(.ws-has-critical) .ws-firstperson,
 body.ws-final-review .ws-wrapper:not(.ws-has-critical) .ws-citation-start,
+body.ws-final-review .ws-wrapper:not(.ws-has-critical) .ws-citation-end,
 body.ws-final-review .ws-wrapper:not(.ws-has-critical) .ws-spelling,
 body.ws-final-review .ws-wrapper:not(.ws-has-critical) .ws-colloquial,
 body.ws-final-review .ws-wrapper:not(.ws-has-critical) .ws-complex-sent,
@@ -11081,6 +11116,7 @@ body.ws-alerts-only .ws-wrapper:not(.ws-has-alert) .ws-wink-propn,
 body.ws-alerts-only .ws-wrapper:not(.ws-has-alert) .ws-wordy,
 body.ws-alerts-only .ws-wrapper:not(.ws-has-alert) .ws-firstperson,
 body.ws-alerts-only .ws-wrapper:not(.ws-has-alert) .ws-citation-start,
+body.ws-alerts-only .ws-wrapper:not(.ws-has-alert) .ws-citation-end,
 body.ws-alerts-only .ws-wrapper:not(.ws-has-alert) .ws-spelling,
 body.ws-alerts-only .ws-wrapper:not(.ws-has-alert) .ws-colloquial,
 body.ws-alerts-only .ws-wrapper:not(.ws-has-alert) .ws-complex-sent,
@@ -11138,6 +11174,7 @@ body.ws-focus-wink-numeric .ws-wrapper,
 body.ws-focus-wink-propn .ws-wrapper,
 body.ws-focus-firstperson .ws-wrapper,
 body.ws-focus-citation-start .ws-wrapper,
+body.ws-focus-citation-end .ws-wrapper,
 body.ws-focus-evidence-parameterized .ws-wrapper,
 body.ws-focus-colloquial .ws-wrapper,
 body.ws-focus-complexsent .ws-wrapper,
@@ -11196,6 +11233,7 @@ body.ws-focus-wink-numeric .ws-wrapper:has(.ws-wink-numeric),
 body.ws-focus-wink-propn .ws-wrapper:has(.ws-wink-propn),
 body.ws-focus-firstperson .ws-wrapper:has(.ws-firstperson),
 body.ws-focus-citation-start .ws-wrapper:has(.ws-citation-start),
+body.ws-focus-citation-end .ws-wrapper:has(.ws-citation-end),
 body.ws-focus-evidence-parameterized .ws-wrapper:has(.ws-evidence-parameterized),
 body.ws-focus-colloquial .ws-wrapper:has(.ws-colloquial),
 body.ws-focus-complexsent .ws-wrapper:has(.ws-complex-sent),
@@ -11338,6 +11376,10 @@ border-bottom-color: #be123c;
 body.ws-focus-citation-start .ws-citation-start {
 background: #ffedd5;
 border-bottom-color: #c2410c;
+}
+body.ws-focus-citation-end .ws-citation-end {
+background: #c7d2fe;
+border-bottom-color: #4338ca;
 }
 body.ws-focus-evidence-parameterized .ws-evidence-parameterized {
 background: #dbeafe;
@@ -11482,6 +11524,7 @@ body.ws-focus-pronounambig .ws-pronoun-ambig,
 body.ws-focus-modal .ws-modal,
 body.ws-focus-firstperson .ws-firstperson,
 body.ws-focus-citation-start .ws-citation-start,
+body.ws-focus-citation-end .ws-citation-end,
 body.ws-focus-italic .ws-italic-text,
 body.ws-focus-regex .ws-regex-match,
 body.ws-focus-connectors .ws-connector,
@@ -11583,6 +11626,7 @@ opacity: 1 !important;
 .ws-wink-propn,
 .ws-firstperson,
 .ws-citation-start,
+.ws-citation-end,
 .ws-spelling,
 .ws-colloquial,
 .ws-complex-sent,
@@ -11895,13 +11939,13 @@ window.WritingStatsConfig = {
   hedgeThreshold: 4,
   defaultCompact: false,
   defaultAlertsOnly: false,
-  sectionGoals: {"Abstract":{"maxLongSentenceRate":["18"],"maxAvgSentence":["24"]},"Materials and Methods":{"maxPassivePer1000":["30"]},"Discussion":{"minLexicalDiversity":["0.58"]}},
+  sectionGoals: {"Abstract":{"maxAvgSentence":["24"],"maxLongSentenceRate":["18"]},"Materials and Methods":{"maxPassivePer1000":["30"]},"Discussion":{"minLexicalDiversity":["0.58"]}},
   ignoreTerms: [["bean"],["phaseolus"],["vulgaris"]],
   connectorAmbiguityMode: ["balanced"],
-  connectorAmbiguityOverrides: {"then":["balanced"],"since":["lenient"],"as":["strict"]},
+  connectorAmbiguityOverrides: {"then":["balanced"],"as":["strict"],"since":["lenient"]},
   variableCount: 30,
-  variableEntries: [{"name":"n_tratamentos","value":"4"},{"name":"n_repeticoes","value":"5"},{"name":"n_unidades","value":"20"},{"name":"n_dias","value":"30"},{"name":"profundidade_semeadura","value":"3"},{"name":"temp_baixa","value":"15"},{"name":"temp_media_baixa","value":"20"},{"name":"temp_otima","value":"25"},{"name":"temp_alta","value":"30"},{"name":"incremento_25","value":"2.3"},{"name":"incremento_15","value":"0.8"},{"name":"area_foliar_deficit","value":"62"},{"name":"temp_max_area_foliar_min","value":"23"},{"name":"temp_max_area_foliar_max","value":"27"},{"name":"alpha_tukey","value":"5"},{"name":"n_treatments","value":"4"},{"name":"n_replicates","value":"5"},{"name":"n_units","value":"20"},{"name":"n_days","value":"30"},{"name":"sowing_depth_cm","value":"3"},{"name":"temp_low_c","value":"15"},{"name":"temp_mid_low_c","value":"20"},{"name":"temp_optimal_c","value":"25"},{"name":"temp_high_c","value":"30"},{"name":"growth_increment_optimal_cm_day","value":"2.3"},{"name":"growth_increment_low_cm_day","value":"0.8"},{"name":"leaf_area_deficit_pct","value":"62"},{"name":"leaf_area_temp_min_c","value":"23"},{"name":"leaf_area_temp_max_c","value":"27"},{"name":"tukey_alpha_pct","value":"5"}],
-  sourceEvidenceTokens: [{"value":"15"},{"value":"20"},{"value":"25"},{"value":"30"},{"name":"n_days","value":"30"},{"name":"n_replicates","value":"5"},{"value":"25"},{"value":"15"},{"value":"2017"},{"value":"2015"},{"value":"2017"},{"value":"2001"},{"value":"2007"},{"value":"15"},{"value":"20"},{"value":"25"},{"value":"30"},{"name":"n_replicates","value":"5"},{"value":"20"},{"name":"sowing_depth_cm","value":"3"},{"name":"n_days","value":"30"},{"name":"tukey_alpha_pct","value":"5"},{"value":"2024"},{"value":"25"},{"value":"2.3"},{"value":"15"},{"value":"0.8"},{"value":"20"},{"value":"30"},{"value":"25"},{"value":"25"},{"value":"15"},{"value":"25"},{"value":"30"},{"value":"23"},{"value":"27"},{"value":"2007"},{"value":"15"},{"name":"leaf_area_deficit_pct","value":"62"},{"value":"25"},{"value":"15"},{"value":"30"},{"value":"400"},{"value":"200"},{"value":"400"},{"value":"200"},{"value":"1"},{"value":"15"},{"value":"5"},{"value":"1"},{"value":"2"},{"value":"20"},{"value":"5"},{"value":"1"},{"value":"3"},{"value":"25"},{"value":"5"},{"value":"1"},{"value":"4"},{"value":"30"},{"value":"5"},{"value":"1"},{"value":"30"},{"value":"15"},{"value":"0.8"},{"value":"38"},{"value":"42"},{"value":"20"},{"value":"1.5"},{"value":"74"},{"value":"79"},{"value":"25"},{"value":"2.3"},{"value":"100"},{"value":"100"},{"value":"30"},{"value":"1.9"},{"value":"88"},{"value":"91"},{"value":"25"},{"value":"15"},{"value":"30"},{"value":"2007"},{"value":"2007"},{"value":"25"},{"value":"15"},{"value":"30"},{"value":"25"},{"value":"2017"},{"value":"25"},{"value":"25"},{"value":"25"},{"value":"15"},{"value":"25"},{"value":"12"},{"value":"15"},{"value":"-1"},{"value":"30"},{"value":"2"},{"value":"32"},{"value":"8"}],
+  variableEntries: [{"value":"4","name":"n_tratamentos"},{"value":"5","name":"n_repeticoes"},{"value":"20","name":"n_unidades"},{"value":"30","name":"n_dias"},{"value":"3","name":"profundidade_semeadura"},{"value":"15","name":"temp_baixa"},{"value":"20","name":"temp_media_baixa"},{"value":"25","name":"temp_otima"},{"value":"30","name":"temp_alta"},{"value":"2.3","name":"incremento_25"},{"value":"0.8","name":"incremento_15"},{"value":"62","name":"area_foliar_deficit"},{"value":"23","name":"temp_max_area_foliar_min"},{"value":"27","name":"temp_max_area_foliar_max"},{"value":"5","name":"alpha_tukey"},{"value":"4","name":"n_treatments"},{"value":"5","name":"n_replicates"},{"value":"20","name":"n_units"},{"value":"30","name":"n_days"},{"value":"3","name":"sowing_depth_cm"},{"value":"15","name":"temp_low_c"},{"value":"20","name":"temp_mid_low_c"},{"value":"25","name":"temp_optimal_c"},{"value":"30","name":"temp_high_c"},{"value":"2.3","name":"growth_increment_optimal_cm_day"},{"value":"0.8","name":"growth_increment_low_cm_day"},{"value":"62","name":"leaf_area_deficit_pct"},{"value":"23","name":"leaf_area_temp_min_c"},{"value":"27","name":"leaf_area_temp_max_c"},{"value":"5","name":"tukey_alpha_pct"}],
+  sourceEvidenceTokens: [{"value":"15"},{"value":"20"},{"value":"25"},{"value":"30"},{"value":"30","name":"n_days"},{"value":"5","name":"n_replicates"},{"value":"25"},{"value":"15"},{"value":"2017"},{"value":"2015"},{"value":"2017"},{"value":"2001"},{"value":"2007"},{"value":"15"},{"value":"20"},{"value":"25"},{"value":"30"},{"value":"5","name":"n_replicates"},{"value":"20"},{"value":"3","name":"sowing_depth_cm"},{"value":"30","name":"n_days"},{"value":"5","name":"tukey_alpha_pct"},{"value":"2024"},{"value":"25"},{"value":"2.3"},{"value":"15"},{"value":"0.8"},{"value":"20"},{"value":"30"},{"value":"25"},{"value":"25"},{"value":"15"},{"value":"25"},{"value":"30"},{"value":"23"},{"value":"27"},{"value":"2007"},{"value":"15"},{"value":"62","name":"leaf_area_deficit_pct"},{"value":"25"},{"value":"15"},{"value":"30"},{"value":"400"},{"value":"200"},{"value":"400"},{"value":"200"},{"value":"1"},{"value":"15"},{"value":"5"},{"value":"1"},{"value":"2"},{"value":"20"},{"value":"5"},{"value":"1"},{"value":"3"},{"value":"25"},{"value":"5"},{"value":"1"},{"value":"4"},{"value":"30"},{"value":"5"},{"value":"1"},{"value":"30"},{"value":"15"},{"value":"0.8"},{"value":"38"},{"value":"42"},{"value":"20"},{"value":"1.5"},{"value":"74"},{"value":"79"},{"value":"25"},{"value":"2.3"},{"value":"100"},{"value":"100"},{"value":"30"},{"value":"1.9"},{"value":"88"},{"value":"91"},{"value":"25"},{"value":"15"},{"value":"30"},{"value":"2007"},{"value":"2007"},{"value":"25"},{"value":"15"},{"value":"30"},{"value":"25"},{"value":"2017"},{"value":"25"},{"value":"25"},{"value":"25"},{"value":"15"},{"value":"25"},{"value":"12"},{"value":"15"},{"value":"-1"},{"value":"30"},{"value":"2"},{"value":"32"},{"value":"8"}],
   referenceKeys: ["taiz2017plant","hatfield2015temperature","wahid2007heat","porch2001effects","sage2007temperature","rcore2024"],
   spellcheckEnabled: true,
   spellcheckProvider: "languagetool",
@@ -11911,7 +11955,7 @@ window.WritingStatsConfig = {
   spellcheckTimeoutMs: 8000,
   nlpCdn: true,
   nlpCdnUrl: "https://cdn.jsdelivr.net/npm/compromise/builds/compromise.min.js",
-  doiValidation: {"10.1111/j.1365-3040.2007.01682.x":[{"field":"Title","status":"ok"},{"field":"Year","status":"ok","value":"2007"},{"field":"Authors","status":"ok","value":"2"},{"field":"Journal","status":"ok"},{"field":"Volume","status":"ok","value":"30"},{"field":"Pages","status":"ok"}],"10.1016/j.wace.2015.08.001":[{"field":"Title","bib":"Temperature extremes: Impact on plant growth and development","status":"error","api":"Temperature extremes: Effect on plant growth and development"},{"field":"Year","bib":"2014","status":"error","api":"2015"},{"field":"Authors","status":"ok","value":"2"},{"field":"Journal","status":"ok"},{"field":"Volume","status":"ok","value":"10"},{"field":"Pages","status":"ok"}],"10.1016/j.envexpbot.2007.05.011":[{"field":"Title","status":"ok"},{"field":"Year","status":"ok","value":"2007"},{"field":"Authors","status":"ok","value":"4"},{"field":"Journal","status":"ok"},{"field":"Volume","status":"ok","value":"61"},{"field":"Pages","status":"ok"}],"10.1046/j.1365-3040.2001.00716.x":[{"field":"Title","status":"ok"},{"field":"Year","status":"ok","value":"2001"},{"field":"Authors","status":"ok","value":"2"},{"field":"Journal","status":"ok"},{"field":"Volume","status":"ok","value":"24"},{"field":"Pages","status":"ok"}]}
+  doiValidation: {"10.1016/j.envexpbot.2007.05.011":[{"field":"Title","status":"ok"},{"field":"Year","value":"2007","status":"ok"},{"field":"Authors","value":"4","status":"ok"},{"field":"Journal","status":"ok"},{"field":"Volume","value":"61","status":"ok"},{"field":"Pages","status":"ok"}],"10.1016/j.wace.2015.08.001":[{"field":"Title","api":"Temperature extremes: Effect on plant growth and development","bib":"Temperature extremes: Impact on plant growth and development","status":"error"},{"field":"Year","api":"2015","bib":"2014","status":"error"},{"field":"Authors","value":"2","status":"ok"},{"field":"Journal","status":"ok"},{"field":"Volume","value":"10","status":"ok"},{"field":"Pages","status":"ok"}],"10.1111/j.1365-3040.2007.01682.x":[{"field":"Title","status":"ok"},{"field":"Year","value":"2007","status":"ok"},{"field":"Authors","value":"2","status":"ok"},{"field":"Journal","status":"ok"},{"field":"Volume","value":"30","status":"ok"},{"field":"Pages","status":"ok"}],"10.1046/j.1365-3040.2001.00716.x":[{"field":"Title","status":"ok"},{"field":"Year","value":"2001","status":"ok"},{"field":"Authors","value":"2","status":"ok"},{"field":"Journal","status":"ok"},{"field":"Volume","value":"24","status":"ok"},{"field":"Pages","status":"ok"}]}
 };
 </script>
 

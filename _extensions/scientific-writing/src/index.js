@@ -196,6 +196,7 @@
         highlightModalVerbs(p);
         highlightFirstPerson(p);
         highlightCitationSentStart(p);
+        highlightCitationSentEnd(p);
         highlightPronounAmbig(p);
         refreshHighlightTooltips(p);
         if (SPELLCHECK_ENABLED) {

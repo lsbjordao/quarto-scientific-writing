@@ -128,6 +128,25 @@
     highlightRegexInNode(p, re, 'ws-citation-start', L.citationSentStart);
   }
 
+  // Citation immediately before sentence-ending punctuation. The terminal '.' is a
+  // sibling text node of the .citation span, so this works on the DOM (the period is
+  // not inside the citation's own text node, which rules out a lookahead regex).
+  function highlightCitationSentEnd(p) {
+    if (!p.querySelectorAll) return;
+    p.querySelectorAll('.citation').forEach(function (cite) {
+      var after = '';
+      var n = cite.nextSibling;
+      while (n && after.length < 4) {
+        if (n.nodeType === Node.TEXT_NODE) { after += n.textContent; n = n.nextSibling; }
+        else break;
+      }
+      if (/^\s*[.!?]/.test(after)) {
+        cite.classList.add('ws-citation-end');
+        markReason(cite, 'citation-end', L.citationSentEnd);
+      }
+    });
+  }
+
   function highlightRegexInNode(node, re, cls, title) {
     if (node.nodeType === Node.TEXT_NODE) {
       var text = node.textContent;

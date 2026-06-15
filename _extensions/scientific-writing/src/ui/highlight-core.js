@@ -15,6 +15,7 @@
     'ws-modal': 'modal',
     'ws-firstperson': 'firstperson',
     'ws-citation-start': 'citation-start',
+    'ws-citation-end': 'citation-end',
     'ws-colloquial': 'colloquial',
     'ws-complex-sent': 'complexsent',
     'ws-repeated-start': 'repeated-start',

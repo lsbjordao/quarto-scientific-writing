@@ -443,7 +443,7 @@
         L.tableRefOrderDesc +
         (crossRefUsage.tableOrder.examples.length ? ' | ' + (LANG === 'pt' ? 'quebras' : 'breaks') + ': ' + crossRefUsage.tableOrder.examples.join(', ') : '')) +
       metricItem(L.citationSentStart, citationSentStartCount, 'citation-start', L.citationSentStartDesc) +
-      metricItem(L.citationSentEnd, citationSentEndCount, null, L.citationSentEndDesc) +
+      metricItem(L.citationSentEnd, citationSentEndCount, 'citation-end', L.citationSentEndDesc) +
       metricItem(L.citationGaps, citationGapCount, 'citation-low', L.citationGapsDesc) +
       metricItem(L.resultsCitations, resultsCitationCount, 'results-citation', L.resultsCitationsDesc) +
       // ── Evidências ───────────────────────────────────────────────────────────
