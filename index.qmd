@@ -14,9 +14,16 @@ format:
       dark: darkly
       light: cosmo
     embed-resources: true
-    google-analytics: "G-H08NTRWWF2"
     include-in-header:
       text: |
+        <!-- Google tag (gtag.js) -->
+        <script async data-external="1" src="https://www.googletagmanager.com/gtag/js?id=G-H08NTRWWF2"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-H08NTRWWF2');
+        </script>
         <style>
           /* Inline code readability on the dark (darkly) theme */
           :not(pre) > code {
