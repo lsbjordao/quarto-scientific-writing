@@ -1,0 +1,171 @@
+# Schema for the scientific-writing extension.
+
+$schema: https://m.canouil.dev/quarto-wizard/assets/schema/v2/extension-schema.json
+
+options:
+  sentence-long:
+    type: integer
+    default: 30
+    minimum: 1
+    description: "Number of words above which a sentence is flagged as long."
+
+  paragraph-long:
+    type: integer
+    default: 150
+    minimum: 1
+    description: "Number of words above which a paragraph is flagged as long."
+
+  passive-threshold:
+    type: integer
+    default: 3
+    minimum: 1
+    description: "Passive constructions per paragraph that trigger an alert outside Methods sections."
+
+  methods-passive-threshold:
+    type: integer
+    default: 5
+    minimum: 1
+    description: "Passive constructions per paragraph that trigger an alert in Materials and Methods sections."
+
+  lexical-diversity-low:
+    type: number
+    default: 0.5
+    exclusiveMinimum: 0
+    maximum: 1
+    description: "Lexical diversity ratio below which a paragraph is considered weak."
+
+  repeated-strong:
+    type: integer
+    default: 3
+    minimum: 1
+    description: "Occurrences of a word within a paragraph that qualify as strong repetition."
+
+  hedge-threshold:
+    type: integer
+    default: 4
+    minimum: 1
+    description: "Hedging expressions per paragraph that trigger an alert."
+
+  section-goals:
+    type: object
+    description: "Per-section writing goals, keyed by a section heading matched case-insensitively."
+    additionalProperties:
+      type: object
+      properties:
+        maxAvgSentence:
+          type: number
+          exclusiveMinimum: 0
+          description: "Maximum average sentence length in words."
+        maxLongSentenceRate:
+          type: number
+          minimum: 0
+          maximum: 100
+          description: "Maximum percentage of sentences above the sentence-long threshold."
+        maxPassivePer1000:
+          type: number
+          minimum: 0
+          description: "Maximum passive constructions per 1,000 words."
+        minLexicalDiversity:
+          type: number
+          minimum: 0
+          maximum: 1
+          description: "Minimum lexical diversity ratio."
+      additionalProperties: false
+
+  connector-ambiguity-mode:
+    type: string
+    default: strict
+    enum:
+      - strict
+      - balanced
+      - lenient
+    enumCaseInsensitive: true
+    description: "How ambiguous words are classified when deciding whether they function as connectors."
+
+  connector-ambiguity-overrides:
+    type: object
+    description: "Per-word overrides for connector ambiguity handling."
+    additionalProperties:
+      type: string
+      enum:
+        - strict
+        - balanced
+        - lenient
+      enumCaseInsensitive: true
+
+  ignore-terms:
+    type: array
+    description: "Case-insensitive terms excluded from repetition detection and optional spellchecking."
+    items:
+      type: string
+      minLength: 1
+
+  spellcheck:
+    type: boolean
+    default: false
+    description: "Enable API-backed spellcheck underlines; paragraph text is sent to the configured provider."
+
+  spellcheck-provider:
+    type: string
+    default: languagetool
+    enum:
+      - languagetool
+    enumCaseInsensitive: true
+    description: "Spellcheck provider. LanguageTool is currently the only supported provider."
+
+  spellcheck-endpoint:
+    type: string
+    default: "https://api.languagetool.org/v2/check"
+    format: uri
+    description: "LanguageTool-compatible HTTP endpoint used for spelling checks."
+
+  spellcheck-language:
+    type: string
+    examples:
+      - pt-BR
+      - en-US
+    description: "LanguageTool language code; when omitted, it is derived from the document language."
+
+  spellcheck-ignore-terms:
+    type: array
+    description: "Case-insensitive terms ignored only by the spellchecker."
+    items:
+      type: string
+      minLength: 1
+
+  spellcheck-timeout-ms:
+    type: integer
+    default: 8000
+    minimum: 1000
+    description: "Timeout in milliseconds for each paragraph spellcheck request."
+
+  doi-validation:
+    type: boolean
+    default: false
+    description: "Validate bibliography DOIs against Crossref at render time; requires network access."
+
+  review:
+    type: boolean
+    default: true
+    description: "Enable the review UI and its assets; disable for a clean published HTML document."
+
+  default-compact:
+    type: boolean
+    default: false
+    description: "Start the metrics panel in compact mode."
+
+  default-alerts-only:
+    type: boolean
+    default: false
+    description: "Start in alerts-only mode, hiding non-critical annotations."
+
+  nlp-cdn:
+    type: boolean
+    default: true
+    description: "Load compromise.js from a CDN for additional NLP analysis."
+
+  nlp-cdn-url:
+    type: string
+    default: "https://cdn.jsdelivr.net/npm/compromise/builds/compromise.min.js"
+    format: uri
+    description: "URL from which compromise.js is loaded when nlp-cdn is enabled."

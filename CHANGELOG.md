@@ -3,6 +3,13 @@
 All notable changes to this project are documented here. This project adheres to
 [Semantic Versioning](https://semver.org/).
 
+## Unreleased
+
+### Added
+
+- Quarto Wizard schema and snippets for editor autocompletion, validation, hover
+  documentation, and configuration templates.
+
 ## v1.0.0 — 2026-06-09
 
 First public release of **scientific-writing**, a Quarto extension that turns a

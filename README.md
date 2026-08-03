@@ -45,6 +45,12 @@ filters:
 
 The extension activates automatically on HTML output only. No configuration is required to get started — all options have sensible defaults.
 
+## Editor support
+
+The extension includes a Quarto Wizard schema and snippets. In supported editors,
+these provide autocompletion, validation, hover documentation, and ready-to-insert
+document, configuration, and section-goal examples.
+
 ## YAML Configuration reference
 
 All options are nested under the `scientific-writing:` key in your front matter.
@@ -552,6 +558,8 @@ No additional configuration is needed.
 ```
 _extensions/scientific-writing/
 ├── _extension.yml                  # Extension metadata
+├── _schema.yml                     # Quarto Wizard option schema
+├── _snippets.json                  # Quarto Wizard editor snippets
 ├── scientific-writing.lua          # Lua filter (config injection + HTML deps)
 ├── scientific-writing.js           # Bundled runtime (build output — DO NOT delete)
 ├── scientific-writing.css          # Stylesheet

@@ -1,0 +1,47 @@
+{
+  "Scientific writing document": {
+    "prefix": "scientific-writing-document",
+    "body": [
+      "---",
+      "title: \"${1:My Manuscript}\"",
+      "lang: ${2|en-US,pt-BR|}",
+      "format: html",
+      "filters:",
+      "  - scientific-writing",
+      "---",
+      "",
+      "$0"
+    ],
+    "description": "Create an HTML Quarto document with scientific-writing enabled."
+  },
+  "Scientific writing configuration": {
+    "prefix": "scientific-writing-config",
+    "body": [
+      "scientific-writing:",
+      "  sentence-long: ${1:30}",
+      "  paragraph-long: ${2:150}",
+      "  passive-threshold: ${3:3}",
+      "  methods-passive-threshold: ${4:5}",
+      "  lexical-diversity-low: ${5:0.5}",
+      "  repeated-strong: ${6:3}",
+      "  hedge-threshold: ${7:4}",
+      "  review: ${8:true}"
+    ],
+    "description": "Insert the main scientific-writing thresholds and review setting."
+  },
+  "Scientific writing section goals": {
+    "prefix": "scientific-writing-section-goals",
+    "body": [
+      "scientific-writing:",
+      "  section-goals:",
+      "    ${1:Abstract}:",
+      "      maxAvgSentence: ${2:24}",
+      "      maxLongSentenceRate: ${3:18}",
+      "    ${4:Materials and Methods}:",
+      "      maxPassivePer1000: ${5:30}",
+      "    ${6:Discussion}:",
+      "      minLexicalDiversity: ${7:0.58}"
+    ],
+    "description": "Insert configurable writing goals for manuscript sections."
+  }
+}
